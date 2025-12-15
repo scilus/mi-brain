@@ -1,0 +1,6 @@
+set(Plugin-Name "IMEKA Property")
+set(Plugin-Version "1.0")
+set(Plugin-Vendor "Imeka")
+set(Plugin-ContactAddress "http://imeka.ca/")
+set(Require-Plugin org.mitk.gui.common)
+set(Plugin-ActivationPolicy eager)

@@ -1,0 +1,13 @@
+MITK_CREATE_MODULE_TESTS(LABELS
+  ColoringTest
+  CutTest
+  DuplicateTGTest
+  MinMaxFilteringTest
+  MirrorTest
+  SaveLoadScenesTest
+  SaveVisibleTest
+  SimpleFilteringTest
+  StatsTest
+  TCKTest
+  TRKTest
+)

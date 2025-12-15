@@ -1,0 +1,5 @@
+set(Plugin-Name "View")
+set(Plugin-Version "1.0")
+set(Plugin-Vendor "Imeka")
+set(Plugin-ContactAddress "http://imeka.ca/")
+set(Require-Plugin org.mitk.gui.qt.common org.mitk.gui.qt.datamanager org.mitk.gui.qt.stdmultiwidgeteditor org.imeka.common.eager)

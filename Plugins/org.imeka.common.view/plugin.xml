@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <extension point="org.mitk.gui.qt.datamanager.contextMenuActions">
+    <contextMenuAction
+      nodeDescriptorName="BoundingObject" where="both" when="hover"
+      DnD="false" idx="1" label="Locate"
+      class="LocateSelectionObjectAction" icon="resources/Locate.png" />
+    <contextMenuAction
+      nodeDescriptorName="Surface" where="both" when="hover"
+      DnD="false" idx="1" label="Locate"
+      class="LocateSurfaceAction" icon="resources/Locate.png" />
+    <contextMenuAction
+      nodeDescriptorName="Image" label="Create 4D sequence..."
+      class="MakeTimedSequenceAction" />
+    <contextMenuAction
+      nodeDescriptorName="DataLoadedFromDisk" label="Reload from disk"
+      class="ReloadFromDiskAction" />
+    <contextMenuAction
+      nodeDescriptorName="RGBImage" label="Toggle RGB view"
+      class="ToggleRGBAction" />
+  </extension>
+</plugin>

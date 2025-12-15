@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/org.imeka.common.view">
+    <file>Locate.png</file>
+  </qresource>
+</RCC>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <extension point="org.blueberry.ui.views">
+    <view id="org.imeka.views.brainanalysisview"
+          name="Fiber Analysis"
+          class="BrainAnalysisView"
+          icon="resources/icon.xpm" />
+  </extension>
+  <extension point="org.mitk.gui.qt.datamanager.contextMenuActions">
+    <subMenu label="Coloring" icon="resources/ColorLocal.png" />
+    <subMenu label="Generate image" icon="resources/GenerateImage.png" />
+    <subMenu label="Mirror" icon="resources/MirrorAntPost.png" />
+
+    <contextMenuAction
+      nodeDescriptorName="Unknown"
+      label="Toggle 2D fibers mappers"
+      icon="resources/2D.png"
+      class="Toggle2DAction" />
+      
+    <contextMenuAction
+      nodeDescriptorName="ROICategory1" where="both" when="always"
+      DnD="false" idx="2" label="Create selection cuboid"
+      icon="resources/Cube.png"
+      class="CreateCubeSOAction" />
+    <contextMenuAction
+      nodeDescriptorName="ROICategory1" where="both" when="always"
+      DnD="false" idx="3" label="Create selection ellipsoid"
+      icon="resources/Sphere.png"
+      class="CreateSphereSOAction" />
+
+	  <!-- SAVE -->
+    <contextMenuAction
+      nodeDescriptorName="TractsCategory1" where="both" when="hover"
+      DnD="false" idx="2" label="Save all visible fibers to file..."
+      condition="HasChildren"
+      icon="resources/Save.png"
+      class="SaveFibersToFileAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle1" where="both" when="hover"
+      DnD="false" idx="2" label="Save visible fibers to file(s)..."
+      icon="resources/Save.png"
+      class="SaveFibersToFileAction" />
+    <contextMenuAction
+      nodeDescriptorName="TractsGroup" where="both" when="hover"
+      DnD="false" idx="2" label="Save visible fibers to file..."
+      icon="resources/Save.png"
+      class="SaveFibersToFileAction" />
+
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle1" where="both" when="hover"
+      DnD="false" idx="3" label="Create new tract group..."
+      icon="resources/Plus.png"
+      class="CreateTractGroupAction" />
+
+    <contextMenuAction
+      nodeDescriptorName="TractsGroup" where="both" when="hover"
+      DnD="false" idx="3" label="Edit active ROIs"
+      icon="resources/Pencil.png"
+      class="EditActiveROIsAction" />
+    <contextMenuAction
+      nodeDescriptorName="TractsGroup" where="both" when="hover"
+      DnD="false" idx="1" label="Duplicate Tracts Group"
+      icon="resources/Duplicate.png"
+      class="DuplicateTractGroupAction" />
+
+    <!-- COLORS -->
+    <contextMenuAction
+      nodeDescriptorName="TractsCategory2"
+      label="Local Coloring"
+      subMenu="Coloring"
+      condition="HasChildren"
+      icon="resources/ColorLocal.png"
+      class="ColorLocalAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Local Coloring"
+      subMenu="Coloring"
+      icon="resources/ColorLocal.png"
+      class="ColorLocalAction" />
+    <contextMenuAction
+      nodeDescriptorName="TractsCategory2"
+      label="Uniform Coloring..."
+      subMenu="Coloring"
+      condition="HasChildren"
+      icon="resources/ColorUniform.png"
+      class="ColorUniformAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Uniform Coloring..."
+      subMenu="Coloring"
+      icon="resources/ColorUniform.png"
+      class="ColorUniformAction" />
+    <contextMenuAction
+      nodeDescriptorName="TractsCategory2"
+      label="Endpoint Coloring"
+      subMenu="Coloring"
+      condition="HasChildren"
+      icon="resources/ColorEndPoints.png"
+      class="ColorEndPointsAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Endpoint Coloring"
+      subMenu="Coloring"
+      icon="resources/ColorEndPoints.png"
+      class="ColorEndPointsAction" />
+    <contextMenuAction
+      nodeDescriptorName="TractsCategory2"
+      label="Color from anatomy"
+      subMenu="Coloring"
+      condition="HasChildren"
+      icon="resources/ColorFromAnatomy.png"
+      class="ColorFromAnatomyAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Color from anatomy"
+      subMenu="Coloring"
+      icon="resources/ColorFromAnatomy.png"
+      class="ColorFromAnatomyAction" />
+    <contextMenuAction
+      nodeDescriptorName="TractsCategory2"
+      label="Shuffle coloring"
+      subMenu="Coloring"
+      condition="HasChildren"
+      icon="resources/ColorShuffle.png"
+      class="ColorShuffleAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Shuffle coloring"
+      subMenu="Coloring"
+      icon="resources/ColorShuffle.png"
+      class="ColorShuffleAction" />
+    <contextMenuAction
+      nodeDescriptorName="ROICategory2"
+      label="Shuffle masks coloring"
+      condition="HasChildren"
+      icon="resources/ColorShuffle.png"
+      class="ColorShuffleMasksAction" />
+    <contextMenuAction
+      nodeDescriptorName="ROICategory2"
+      label="Shuffle all ROIs coloring"
+      condition="HasChildren"
+      icon="resources/ColorShuffle.png"
+      class="ColorShuffleAction" />
+    <contextMenuAction
+      nodeDescriptorName="SelectionROI"
+      label="Shuffle coloring"
+      icon="resources/ColorShuffle.png"
+      class="ColorShuffleAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle3"
+      label="Load colors from text file..."
+      subMenu="Coloring"
+      icon="resources/LoadColors.png"
+      class="LoadTextAction" />
+
+    <!-- idx="1" is already in use in common.view -->
+    <contextMenuAction
+      nodeDescriptorName="BoundingObject"
+      label="Create mask from Selection Object"
+      icon="resources/GenerateBinary.png"
+      class="SOToImageAction" />
+    <contextMenuAction
+      nodeDescriptorName="BoundingObject" where="DM" when="hover"
+      DnD="true" idx="2" label="Cut Inside"
+      icon="resources/CutFibersIn.png"
+      class="CutFibersInsideAction" />
+    <contextMenuAction
+      nodeDescriptorName="BoundingObject" where="DM" when="hover"
+      DnD="true" idx="3" label="Cut Outside"
+      icon="resources/CutFibersOut.png"
+      class="CutFibersOutsideAction" />
+
+    <contextMenuAction
+      nodeDescriptorName="TractsCategory2"
+      label="Binary image"
+      subMenu="Generate image"
+      condition="HasChildren"
+      icon="resources/GenerateBinary.png"
+      class="BinaryImageAction" />
+    <contextMenuAction
+      nodeDescriptorName="TractsCategory2"
+      label="Density image"
+      subMenu="Generate image"
+      condition="HasChildren"
+      icon="resources/GenerateDensity.png"
+      class="DensityImageAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Binary image"
+      subMenu="Generate image"
+      icon="resources/GenerateBinary.png"
+      class="BinaryImageAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Density image"
+      subMenu="Generate image"
+      icon="resources/GenerateDensity.png"
+      class="DensityImageAction" />
+
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Mirror fibers Inf-Sup"
+      subMenu="Mirror"
+      icon="resources/MirrorInfSup.png"
+      class="FlipFibersAxialAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Mirror fibers Left-Right"
+      subMenu="Mirror"
+      icon="resources/MirrorLeftRight.png"
+      class="FlipFibersSagittalAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle2"
+      label="Mirror fibers Ant-Post"
+      subMenu="Mirror"
+      icon="resources/MirrorAntPost.png"
+      class="FlipFibersCoronalAction" />
+    <contextMenuAction
+      nodeDescriptorName="FiberBundle1"
+      label="Shuffle streamlines"
+      icon="resources/ColorShuffle.png"
+      class="ShuffleTractsAction" />
+    <!--<contextMenuAction
+	  nodeDescriptorName="DataNodeSubsets"
+	  label="Duplicate"
+	  icon=""
+	  class="DuplicateSubset" />-->
+    <contextMenuAction
+      nodeDescriptorName="PeaksImage"
+      label="Toggle peaks image"
+      class="TogglePeaksStatusAction" />
+  </extension>
+</plugin>

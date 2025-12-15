@@ -1,0 +1,5 @@
+MITK_CREATE_MODULE( ImekaGeometry
+  PACKAGE_DEPENDS Qt5|Core
+  DEPENDS MitkQtWidgets ImekaCommon
+  WARNINGS_NO_ERRORS
+)

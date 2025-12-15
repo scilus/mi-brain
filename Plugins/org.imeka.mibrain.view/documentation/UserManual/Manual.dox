@@ -1,0 +1,328 @@
+/**
+\page org.imeka.qt.brainanalysis The Brain Analysis Plugin
+
+\image html icon.xpm "Icon of Brainanalysis"
+
+Available sections:
+  - \ref org_imeka_qt_brainanalysisOverview
+  - \ref org_imeka_qt_brainanalysisUsage
+  - \ref org_imeka_qt_brainanalysisTools
+    - \ref org_imeka_qt_brainanalysis2dview
+    - \ref org_imeka_qt_brainanalysisSO
+    - \ref org_imeka_qt_brainanalysisFiberColoring
+        - \ref org_imeka_qt_brainanalysisUniformColoring
+        - \ref org_imeka_qt_brainanalysisLocalSegmentColoring
+        - \ref org_imeka_qt_brainanalysisEndpointsColoring
+        - \ref org_imeka_qt_brainanalysisShuffleColoring
+    - \ref org_imeka_qt_brainanalysisFiberGeometry
+    - \ref org_imeka_qt_brainanalysisVisibleFiberBundle
+    - \ref org_imeka_qt_brainanalysisGenerateBinaryImage
+  - \ref org_imeka_qt_brainanalysisTrackingDisplay
+    - \ref org_imeka_qt_brainanalysisFiberfiltering
+    - \ref org_imeka_qt_brainanalysisHARDIRTT
+
+\section org_imeka_qt_brainanalysisOverview Overview
+The brain analysis plugin allows advanced visualization and interaction
+with diffusion MRI (dMRI) datasets.
+
+\section org_imeka_qt_brainanalysisUsage Usage
+This section provides a description of the plugin usage. The interface is
+divided into four sections
+
+<ol>
+  <li>Tools</li>
+  <li>Data</li>
+  <li>Selection objects</li>
+  <li>Display</li>
+</ol>
+
+\image html BrainAnalysisInterface.png "Brain Analysis plugin interface"
+
+\section org_imeka_qt_brainanalysisTools Tools
+Help tooltip can be displayed by moving the mouse cursor over any of the
+tool icon.
+
+\subsection org_imeka_qt_brainanalysis2dview Fiber display in 2D views
+<center>
+<table>
+  <tr>
+    <td>
+      \image html 2d_resize.png "2D fiber display icon"
+    </td>
+  </tr>
+</table>
+</center>
+Display fibers passing through each 2D views.
+
+\warning 2D fiber display is not enabled by default because it can impact the
+performance greatly.
+
+\image html fibersOn2dViews.png "Display fibers on 2D views"
+
+\subsection org_imeka_qt_brainanalysisSO Selection/Exclusion objects
+<center>
+<table>
+  <tr>
+    <td>
+      \image html 3d78_resize.png "Selection cuboid icon"
+    </td>
+    <td>
+      \image html 3d78_not_resize.png "Exclusion cuboid icon"
+    </td>
+  </tr>
+  <tr>
+    <td>
+      \image html sphere_resize.png "Selection ellipsoid icon"
+    </td>
+    <td>
+      \image html sphere_not_resize.png "Exclusion ellipsoid icon"
+    </td>
+  </tr>
+</table>
+</center>
+
+Objects can be used to select/exclude fibers passing through them. MI-Brain
+currently support cuboid and ellipsoid shape. Size, location and rotation can
+be set using
+
+<ul>
+  <li>
+    <b>Ctrl-Left mouse button: </b>
+      Translate the bounding box
+  </li>
+  <li>
+    <b>Ctrl-Right mouse button: </b>
+      Resize the bounding box
+  </li>
+  <li>
+    <b>Ctrl-Middle mouse button: </b>
+      Rotate the bounding box
+  </li>
+</ul>
+
+\note OSX users will need to use the Command button instead of Ctrl.
+
+\image html fiberSelection.png "Basic fiber selection"
+
+\note You can only use <b>one</b> selection object while in HARDI RTT mode
+
+User can easily build an object hierarchy to refine filtering. Simply select
+the selection object you want to refine the selection from in the data manager
+and create a new selection object.
+
+\image html selectionObjectHierarchy.png "Selection object hierarchy"
+\image html fiberSelectionHierarchy.png "Fiber selection hierarchy using two selection objects"
+
+\subsection org_imeka_qt_brainanalysisFiberColoring Fiber coloring
+\subsubsection org_imeka_qt_brainanalysisUniformColoring Uniform coloring
+<center>
+<table>
+  <tr>
+    <td>
+      \image html paint37_resize.png "Uniform coloring icon"
+    </td>
+  </tr>
+</table>
+</center>
+
+Apply an uniform color to the fibers. Applies to all fiber datasets if no
+selection has been made in the data manager.
+
+\image html uniformColoring.png "Uniform red coloring"
+
+\subsubsection org_imeka_qt_brainanalysisLocalSegmentColoring Local segment coloring
+<center>
+<table>
+  <tr>
+    <td>
+      \image html local_resize.png "Color based on local fiber segment icon"
+    </td>
+  </tr>
+</table>
+</center>
+
+Apply a color to each fiber segment based on the local segment orientation.
+Applies to all fiber datasets if no selection has been made in the data
+manager.
+
+\image html localSegmentColoring.png "Color based on local fiber segment"
+
+\subsubsection org_imeka_qt_brainanalysisEndpointsColoring Endpoints coloring
+<center>
+<table>
+  <tr>
+    <td>
+      \image html endpoints_resize.png "Color based on fiber endpoints icon"
+    </td>
+  </tr>
+</table>
+</center>
+
+Apply a color to each fiber based on the average fiber orientation. Applies to
+all fiber datasets if no selection has been made in the data
+manager.
+
+\image html endpointsColoring.png "Color based on fiber endpoints"
+
+\subsubsection org_imeka_qt_brainanalysisShuffleColoring Shuffle coloring
+<center>
+<table>
+  <tr>
+    <td>
+      \image html couple35_resize.png "Shuffle fiber color icon"
+    </td>
+  </tr>
+</table>
+</center>
+
+Apply a (different) uniform color to each fiber datasets. Applies to all fiber
+datasets if no selection has been made in the data manager.
+
+\image html shuffleColoring.png "Shuffle coloring"
+
+\subsection org_imeka_qt_brainanalysisFiberGeometry Fiber geometry
+<center>
+<table>
+  <tr>
+    <td>
+      \image html fitGeometry_resize.png "Align fibers on reference anatomy icon"
+    </td>
+  </tr>
+</table>
+</center>
+
+\note Always load your reference anatomy prior to your fiber datasets
+
+A good rule of thumb is to <b>always</b> load your reference anatomy prior to
+loading your fiber dataset. MI-Brain will automatically transform your fiber
+dataset to fit on your reference anatomy using the anatomy affine
+transformation matrix. If you happen to load your fiber dataset before the
+reference anatomy, there is a good chance the two won't be aligned. Use this
+tool to correct alignment.
+
+\image html unalignedBundles.png "Unaligned fiber bundles"
+
+\warning Do not use the fiber alignment tool on data that are already aligned.
+It <b>will</b> unalign them.
+
+<center>
+<table>
+  <tr>
+    <td>
+      \image html one64_resize.png "Mirror axially"
+    </td>
+    <td>
+      \image html one64_h_resize.png "Mirror sagitally"
+    </td>
+    <td>
+      \image html double125_resize.png "Mirror coronally"
+    </td>
+  </tr>
+</table>
+</center>
+
+Mirror fibers relative to the reference anatomy center.
+
+\subsection org_imeka_qt_brainanalysisVisibleFiberBundle Save visible fibers
+
+<center>
+<table>
+  <tr>
+    <td>
+      \image html human90_resize.png "Save visible fibers to datamanager"
+    </td>
+    <td>
+      \image html watch3_resize.png "Save visible fibers to disk"
+    </td>
+  </tr>
+</table>
+</center>
+
+
+Make a new fiber bundle with fibers that are currently visible on-screen and
+save it in the datamanager or on disk.
+
+\subsection org_imeka_qt_brainanalysisGenerateBinaryImage Generate binary mask
+
+<center>
+<table>
+  <tr>
+    <td>
+      \image html brain8_resize.png "Generate binary mask with visible fibers icon"
+    </td>
+  </tr>
+</table>
+</center>
+
+Generate a binary mask with on-screen fibers. A voxel will be assigned to the
+foreground of the mask if at least one fiber passes through it.
+
+\image html binaryMask.png "Binary mask (in red) generated from visible fibers"
+
+\section org_imeka_qt_brainanalysisTrackingDisplay Tracking and filtering parameters
+This section describes the different filtering/tracking parameters that the
+user can ajust to enhance the displayed fibers.
+
+\subsection org_imeka_qt_brainanalysisFiberfiltering Fiber filtering
+User can filter fibers using selection/exclusion object. Min/max fiber lenght
+can be set using the two sliders in the "Display" section. Information about
+fibers (number, min/max lenght, etc) are displayed in the box below the
+sliders.
+
+\image html displaySection.png "Fiber display parameters"
+
+\subsection org_imeka_qt_brainanalysisHARDIRTT HARDI Real-time tracking (RTT)
+One can generate HARDI fibers in real-time using maximas and a tracking mask
+such as the FA. The maximas dataset is a 4D image where the fourth
+dimension has 9 components (x<sub>1</sub>, y<sub>1</sub>, z<sub>1</sub>, ...,
+x<sub>3</sub>, y<sub>3</sub>, z<sub>3</sub>). User can ajust
+the tracking parameters using the appropriate sliders.
+
+<ul>
+  <li>
+    <b>Min. lenght: </b>
+      Minimum fiber lenght
+  </li>
+  <li>
+    <b>Max. lenght: </b>
+      Maximum fiber lenght
+  </li>
+  <li>
+    <b>Max. angle: </b>
+      Maximum angle that a fiber segment is allowed to curve
+  </li>
+  <li>
+    <b>Min. mask: </b>
+      Minimal value of the tracking mask to be considered as a voxel in which
+      the tracking can proceed
+  </li>
+  <li>
+    <b>Step: </b>
+      Size of a tractography step in the image
+  </li>
+  <li>
+    <b>Seed/axis: </b>
+      Number of seeds per axis
+  </li>
+  <li>
+    <b>Puncture: </b>
+      Weighting factor between the previous direction and the direction found
+      for the next tractography step. The next direction is chosen as the
+      closest to the previous direction. A high puncture value gives more
+      importance to the new direction,  which implies that the fibers will
+      more easily deviate to follow new directions at each step. A lower
+      puncture value implies that the streamline will more closely follow the
+      input direction
+  </li>
+</ul>
+
+\image html displayRTT.png "HARDI RTT parameters"
+
+The user can seed the tracking from a selection object or from one or more
+binary mask(s).
+
+\note You can only use <b>one</b> selection object while in HARDI RTT mode
+
+\image html rttSeedFromBinMask.png "HARDI RTT seed from binary mask"
+
+*/

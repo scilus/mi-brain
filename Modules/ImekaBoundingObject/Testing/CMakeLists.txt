@@ -1,0 +1,3 @@
+MITK_CREATE_MODULE_TESTS(LABELS BoundingObjectTest)
+
+mitkAddCustomModuleTest(BoundingObjectTest1 BoundingObjectTest)

@@ -1,0 +1,9 @@
+set(MODULE_TESTS
+)
+set(MODULE_IMAGE_TESTS
+)
+set(MODULE_CUSTOM_TESTS
+  CSVWriterTest.cpp
+)
+set(MODULE_TESTIMAGES
+)

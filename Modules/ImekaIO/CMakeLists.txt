@@ -1,0 +1,6 @@
+MITK_CREATE_MODULE( ImekaIO
+  PACKAGE_DEPENDS
+  DEPENDS MitkPlanarFigure ImekaCommon ImekaWidgets
+  AUTOLOAD_WITH MitkCore
+  WARNINGS_NO_ERRORS
+)

@@ -1,0 +1,5 @@
+set(Plugin-Name "MIBrainView")
+set(Plugin-Version "1.0")
+set(Plugin-Vendor "Imeka")
+set(Plugin-ContactAddress "http://imeka.ca/")
+set(Require-Plugin org.imeka.common.view org.imeka.mibrain.eager)

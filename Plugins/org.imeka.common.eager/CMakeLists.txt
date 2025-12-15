@@ -1,0 +1,9 @@
+project(org_imeka_common_eager)
+
+mitk_create_plugin(
+  EXPORT_DIRECTIVE COMMONEAGER_EXPORT
+  EXPORTED_INCLUDE_SUFFIXES src
+  PACKAGE_DEPENDS
+  MODULE_DEPENDS ImekaBoundingObject
+  WARNINGS_NO_ERRORS
+)

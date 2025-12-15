@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?BlueBerry version="0.1"?>
+<plugin>
+  <extension point="org.blueberry.osgi.applications" id="org.imeka.mibrain.app">
+    <application>
+      <run class="PlitkApplication" />
+    </application>
+  </extension>
+  <extension id="mibrain" point="org.blueberry.core.runtime.products">
+    <product name="MI-Brain" application="org.imeka.mibrain.app" />
+  </extension>
+  <extension point="org.blueberry.ui.perspectives">
+    <perspective id="org.imeka.plitk.mibrainperspective" name="Imeka" class="MIBrainPerspective" icon="">
+      <description>The user won't see this</description>
+    </perspective>
+  </extension>
+</plugin>

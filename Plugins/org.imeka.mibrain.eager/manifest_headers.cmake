@@ -1,0 +1,6 @@
+set(Plugin-Name "MIBrainEager")
+set(Plugin-Version "1.0")
+set(Plugin-Vendor "Imeka")
+set(Plugin-ContactAddress "http://www.imeka.ca")
+set(Require-Plugin org.mitk.gui.common)
+set(Plugin-ActivationPolicy eager)

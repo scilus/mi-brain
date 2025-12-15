@@ -1,0 +1,24 @@
+<RCC>
+  <qresource prefix="/org.imeka.mibrain.view">
+    <file>2D.png</file>
+    <file>ColorEndPoints.png</file>
+    <file>ColorFromAnatomy.png</file>
+    <file>ColorLocal.png</file>
+    <file>ColorShuffle.png</file>
+    <file>ColorUniform.png</file>
+    <file>Cube.png</file>
+    <file>CutFibersIn.png</file>
+    <file>CutFibersOut.png</file>
+    <file>Duplicate.png</file>
+    <file>GenerateImage.png</file>
+    <file>MirrorAntPost.png</file>
+    <file>MirrorInfSup.png</file>
+    <file>MirrorLeftRight.png</file>
+    <file>Pencil.png</file>
+    <file>Plus.png</file>
+    <file>Save.png</file>
+    <file>SaveFibersToDM.png</file>
+    <file>SaveFibersToFile.png</file>
+    <file>Sphere.png</file>
+  </qresource>
+</RCC>

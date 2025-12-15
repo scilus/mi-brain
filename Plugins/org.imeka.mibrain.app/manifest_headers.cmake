@@ -1,0 +1,5 @@
+set(Plugin-Name "MIBrainApp")
+set(Plugin-Version "1.0")
+set(Plugin-Vendor "Imeka")
+set(Plugin-ContactAddress "http://www.imeka.ca")
+set(Require-Plugin org.imeka.common.app)
