@@ -37,7 +37,7 @@ mitk::FiberBundleTrackVisReader * mitk::FiberBundleTrackVisReader::Clone() const
   return new FiberBundleTrackVisReader(*this);
 }
 
-std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleTrackVisReader::Read()
+std::vector<itk::SmartPointer<mitk::BaseData>> mitk::FiberBundleTrackVisReader::DoRead()
 {
 
   std::vector<itk::SmartPointer<mitk::BaseData> > result;
@@ -92,6 +92,28 @@ std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleTrackVisReader:
           "Error reading properties. Trk file is corrupted.";
         throw std::length_error(noReadPropertiesWarning);
       }
+      
+      // MITK 2025 FIX: reader.Read() calls SetFiberPolyData() which calls UpdateFiberGeometry()
+      // which replaces the geometry (with vox_to_ras transform from TRK header) with a simple 
+      // bounding-box geometry. We must restore the proper geometry from the reference geometry.
+      if (auto refGeometry = fiber->GetReferenceGeometry())
+      {
+        MITK_INFO << "MITK 2025: Restoring proper TRK geometry with vox_to_ras transform";
+        fiber->SetGeometry(refGeometry->Clone());
+      }
+      else
+      {
+        MITK_WARN << "MITK 2025: No reference geometry found after TRK read - fibers may not align with anatomy";
+      }
+      
+      // Debug: Check fiber bundle contents
+      MITK_INFO << "TRK loaded successfully. Fiber count: " << fiber->GetNumFibers() 
+                << ", Points: " << fiber->GetNumberOfPoints();
+      
+      // MITK 2025: Request 3D update so mapper knows to render the fibers
+      fiber->RequestUpdate3D();
+      MITK_INFO << "Requested 3D update for fiber bundle";
+      
       result.push_back(fiber.GetPointer());
       return result;
     }

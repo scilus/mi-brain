@@ -113,6 +113,14 @@ void FibersManager::GroupAdded(mitk::DataNode* node)
 
 void FibersManager::NodeAdded(mitk::DataNode* node)
 {
+  std::cout << "FibersManager::NodeAdded called for: " << node->GetName() << "\n";
+  if (!node->GetData())
+  {
+    std::cout << "  ERROR: node->GetData() is nullptr!\n";
+    return;
+  }
+  std::cout << "  Data class: " << node->GetData()->GetNameOfClass() << "\n";
+  
   m_DM.GiveUUID(node);
 
   auto selectionObject = dynamic_cast<SelectionObject*>(node->GetData());
@@ -149,10 +157,13 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
   else if (
     auto fiber = dynamic_cast<mitk::FilteredFiberBundle*>(node->GetData()))
   {
+    std::cout << "FilteredFiberBundle detected: " << node->GetName() << "\n";
     bool helperObject = false;
     node->GetBoolProperty("helper object", helperObject);
+    std::cout << "  helperObject: " << helperObject << "\n";
     if (!helperObject) // Not RTT
     {
+      std::cout << "  Not helper object, calling FibersAdded\n";
       m_DM.ChangeParent(node, m_Groups.Tracts);
       FibersAdded(node, fiber);
 
@@ -239,6 +250,7 @@ void FibersManager::FibersAdded(
   mitk::DataNode* node,
   mitk::FilteredFiberBundle* fiber)
 {
+  std::cout << "FibersManager::FibersAdded called for node: " << node->GetName() << "\n";
   SetupNodeDataAndMappers(node, fiber, m_FibersNodeData[node]);
   m_FibersColors.SetFibersActions(node);
 
@@ -278,13 +290,65 @@ void FibersManager::FibersAdded(
     [](){},
     [](){},
     [node](){
-      const auto visible = node->IsVisible(nullptr)
-        && Mappers2DSettingsWidget::Instance->IsEnabled();
+      // MITK 2025: Set visibility for both 2D and 3D renderers
+      std::cout << "Visibility callback triggered for: " << node->GetName() << "\n";
+      const auto globalVisible = node->IsVisible(nullptr);
+      // FORCE 2D visibility to TRUE for fibers (ignore Mappers2DSettingsWidget)
+      const auto visible2D = true; // Was: globalVisible && Mappers2DSettingsWidget::Instance->IsEnabled();
+      std::cout << "  globalVisible=" << globalVisible << ", visible2D=" << visible2D << " (FORCED)\n";
+      
+      // Set 2D visibility - now always true for fiber bundles
       for (auto renderer : Imeka::View::Get2DRenderers())
       {
-        node->SetBoolProperty("visible", visible, renderer);
+        node->SetBoolProperty("visible", visible2D, renderer);
+      }
+      std::cout << "  Set 2D visibility to TRUE\n";
+      
+      // FORCE 3D visibility to TRUE always for fiber bundles
+      auto renderer3D = Imeka::View::Get3DRenderer();
+      if (renderer3D)
+      {
+        std::cout << "  FORCING 3D visibility to TRUE\n";
+        node->SetBoolProperty("visible", true, renderer3D);
+        std::cout << "  3D visibility forced to true\n";
+      }
+      else
+      {
+        std::cout << "  ERROR: Get3DRenderer() returned nullptr!\n";
       }
     }, m_DM);
+
+  // MITK 2025: Manually set initial per-renderer visibility
+  // The callback only triggers on changes, so we need to set initial state
+  std::cout << "Setting initial per-renderer visibility\n";
+  const auto globalVisible = node->IsVisible(nullptr);
+  // FORCE 2D visibility to TRUE for fibers
+  const auto visible2D = true; // Was: globalVisible && Mappers2DSettingsWidget::Instance->IsEnabled();
+  std::cout << "  globalVisible=" << globalVisible << ", visible2D=" << visible2D << " (FORCED)\n";
+  
+  // Set 2D visibility - forced to true
+  for (auto renderer : Imeka::View::Get2DRenderers())
+  {
+    node->SetBoolProperty("visible", visible2D, renderer);
+  }
+  std::cout << "  Set 2D visibility to TRUE\n";
+  
+  // FORCE 3D visibility to TRUE always
+  auto renderer3D = Imeka::View::Get3DRenderer();
+  if (renderer3D)
+  {
+    std::cout << "  FORCING initial 3D renderer visibility to TRUE\n";
+    node->SetBoolProperty("visible", true, renderer3D);
+    std::cout << "  3D visibility forced to true\n";
+    
+    // Request render update to apply visibility changes
+    mitk::RenderingManager::GetInstance()->RequestUpdate(renderer3D->GetRenderWindow());
+  }
+  else
+  {
+    std::cout << "  WARNING: 3D renderer not available yet - will be set on first render\n";
+    // Fallback: The renderer will check global visibility on first render
+  }
 
   m_FilteringUI.AddActionsToDataset(node);
 }
