@@ -178,6 +178,11 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
   if (node == nullptr)
     return;
 
+  // MITK 2025: Ensure visibility is true for this renderer
+  // SetDefaultProperties may have been called with nullptr, leaving per-renderer visibility unset
+  node->SetBoolProperty("visible", true, renderer);
+  std::cout << "FiberBundleMapper2D: Setting visibility=true for renderer: " << renderer->GetName() << "\n";
+
   vtkSmartPointer<vtkPolyData> fiberPolyData = fiberBundle->GetFiberPolyData();
   if (fiberPolyData == nullptr)
     return;
@@ -190,56 +195,13 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
   localStorage->m_Mapper->SelectColorArray("FIBER_COLORS");
   localStorage->m_Mapper->SetInputData(fiberPolyData);
 
-  localStorage->m_Mapper->SetVertexShaderCode(
-        "//VTK::System::Dec\n"
-        "attribute vec4 vertexMC;\n"
-
-        "//VTK::Normal::Dec\n"
-        "uniform mat4 MCDCMatrix;\n"
-
-        "//VTK::Color::Dec\n"
-
-        "varying vec4 positionWorld;\n"
-        "varying vec4 colorVertex;\n"
-
-        "void main(void)\n"
-        "{\n"
-        "  colorVertex = scalarColor;\n"
-        "  positionWorld = vertexMC;\n"
-        "  gl_Position = MCDCMatrix * vertexMC;\n"
-        "}\n"
-        );
-
-  localStorage->m_Mapper->SetFragmentShaderCode(
-        "//VTK::System::Dec\n"  // always start with this line
-        "//VTK::Output::Dec\n"  // always have this line in your FS
-        "uniform vec4 slicingPlane;\n"
-        "uniform float fiberThickness;\n"
-        "uniform int fiberFadingON;\n"
-        "uniform float fiberOpacity;\n"
-
-        "varying vec4 positionWorld;\n"
-        "varying vec4 colorVertex;\n"
-        "out vec4 out_Color;\n"
-
-        "void main(void)\n"
-        "{\n"
-        "  float r1 = dot(positionWorld.xyz, slicingPlane.xyz) - slicingPlane.w;\n"
-
-        "  if (abs(r1) >= fiberThickness)\n"
-        "    discard;\n"
-
-        "  if (fiberFadingON != 0)\n"
-        "  {\n"
-        "    float x = (r1 + fiberThickness) / (fiberThickness*2.0);\n"
-        "    x = 1.0 - x;\n"
-        "    out_Color = vec4(colorVertex.xyz*x, fiberOpacity);\n"
-        "  }\n"
-        "  else{\n"
-        "    out_Color = vec4(colorVertex.xyz, fiberOpacity);\n"
-        "  }\n"
-        "}\n"
-        );
+  // VTK 9.4: Custom shader code disabled - VTK removed SetVertexShaderCode/SetFragmentShaderCode
+  // TODO: Migrate to new VTK shader replacement API if custom shaders are needed
+  // Original shader code implemented fiber thickness and fading based on slicing plane
+  /*
+  localStorage->m_Mapper->SetVertexShaderCode(...);
+  localStorage->m_Mapper->SetFragmentShaderCode(...);
+  */
 
   vtkSmartPointer<vtkShaderCallback> myCallback = vtkSmartPointer<vtkShaderCallback>::New();
   myCallback->renderer = renderer;
@@ -264,6 +226,11 @@ vtkProp* mitk::FiberBundleMapper2D::GetVtkProp(mitk::BaseRenderer *renderer)
 void mitk::FiberBundleMapper2D::SetDefaultProperties(mitk::DataNode* node, mitk::BaseRenderer* renderer, bool overwrite)
 {
   Superclass::SetDefaultProperties(node, renderer, overwrite);
+
+  // MITK 2025: Superclass may have set visible=false, explicitly set it to true
+  node->SetBoolProperty("visible", true, renderer);
+  std::cout << "FiberBundleMapper2D::SetDefaultProperties - Set visibility=true for renderer: " 
+            << (renderer ? renderer->GetName() : "nullptr") << "\n";
   //    node->SetProperty("shader",mitk::ShaderProperty::New("mitkShaderFiberClipping"));
 
   //add other parameters to propertylist
@@ -272,6 +239,26 @@ void mitk::FiberBundleMapper2D::SetDefaultProperties(mitk::DataNode* node, mitk:
   node->AddProperty( "color", mitk::ColorProperty::New(1.0,1.0,1.0), renderer, overwrite);
 }
 
+// MITK 2025: Override to bypass visibility check that may incorrectly return false
+void mitk::FiberBundleMapper2D::MitkRenderOpaqueGeometry(BaseRenderer *renderer)
+{
+  std::cout << "FiberBundleMapper2D::MitkRenderOpaqueGeometry called for renderer: " << renderer->GetName() << "\n";
+  if (this->GetVtkProp(renderer)->GetVisibility())
+  {
+    std::cout << "  Rendering opaque 2D fibers...\n";
+    GetVtkProp(renderer)->RenderOpaqueGeometry(renderer->GetVtkRenderer());
+  }
+}
+
+void mitk::FiberBundleMapper2D::MitkRenderTranslucentGeometry(BaseRenderer *renderer)
+{
+  std::cout << "FiberBundleMapper2D::MitkRenderTranslucentGeometry called for renderer: " << renderer->GetName() << "\n";
+  if (this->GetVtkProp(renderer)->GetVisibility())
+  {
+    std::cout << "  Rendering translucent 2D fibers...\n";
+    GetVtkProp(renderer)->RenderTranslucentPolygonalGeometry(renderer->GetVtkRenderer());
+  }
+}
 
 mitk::FiberBundleMapper2D::FBXLocalStorage::FBXLocalStorage()
 {

@@ -87,10 +87,10 @@ bool ActiveROIsDialogBox::GenerateDialogBox(
       + layout->contentsMargins().right();
 
     return hSpace
-      + fm.width(m_Title1->text())
+      + fm.horizontalAdvance(m_Title1->text())
       + 200 // Min name label size
-      + fm.width(m_Title3->text())
-      + fm.width(m_Title4->text()) * 2;
+      + fm.horizontalAdvance(m_Title3->text())
+      + fm.horizontalAdvance(m_Title4->text()) * 2;
   }();
   int currentMinWidth = absoluteMinWidth;
   int lineIdx = 1;
@@ -103,7 +103,7 @@ bool ActiveROIsDialogBox::GenerateDialogBox(
  
     currentMinWidth = std::max(
       currentMinWidth,
-      absoluteMinWidth + fm.width(uiLine.name->text()) - 200);
+      absoluteMinWidth + fm.horizontalAdvance(uiLine.name->text()) - 200);
     m_Layout->addWidget(uiLine.enabled, lineIdx, 0);
     m_Layout->addWidget(uiLine.name, lineIdx, 1);
 

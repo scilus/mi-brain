@@ -38,7 +38,7 @@ mitk::FiberBundleTckReader * mitk::FiberBundleTckReader::Clone() const
   return new FiberBundleTckReader(*this);
 }
 
-std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleTckReader::Read()
+std::vector<itk::SmartPointer<mitk::BaseData>> mitk::FiberBundleTckReader::DoRead()
 {
 
   std::vector<itk::SmartPointer<mitk::BaseData> > result;

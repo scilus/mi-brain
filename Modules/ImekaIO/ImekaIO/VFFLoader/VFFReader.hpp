@@ -34,7 +34,9 @@ public:
   virtual VFFReader* Clone() const;
 
   using mitk::AbstractFileReader::Read;
-  virtual std::vector<itk::SmartPointer<mitk::BaseData>> Read();
+
+protected:
+  virtual std::vector<itk::SmartPointer<mitk::BaseData>> DoRead();
 
 private:
   us::ServiceRegistration<mitk::IFileReader> m_ServiceReg;

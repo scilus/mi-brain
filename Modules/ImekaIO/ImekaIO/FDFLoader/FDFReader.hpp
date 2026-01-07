@@ -87,7 +87,9 @@ public:
   virtual FDFReader* Clone() const;
 
   using mitk::AbstractFileReader::Read;
-  virtual std::vector<itk::SmartPointer<mitk::BaseData>> Read();
+
+protected:
+  virtual std::vector<itk::SmartPointer<mitk::BaseData>> DoRead();
 
 private:
   template<typename OutputContainer>

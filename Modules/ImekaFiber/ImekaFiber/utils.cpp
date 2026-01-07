@@ -153,11 +153,25 @@ void SetupNodeDataAndMappers(
   mitk::FilteredFiberBundle* fiber,
   FiberNodeData& fiberNodeData)
 {
+  std::cout << "SetupNodeDataAndMappers: Setting up fiber node " << node->GetName() << "\n";
+  
   node->SetBoolProperty("pickable", false);
   node->SetBoolProperty("Fiber2DfadeEFX", false);
 
-  Mappers2DSettingsWidget::SetVisibility(node);
+  // MITK 2025: Set visibility for all renderers (3D + 2D)
+  // SetVisibility for 2D is handled by Mappers2DSettingsWidget
+  // But we need to explicitly enable 3D visibility
+  std::cout << "  Setting global visibility to true\n";
+  node->SetVisibility(true);  // Sets default/global visibility
+  
+  std::cout << "  Setting 2D visibility via Mappers2DSettingsWidget\n";
+  Mappers2DSettingsWidget::SetVisibility(node);  // Sets 2D visibility
   Mappers2DSettingsWidget::SetFiberThickness(node);
+  
+  std::cout << "  Checking visibility after setup:\n";
+  bool vis = false;
+  node->GetVisibility(vis, nullptr);
+  std::cout << "    Global (nullptr): " << vis << "\n";
 
   // TODO Do we really need (or even use) this?
   fiberNodeData.fiberMapperData.fiberBundle = fiber;
@@ -175,6 +189,20 @@ void SetupNodeDataAndMappers(
   fiberNodeData.fiberMapper3D = mapper3D;
   node->SetMapper(2, mapper3D);
   mitk::MitkFiberMapper3D::SetDefaultProperties(node);
+  
+  // MITK 2025: Force 3D visibility to true after SetDefaultProperties
+  // SetDefaultProperties may have set "visible" to false
+  std::cout << "  Forcing 3D renderer visibility to true\n";
+  auto allRenderWindows = mitk::RenderingManager::GetInstance()->GetAllRegisteredRenderWindows();
+  for (auto renderWindow : allRenderWindows)
+  {
+    auto renderer = mitk::BaseRenderer::GetInstance(renderWindow);
+    if (renderer && renderer->GetMapperID() == mitk::BaseRenderer::Standard3D)
+    {
+      node->SetBoolProperty("visible", true, renderer);
+      std::cout << "    Set visibility=true for 3D renderer: " << renderer->GetName() << "\n";
+    }
+  }
 }
 
 mitk::FilteredFiberBundle::Pointer Union(const ConstNodes& nodes)

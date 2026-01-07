@@ -74,9 +74,9 @@ public:
     };
     EditTG(newTGNode, autoSetup);
 
-    CPPUNIT_ASSERT_EQUAL(10, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(10, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
     m_TGNode->SetVisibility(false);
-    CPPUNIT_ASSERT_EQUAL(7, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(7, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
   }
 };
 

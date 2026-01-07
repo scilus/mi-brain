@@ -7,7 +7,8 @@
 #include "BoundingObject/BoundingObjectWriter.hpp"
 #include "DataNodeGroup/DataNodeGroupReader.hpp"
 #include "DataNodeGroup/DataNodeGroupWriter.hpp"
-#include "Dicom/DicomWriter.hpp"
+// TODO: DicomWriter needs ITK API updates for MITK 2025.12
+// #include "Dicom/DicomWriter.hpp"
 #include "FDFLoader/FDFReader.hpp"
 #include "VFFLoader/VFFReader.hpp"
 
@@ -35,7 +36,8 @@ public:
     m_BoundingObjectWriter = new BoundingObjectWriter();
     m_DataNodeGroupReader = new DataNodeGroupReader();
     m_DataNodeGroupWriter = new DataNodeGroupWriter();
-    m_DicomWriter = new DicomWriter();
+    // TODO: DicomWriter needs ITK API updates for MITK 2025.12
+    // m_DicomWriter = new DicomWriter();
     m_FDFReader = new FDFReader();
     m_VFFReader = new VFFReader();
   }
@@ -46,7 +48,8 @@ public:
     delete m_BoundingObjectWriter;
     delete m_DataNodeGroupReader;
     delete m_DataNodeGroupWriter;
-    delete m_DicomWriter;
+    // TODO: DicomWriter needs ITK API updates for MITK 2025.12
+    // delete m_DicomWriter;
     delete m_FDFReader;
     delete m_VFFReader;
   }
@@ -56,7 +59,8 @@ private:
   BoundingObjectWriter* m_BoundingObjectWriter;
   DataNodeGroupReader* m_DataNodeGroupReader;
   DataNodeGroupWriter* m_DataNodeGroupWriter;
-  DicomWriter* m_DicomWriter;
+  // TODO: DicomWriter needs ITK API updates for MITK 2025.12
+  // DicomWriter* m_DicomWriter;
   FDFReader* m_FDFReader;
   VFFReader* m_VFFReader;
 };

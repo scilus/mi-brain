@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/Images">
     <file alias="mosaic.png">images/mosaic.png</file>
+    <file alias="logo_plitk.png">images/logo_plitk.png</file>
   </qresource>
 </RCC>

@@ -58,7 +58,7 @@ public:
   // Toy test with a SO. We do test with real data in other files.
   void TestSO()
   {
-    CPPUNIT_ASSERT_EQUAL(10, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(10, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
     const auto TGNode_SO_pair = SetupTG(
       m_FibersNode,
       Vector3D(2.5, 1.501, 2.5),
@@ -66,7 +66,7 @@ public:
     auto TGNode = TGNode_SO_pair.first;
     auto SO = TGNode_SO_pair.second;
     auto geo = SO->GetGeometry();
-    CPPUNIT_ASSERT_EQUAL(0, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
 
     const auto& mapperData =
       m_FM->GetFiberNodeData(m_FibersNode).fiberMapperData;
@@ -95,7 +95,7 @@ public:
           static_cast<unsigned int>(m_Fibers->GetFibersVisibility().size()));
       }
       CPPUNIT_ASSERT_EQUAL(
-        static_cast<int>(nbStreamlines), pmd.GetIndices().size());
+        static_cast<int>(nbStreamlines), static_cast<int>(pmd.GetIndices().size()));
       CPPUNIT_ASSERT_EQUAL(2u * nbStreamlines, pmd.NbPoints());
       CPPUNIT_ASSERT_EQUAL(
         static_cast<size_t>(2 * nbStreamlines), mapperData.GetIBO().size());

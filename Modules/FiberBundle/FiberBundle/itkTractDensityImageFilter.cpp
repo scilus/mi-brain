@@ -8,7 +8,7 @@
 
 // misc
 #include <cmath>
-#include <boost/progress.hpp>
+#include <boost/timer/progress_display.hpp>
 
 namespace itk{
 
@@ -128,7 +128,7 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
   vtkSmartPointer<vtkPolyData> fiberPolyData = m_FiberBundle->GetFiberPolyData();
 
   int numFibers = m_FiberBundle->GetNumFibers();
-  boost::progress_display disp(numFibers);
+  boost::timer::progress_display disp(numFibers);
   for( int i=0; i<numFibers; i++ )
   {
     ++disp;

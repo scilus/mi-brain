@@ -3,7 +3,7 @@
 
 #include <mitkBoundingObject.h>
 #include <itksys/SystemTools.hxx>
-#include <tinyxml.h>
+#include <tinyxml2.h>
 
 #include "../MimeType.hpp"
 #include "ImekaBoundingObject/BoundingObjectFactory.hpp"
@@ -31,7 +31,7 @@ BoundingObjectReader* BoundingObjectReader::Clone() const
 }
 
 std::vector<itk::SmartPointer<mitk::BaseData>>
-BoundingObjectReader::Read()
+BoundingObjectReader::DoRead()
 {
   std::vector<itk::SmartPointer<mitk::BaseData>> result;
 
@@ -39,21 +39,25 @@ BoundingObjectReader::Read()
   const std::string& currLocale = setlocale( LC_ALL, nullptr );
   setlocale(LC_ALL, locale.c_str());
 
-  TiXmlDocument doc(GetInputLocation().c_str());
-  if (!doc.LoadFile())
+  tinyxml2::XMLDocument doc;
+  if (doc.LoadFile(GetInputLocation().c_str()) != tinyxml2::XML_SUCCESS)
   {
     mitkThrow() << "Could not open file " << GetInputLocation()
       << " for reading.";
   }
 
-  TiXmlHandle hDoc(&doc);
-  TiXmlElement* pElem;
-  TiXmlHandle hRoot(0);
+  tinyxml2::XMLElement* pElem = doc.FirstChildElement();
+  if (!pElem)
+  {
+    mitkThrow() << "No root element found in " << GetInputLocation();
+  }
 
-  pElem = hDoc.FirstChildElement().Element();
-  hRoot = TiXmlHandle(pElem);
-
-  const std::string type = pElem->Attribute("type");
+  const char* typeAttr = pElem->Attribute("type");
+  if (!typeAttr)
+  {
+    mitkThrow() << "Missing 'type' attribute in " << GetInputLocation();
+  }
+  const std::string type = typeAttr;
   if (!Imeka::BoundingObject::BoundingObjectFactory::get()
     ->typeExists(type))
   {
@@ -64,8 +68,8 @@ BoundingObjectReader::Read()
 
   auto bdo = Imeka::BoundingObject::BoundingObjectFactory::get()
     ->createBoundingObject(type);
-  ReadWorldTransform(bdo, hRoot);
-  ReadOrigin(bdo, hRoot);
+  ReadWorldTransform(bdo, pElem);
+  ReadOrigin(bdo, pElem);
 
   result.push_back(bdo.GetPointer());
 
@@ -76,29 +80,32 @@ BoundingObjectReader::Read()
 }
 
 void BoundingObjectReader::ReadOrigin(
-  mitk::BoundingObject* boundingObject, TiXmlHandle xmlHandle)
+  mitk::BoundingObject* boundingObject, tinyxml2::XMLElement* rootElement)
 {
-  double temp = 0.0;
   mitk::Point3D origin;
-  TiXmlElement* pElem = xmlHandle.FirstChildElement("origin").Element();
-  pElem->Attribute("x", &temp); origin[0] = temp;
-  pElem->Attribute("y", &temp); origin[1] = temp;
-  pElem->Attribute("z", &temp); origin[2] = temp;
-  boundingObject->GetGeometry()->SetOrigin(origin);
+  tinyxml2::XMLElement* pElem = rootElement->FirstChildElement("origin");
+  if (pElem)
+  {
+    pElem->QueryDoubleAttribute("x", &origin[0]);
+    pElem->QueryDoubleAttribute("y", &origin[1]);
+    pElem->QueryDoubleAttribute("z", &origin[2]);
+    boundingObject->GetGeometry()->SetOrigin(origin);
+  }
 }
 
 void BoundingObjectReader::ReadWorldTransform(
-  mitk::BoundingObject* boundingObject, TiXmlHandle xmlHandle)
+  mitk::BoundingObject* boundingObject, tinyxml2::XMLElement* rootElement)
 {
-  TiXmlElement* row = xmlHandle.FirstChildElement("WorldTransformMatrix")
-    .Element()->FirstChildElement("Row");
+  tinyxml2::XMLElement* matrixElem = rootElement->FirstChildElement("WorldTransformMatrix");
+  if (!matrixElem) return;
+  
+  tinyxml2::XMLElement* row = matrixElem->FirstChildElement("Row");
   mitk::AffineTransform3D::MatrixType matrix;
-  for (unsigned int i = 0; i < 3; ++i)
+  for (unsigned int i = 0; i < 3 && row; ++i)
   {
-    double temp = 0.0;
-    row->Attribute("col1", &temp); matrix(i, 0) = temp;
-    row->Attribute("col2", &temp); matrix(i, 1) = temp;
-    row->Attribute("col3", &temp); matrix(i, 2) = temp;
+    row->QueryDoubleAttribute("col1", &matrix(i, 0));
+    row->QueryDoubleAttribute("col2", &matrix(i, 1));
+    row->QueryDoubleAttribute("col3", &matrix(i, 2));
     row = row->NextSiblingElement("Row");
   }
   mitk::AffineTransform3D::Pointer transform = mitk::AffineTransform3D::New();

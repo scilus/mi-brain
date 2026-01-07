@@ -66,7 +66,7 @@ private:
         dynamic_cast<mitk::FilteredFiberBundle*>(loadedNode->GetData());
 
       CPPUNIT_ASSERT_EQUAL(
-        nbStreamlines, loadedData->GetFibersVisibility().size());
+        nbStreamlines, static_cast<int>(loadedData->GetFibersVisibility().size()));
     }
   }
 

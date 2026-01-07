@@ -33,7 +33,7 @@ public:
     m_Fibers->SetFibersVisibility(visibility);
     m_Fibers->CalculateStatsUsingVisibility();
 
-    CPPUNIT_ASSERT_EQUAL(0, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
     CPPUNIT_ASSERT_EQUAL(10, m_Fibers->GetNumFibers());
     CPPUNIT_ASSERT_EQUAL(0.0f, m_Fibers->GetMinFiberLength());
     CPPUNIT_ASSERT_EQUAL(0.0f, m_Fibers->GetMaxFiberLength());
@@ -50,7 +50,7 @@ public:
       m_Fibers->SetFibersVisibility(visibility);
       m_Fibers->CalculateStatsUsingVisibility();
 
-      CPPUNIT_ASSERT_EQUAL(i + 1, m_Fibers->GetFibersVisibility().size());
+      CPPUNIT_ASSERT_EQUAL(i + 1, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
       CPPUNIT_ASSERT_EQUAL(1.0f, m_Fibers->GetMinFiberLength());
       CPPUNIT_ASSERT_EQUAL(1.0f * (i + 1), m_Fibers->GetMaxFiberLength());
       CPPUNIT_ASSERT_EQUAL(means[i], m_Fibers->GetMeanFiberLength());
@@ -65,7 +65,7 @@ public:
     m_Fibers->SetFibersVisibility(visibility);
     m_Fibers->CalculateStatsUsingVisibility();
 
-    CPPUNIT_ASSERT_EQUAL(8, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(8, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
     CPPUNIT_ASSERT_EQUAL(10, m_Fibers->GetNumFibers());
     CPPUNIT_ASSERT_EQUAL(3.0f, m_Fibers->GetMinFiberLength());
     CPPUNIT_ASSERT_EQUAL(10.0f, m_Fibers->GetMaxFiberLength());

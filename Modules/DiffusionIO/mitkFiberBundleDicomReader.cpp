@@ -27,7 +27,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <vtkCellData.h>
 #include <vtkPointData.h>
 #include <itksys/SystemTools.hxx>
-#include <tinyxml.h>
+#include <tinyxml2.h>
 #include <vtkCleanPolyData.h>
 #include "FiberBundle/mitkTrackvis.h"
 #include <mitkCustomMimeType.h>
@@ -55,7 +55,7 @@ mitk::FiberBundleDicomReader * mitk::FiberBundleDicomReader::Clone() const
   return new FiberBundleDicomReader(*this);
 }
 
-std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleDicomReader::Read()
+std::vector<itk::SmartPointer<mitk::BaseData>> mitk::FiberBundleDicomReader::DoRead()
 {
 
   std::vector<itk::SmartPointer<mitk::BaseData> > output_fibs;

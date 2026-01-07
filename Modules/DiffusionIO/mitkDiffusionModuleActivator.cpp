@@ -1,15 +1,19 @@
 #include <usModuleActivator.h>
 #include <usModuleContext.h>
 
-#include <mitkFiberBundleVtkReader.h>
+// TODO MITK 2025: Re-enable after TinyXML2 migration
+// #include <mitkFiberBundleVtkReader.h>
 #include <mitkFiberBundleTckReader.hpp>
 #include <mitkFiberBundleTrackVisReader.h>
-#include <mitkFiberBundleDicomReader.h>
+// TODO MITK 2025: Re-enable after DCMTK API migration
+// #include <mitkFiberBundleDicomReader.h>
 
-#include <mitkFiberBundleVtkWriter.h>
+// TODO MITK 2025: Re-enable after TinyXML2 migration
+// #include <mitkFiberBundleVtkWriter.h>
 #include <mitkFiberBundleTckWriter.hpp>
 #include <mitkFiberBundleTrackVisWriter.h>
-#include <mitkFiberBundleDicomWriter.h>
+// TODO MITK 2025: Re-enable after DCMTK API migration
+// #include <mitkFiberBundleDicomWriter.h>
 
 #include <mitkCoreServices.h>
 #include <mitkIPropertyDescriptions.h>
@@ -48,15 +52,19 @@ namespace mitk
         context->RegisterService(*mimeTypeIter, props);
       }
 
-      m_FiberBundleVtkReader = new FiberBundleVtkReader();
+      // TODO MITK 2025: Re-enable after TinyXML2 migration
+      // m_FiberBundleVtkReader = new FiberBundleVtkReader();
       m_FiberBundleTrackVisReader = new FiberBundleTrackVisReader();
       m_FiberBundleTckReader = new FiberBundleTckReader();
-      m_FiberBundleDicomReader = new FiberBundleDicomReader();
+      // TODO MITK 2025: Re-enable after DCMTK API migration
+      // m_FiberBundleDicomReader = new FiberBundleDicomReader();
 
-      m_FiberBundleVtkWriter = new FiberBundleVtkWriter();
+      // TODO MITK 2025: Re-enable after TinyXML2 migration  
+      // m_FiberBundleVtkWriter = new FiberBundleVtkWriter();
       m_FiberBundleTckWriter = new FiberBundleTckWriter();
       m_FiberBundleTrackVisWriter = new FiberBundleTrackVisWriter();
-      m_FiberBundleDicomWriter = new FiberBundleDicomWriter();
+      // TODO MITK 2025: Re-enable after DCMTK API migration
+      // m_FiberBundleDicomWriter = new FiberBundleDicomWriter();
     }
 
     void Unload(us::ModuleContext*) override
@@ -66,26 +74,28 @@ namespace mitk
         delete m_MimeTypes.at(loop);
       }
 
-      delete m_FiberBundleVtkReader;
+      // TODO MITK 2025: Re-enable after TinyXML2/DCMTK migrations
+      // delete m_FiberBundleVtkReader;
       delete m_FiberBundleTckReader;
       delete m_FiberBundleTrackVisReader;
-      delete m_FiberBundleDicomReader;
+      // delete m_FiberBundleDicomReader;
 
-      delete m_FiberBundleDicomWriter;
-      delete m_FiberBundleVtkWriter;
+      // delete m_FiberBundleDicomWriter;
+      // delete m_FiberBundleVtkWriter;
       delete m_FiberBundleTckWriter;
       delete m_FiberBundleTrackVisWriter;
     }
 
   private:
 
-    FiberBundleVtkReader * m_FiberBundleVtkReader;
+    // TODO MITK 2025: Re-enable after migrations
+    // FiberBundleVtkReader * m_FiberBundleVtkReader;
     FiberBundleTckReader * m_FiberBundleTckReader;
     FiberBundleTrackVisReader * m_FiberBundleTrackVisReader;
-    FiberBundleDicomReader * m_FiberBundleDicomReader;
+    // FiberBundleDicomReader * m_FiberBundleDicomReader;
 
-    FiberBundleDicomWriter * m_FiberBundleDicomWriter;
-    FiberBundleVtkWriter * m_FiberBundleVtkWriter;
+    // FiberBundleDicomWriter * m_FiberBundleDicomWriter;
+    // FiberBundleVtkWriter * m_FiberBundleVtkWriter;
     FiberBundleTckWriter *m_FiberBundleTckWriter;
     FiberBundleTrackVisWriter * m_FiberBundleTrackVisWriter;
 

@@ -14,7 +14,7 @@
 #include <vtkMath.h>
 #include <vtkPolyLine.h>
 
-#include <boost/progress.hpp>
+#include <boost/timer/progress_display.hpp>
 
 #include <numeric> // Fill vector with std::itoa
 
@@ -112,18 +112,21 @@ void FilteredFiberBundle::ExportDataTo(
   vtkPoints* thisPoints = m_FiberPolyData->GetPoints();
   float* thisPointsData = static_cast<float*>(thisPoints->GetVoidPointer(0));
   vtkCellArray* ca = m_FiberPolyData->GetLines();
-  vtkIdType* p = ca->GetPointer();
-  vtkIdType* pEnd = p + ca->GetNumberOfConnectivityEntries();
+  
+  // VTK 9.x: Use new iterator API instead of GetPointer()
   vtkIdType currentCell = 0, colorIdx = 0;
-  while (p < pEnd)
+  for (vtkIdType cellId = 0; cellId < ca->GetNumberOfCells(); ++cellId)
   {
-    vtkIdType nbPointsOnFiber = *p; ++p;
+    vtkIdType nbPointsOnFiber;
+    const vtkIdType* cellPts;
+    ca->GetCellAtId(cellId, nbPointsOnFiber, cellPts);
+    
     const bool addCell = visibility.contains(currentCell++);
     if (addCell) { lines->InsertNextCell(nbPointsOnFiber); }
 
-    while (nbPointsOnFiber > 0)
+    for (vtkIdType i = 0; i < nbPointsOnFiber; ++i)
     {
-      float* pointData = thisPointsData + 3 * *p;
+      float* pointData = thisPointsData + 3 * cellPts[i];
       if (addCell)
       {
         lines->InsertCellPoint(
@@ -137,9 +140,7 @@ void FilteredFiberBundle::ExportDataTo(
         }
       }
 
-      ++p;
       ++colorIdx;
-      --nbPointsOnFiber;
     }
   }
 }
@@ -157,6 +158,7 @@ void FilteredFiberBundle::ExportDataRTT(
   const vtkIdType nbStreamlines = polyData->GetLines()->GetNumberOfCells();
   for (vtkIdType cellID = 0; cellID < nbStreamlines; ++cellID)
   {
+    const vtkIdType* pts;
     polyData->GetCellPoints(cellID, nbPoints, pts);
     auto streamlinePoints = points + 3 * *pts;
     auto streamlineColors = colors + 4 * *pts;
@@ -260,7 +262,7 @@ void FilteredFiberBundle::MirrorFibers(
   if (axis > 2) { return; }
 
   MITK_INFO << "Mirroring fibers";
-  boost::progress_display disp(m_NumFibers);
+  boost::timer::progress_display disp(m_NumFibers);
 
   const float shift = 2.0 * anatGeo->GetCenter()[axis];
   vtkPoints* points = m_FiberPolyData->GetPoints();
@@ -334,7 +336,7 @@ void FilteredFiberBundle::ColorCodingByEndPoints()
   fiberList->InitTraversal();
   for (vtkIdType fiberIdx = 0; fiberIdx < nbFibers; ++fiberIdx)
   {
-    vtkIdType* idList; // contains the point id's of the line
+    const vtkIdType* idList; // contains the point id's of the line
     vtkIdType nbPointsInCell; // number of points for current line
     fiberList->GetNextCell(nbPointsInCell, idList);
 
@@ -721,7 +723,8 @@ void FilteredFiberBundle::Shuffle()
   {
     auto container = vtkSmartPointer<vtkPolyLine>::New();
 
-    vtkIdType nPts, *pts;
+    vtkIdType nPts;
+    const vtkIdType* pts;
     m_FiberPolyData->GetCellPoints(cellID, nPts, pts);
     const float* streamlineBegin = allPointsBegin + (3 * *pts);
     for (vtkIdType j = 0; j < nPts; ++j)
@@ -741,7 +744,8 @@ void FilteredFiberBundle::Shuffle()
       m_FiberPolyData->GetPoints()->GetNumberOfPoints());;
     for (const auto cellID : ordering)
     {
-      vtkIdType nPts, *pts;
+      vtkIdType nPts;
+      const vtkIdType* pts;
       m_FiberPolyData->GetCellPoints(cellID, nPts, pts);
       const auto streamlineColors = colors + 4 * *pts;
       for (auto pointID = 0; pointID < nPts; ++pointID)

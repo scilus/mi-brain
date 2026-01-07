@@ -42,30 +42,30 @@ public:
       static_cast<size_t>(0), mapperData.partsMapperData.size());
     CPPUNIT_ASSERT_EQUAL(20u, mapperData.TotalNbPoints());
     CPPUNIT_ASSERT_EQUAL(20u, mapperData.wholeMapperData.NbPoints());
-    CPPUNIT_ASSERT_EQUAL(10, mapperData.wholeMapperData.GetIndices().size());
+    CPPUNIT_ASSERT_EQUAL(10, static_cast<int>(mapperData.wholeMapperData.GetIndices().size()));
 
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(20), mapperData.GetIBO().size());
-    CPPUNIT_ASSERT_EQUAL(10, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(10, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
 
     m_FM->SetFilteringLengths(0.0, 10.0);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(20), mapperData.GetIBO().size());
-    CPPUNIT_ASSERT_EQUAL(10, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(10, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
 
     m_FM->SetFilteringLengths(1.0, 9.0);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(18), mapperData.GetIBO().size());
-    CPPUNIT_ASSERT_EQUAL(9, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(9, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
 
     m_FM->SetFilteringLengths(1.0, 8.0);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(16), mapperData.GetIBO().size());
-    CPPUNIT_ASSERT_EQUAL(8, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(8, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
 
     m_FM->SetFilteringLengths(3.0, 6.0);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(8), mapperData.GetIBO().size());
-    CPPUNIT_ASSERT_EQUAL(4, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(4, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
 
     m_FM->SetFilteringLengths(3.0, 3.0);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), mapperData.GetIBO().size());
-    CPPUNIT_ASSERT_EQUAL(1, m_Fibers->GetFibersVisibility().size());
+    CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(m_Fibers->GetFibersVisibility().size()));
 
     CPPUNIT_ASSERT_EQUAL(true, mapperData.useWhole);
 
@@ -73,7 +73,7 @@ public:
       static_cast<size_t>(0), mapperData.partsMapperData.size());
     CPPUNIT_ASSERT_EQUAL(2u, mapperData.TotalNbPoints());
     CPPUNIT_ASSERT_EQUAL(2u, mapperData.wholeMapperData.NbPoints());
-    CPPUNIT_ASSERT_EQUAL(1, mapperData.wholeMapperData.GetIndices().size());
+    CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(mapperData.wholeMapperData.GetIndices().size()));
   }
 };
 

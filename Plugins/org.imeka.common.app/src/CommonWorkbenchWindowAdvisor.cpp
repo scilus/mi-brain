@@ -4,14 +4,17 @@
 #include <berryCommandContributionItem.h>
 #include <berryCommandContributionItemParameter.h>
 #include <berryFileEditorInput.h>
-#include <berryIPreferences.h>
-#include <berryIPreferencesService.h>
+// #include <berryIPreferences.h>  // Removed in MITK 2025.12
+// #include <berryIPreferencesService.h>  // Moved to mitk namespace
 #include <berryIQtStyleManager.h>
 #include <berryMenuManager.h>
 #include <berryPlatformUI.h>
 #include <berryQtPreferences.h>
 #include <berryWorkbenchPlugin.h>
 #include <internal/berryQtShowViewAction.h>
+
+#include <mitkIPreferences.h>
+#include <mitkIPreferencesService.h>
 
 #include <QLayout>
 #include <QMainWindow>
@@ -96,32 +99,44 @@ CommonWorkbenchWindowAdvisor::CommonWorkbenchWindowAdvisor(
 
 void CommonWorkbenchWindowAdvisor::PostWindowCreate()
 {
-  // Change the Qt theme to "Light"
-  ctkPluginContext* context = berry::WorkbenchPlugin::GetDefault()->GetPluginContext();
-  ctkServiceReference styleManagerRef = context->getServiceReference<berry::IQtStyleManager>();
-  auto styleManager = context->getService<berry::IQtStyleManager>(styleManagerRef);
-  styleManager->SetStyle(":/org.blueberry.ui.qt/lightstyle.qss");
+  try
+  {
+    // Change the Qt theme to "Light"
+    ctkPluginContext* context = berry::WorkbenchPlugin::GetDefault()->GetPluginContext();
+    if (!context)
+    {
+      MITK_ERROR << "Failed to get plugin context in PostWindowCreate";
+      return;
+    }
+    
+    ctkServiceReference styleManagerRef = context->getServiceReference<berry::IQtStyleManager>();
+    auto styleManager = context->getService<berry::IQtStyleManager>(styleManagerRef);
+    if (styleManager)
+    {
+      styleManager->SetStyle(":/org.blueberry.ui.qt/lightstyle.qss");
+    }
 
   // Set all the default preferences for MI-Brain. All preferences are linked to a specific id,
   // that's why it's currently separated in 2 groups.
   auto prefService = berry::WorkbenchPlugin::GetDefault()->GetPreferencesService();
 
-  {
-    auto prefs = prefService->GetSystemPreferences()
-      ->Node(berry::QtPreferences::QT_STYLES_NODE);
-    const bool showCategoryNames = prefs->GetBool(
-      berry::QtPreferences::QT_SHOW_TOOLBAR_CATEGORY_NAMES, true);
-    if (showCategoryNames)
-    {
-      prefs->PutBool(berry::QtPreferences::QT_SHOW_TOOLBAR_CATEGORY_NAMES, false);
-    }
-  }
+  // MITK 2025.12: QT_SHOW_TOOLBAR_CATEGORY_NAMES constant removed
+  // {
+  //   auto prefs = prefService->GetSystemPreferences()
+  //     ->Node(berry::QtPreferences::QT_STYLES_NODE);
+  //   const bool showCategoryNames = prefs->GetBool(
+  //     berry::QtPreferences::QT_SHOW_TOOLBAR_CATEGORY_NAMES, true);
+  //   if (showCategoryNames)
+  //   {
+  //     prefs->PutBool(berry::QtPreferences::QT_SHOW_TOOLBAR_CATEGORY_NAMES, false);
+  //   }
+  // }
 
   {
     auto prefs = prefService->GetSystemPreferences()->Node("/org.mitk.views.datamanager");
-    const QString pref = "Call global reinit if node is deleted";
+    const std::string pref = "Call global reinit if node is deleted";
     const bool reinitOnDelete = prefs->GetBool(pref, false);
-    if (reinitOnDelete)
+    if (!reinitOnDelete)
     {
       prefs->PutBool(pref, true);
     }
@@ -132,8 +147,19 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
   // very bad hack...
   berry::IWorkbenchWindow::Pointer window =
     this->GetWindowConfigurer()->GetWindow();
+  if (!window || !window->GetShell())
+  {
+    MITK_ERROR << "Failed to get workbench window or shell in PostWindowCreate";
+    return;
+  }
+  
   auto mainWindow =
     static_cast<QMainWindow*>(window->GetShell()->GetControl());
+  if (!mainWindow)
+  {
+    MITK_ERROR << "Failed to get main window control in PostWindowCreate";
+    return;
+  }
 
   if (m_SetViewPlacerHotkeys)
   {
@@ -187,15 +213,24 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     m_MarkerWidget = vtkSmartPointer<vtkOrientationMarkerWidget>::New();
     m_MarkerWidget->SetOrientationMarker(m_AnnotatedCube);
     m_MarkerWidget->SetOutlineColor(0.9300, 0.5700, 0.1300);
-    m_MarkerWidget->SetInteractor(
-      mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4")
-      ->GetInteractor());
+    
+    // MITK 2025: Check if render window is available yet
+    // During PostWindowCreate, stdmulti.widget4 may not be initialized yet
+    auto renderWindow = mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4");
+    if (renderWindow && renderWindow->GetInteractor())
+    {
+      m_MarkerWidget->SetInteractor(renderWindow->GetInteractor());
 
-    m_Listener.reset(new StdMultiWidgetPartListener(m_MarkerWidget));
-    GetWindowConfigurer()->GetWindow()->GetActivePage()->AddPartListener(
-      m_Listener.data());
+      m_Listener.reset(new StdMultiWidgetPartListener(m_MarkerWidget));
+      GetWindowConfigurer()->GetWindow()->GetActivePage()->AddPartListener(
+        m_Listener.data());
 
-    m_MarkerWidget->SetEnabled(1);
+      m_MarkerWidget->SetEnabled(1);
+    }
+    else
+    {
+      MITK_WARN << "Render window 'stdmulti.widget4' not available during PostWindowCreate - orientation marker disabled";
+    }
   }
 
   // We modified MITK's code to NOT add the Help menu because it's
@@ -217,16 +252,14 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     }
   }
 
-  /**
-  Add the &About action again.
-  THIS CODE IS BAD. The berry classes should NEVER be used outside of MITK's
-  code. THIS IS A HACK AND SHOULD BE REMOVED. However, it's here because
-  - we remove the standard Help menu because we want to add more menus before
-    the Help menu, which should be last
-  - "org.blueberry.ui.help.aboutAction" kind-of work but it takes their
-    extension point most of the time, so we disable theirs in
-    Plugins/org.mitk.gui.qt.ext/plugin.xml
-  */
+  // Add the &About action again.
+  // THIS CODE IS BAD. The berry classes should NEVER be used outside of MITK's
+  // code. THIS IS A HACK AND SHOULD BE REMOVED. However, it's here because
+  // - we remove the standard Help menu because we want to add more menus before
+  //   the Help menu, which should be last
+  // - "org.blueberry.ui.help.aboutAction" kind-of work but it takes their
+  //   extension point most of the time, so we disable theirs in
+  //   Plugins/org.mitk.gui.qt.ext/plugin.xml
   berry::CommandContributionItemParameter::Pointer command(
     new berry::CommandContributionItemParameter(
       window.GetPointer(), QString(),
@@ -239,6 +272,16 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
   berry::CommandContributionItem::Pointer item(
     new berry::CommandContributionItem(command));
   item->Fill(m_HelpMenu, nullptr);
+  
+  }
+  catch (const std::exception& e)
+  {
+    MITK_ERROR << "Exception in PostWindowCreate: " << e.what();
+  }
+  catch (...)
+  {
+    MITK_ERROR << "Unknown exception in PostWindowCreate";
+  }
 }
 
 void CommonWorkbenchWindowAdvisor::Setup()

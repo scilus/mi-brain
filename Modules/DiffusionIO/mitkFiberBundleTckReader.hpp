@@ -19,7 +19,7 @@ public:
   virtual FiberBundleTckReader * Clone() const override;
 
   using mitk::AbstractFileReader::Read;
-  virtual std::vector<itk::SmartPointer<BaseData> > Read() override;
+  virtual std::vector<itk::SmartPointer<BaseData>> DoRead() override;
 
 private:
   us::ServiceRegistration<mitk::IFileReader> m_ServiceReg;
