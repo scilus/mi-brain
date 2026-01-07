@@ -150,7 +150,7 @@ void FilteredFiberBundle::ExportDataRTT(
   vtkPoints *newPoints,
   vtkUnsignedCharArray* newColors) const
 {
-  vtkIdType nbPoints, *pts;
+  vtkIdType nbPoints;
   auto polyData = GetFiberPolyData();
   auto points = static_cast<float *>(polyData->GetPoints()->GetVoidPointer(0));
   auto colors = static_cast<unsigned char *>(GetFiberColors()->GetVoidPointer(0));
