@@ -1,14 +1,14 @@
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
 
 # Change project and application name to your own
 set(MY_PROJECT_NAME Imeka)
 set(MY_APP_NAME MI-Brain)
 
 #-----------------------------------------------------------------------------
-# Set the language standard (MITK requires C++14)
+# Set the language standard (MITK 2025.12 requires C++17)
 #-----------------------------------------------------------------------------
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED 1)
 set(CMAKE_CXX_EXTENSIONS 0)
 
@@ -127,12 +127,21 @@ endif()
 set(${PROJECT_NAME}_MODULES_PACKAGE_DEPENDS_DIR "${PROJECT_SOURCE_DIR}/CMake/PackageDepends")
 set(MODULES_PACKAGE_DEPENDS_DIRS ${${PROJECT_NAME}_MODULES_PACKAGE_DEPENDS_DIR})
 
-find_package(MITK 2016.11.00 REQUIRED)
+find_package(MITK 2025.12 REQUIRED)
 
 if(COMMAND mitkFunctionCheckMitkCompatibility)
   mitkFunctionCheckMitkCompatibility(VERSIONS MITK_VERSION_PLUGIN_SYSTEM 1 REQUIRED)
 else()
-  message(SEND_ERROR "Your MITK version is too old. Please use Git hash b86bf28 or newer")
+  message(SEND_ERROR "Your MITK version is too old. Please use MITK 2025.12 or newer")
+endif()
+
+# MITK 2025 Qt6 migration: Set QT_QMAKE_EXECUTABLE for install rules
+if(MITK_USE_Qt6 AND Qt6_DIR)
+  get_filename_component(_qt6_bin_dir "${Qt6_DIR}/../../../bin" ABSOLUTE)
+  find_program(QT_QMAKE_EXECUTABLE NAMES qmake6 qmake PATHS "${_qt6_bin_dir}" NO_DEFAULT_PATH)
+  if(NOT QT_QMAKE_EXECUTABLE)
+    message(WARNING "Could not find qmake executable for Qt6 plugin installation")
+  endif()
 endif()
 
 link_directories(${MITK_LINK_DIRECTORIES})
@@ -355,8 +364,25 @@ add_subdirectory(Apps/${MY_APP_NAME})
 # Set MITK cpack variables, customize CPack variables for this project
 include(mitkSetupCPack)
 include(CPackSetup)
-MITK_INSTALL(FILES
-  "${PROJECT_SOURCE_DIR}/MI-Brain.bmp")
+
+# MITK 2025 Qt6 migration: Install Qt6 XCB private libraries needed by platform plugin
+# Must be in bin/lib (not bin/) due to RUNPATH=$ORIGIN/../../lib in xcb plugin
+if(UNIX AND NOT APPLE AND MITK_USE_Qt6 AND Qt6_DIR)
+  get_filename_component(_qt6_lib_dir "${Qt6_DIR}/../../../lib" ABSOLUTE)
+  if(EXISTS "${_qt6_lib_dir}/libQt6XcbQpa.so.6.6.0")
+    set(_install_DESTINATION "lib")
+    # Install both the actual library and the symlink
+    MITK_INSTALL(FILES "${_qt6_lib_dir}/libQt6XcbQpa.so.6.6.0")
+    MITK_INSTALL(FILES "${_qt6_lib_dir}/libQt6XcbQpa.so.6")
+    set(_install_DESTINATION "")
+  endif()
+endif()
+
+# MI-Brain.bmp is only needed for Windows NSIS installer
+if(WIN32)
+  MITK_INSTALL(FILES
+    "${PROJECT_SOURCE_DIR}/MI-Brain.bmp")
+endif()
 
 list(APPEND CPACK_CREATE_DESKTOP_LINKS "${MY_APP_NAME}")
 
@@ -376,4 +402,6 @@ set(CPACK_PROJECT_CONFIG_FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}CPackOptions
 include(CPack)
 
 # Additional installation rules
+# Override MITK Python setting since we don't use Python in mi-brain
+set(MITK_USE_Python3 OFF)
 include(mitkInstallRules)

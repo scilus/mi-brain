@@ -1,6 +1,8 @@
 
 #include "ViewPlacerAction.hpp"
 
+#include <QWidget>
+
 #include <mitkBaseRenderer.h>
 #include <mitkCameraController.h>
 

@@ -71,6 +71,10 @@ protected:
 
   /** Does the actual resampling, without rendering. */
   void GenerateDataForRenderer(mitk::BaseRenderer*) override;
+  
+  // MITK 2025: Override to force visibility check to always return true
+  void MitkRenderOpaqueGeometry(BaseRenderer *renderer) override;
+  void MitkRenderTranslucentGeometry(BaseRenderer *renderer) override;
 
   void UpdateShaderParameter(mitk::BaseRenderer*);
 

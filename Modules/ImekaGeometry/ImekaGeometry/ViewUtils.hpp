@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <mitkSliceNavigationController.h>
+#include <mitkAnatomicalPlanes.h>
 
 #include <ImekaGeometryExports.h>
 
@@ -17,7 +18,7 @@ namespace Imeka
 namespace View
 {
 
-typedef mitk::SliceNavigationController::ViewDirection ViewDirection;
+typedef mitk::AnatomicalPlane ViewDirection;
 
 mitk::BaseRenderer ImekaGeometry_EXPORT * GetRenderer(const ViewDirection);
 mitk::BaseRenderer ImekaGeometry_EXPORT * GetRenderer(const std::string&);

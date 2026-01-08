@@ -78,10 +78,11 @@ void InteractorEmitter::InitAction(
   mitk::StateMachineAction* action,
   mitk::InteractionEvent* event)
 {
+  (void)action;
+  (void)event;
   GetDataNode()->SetFloatProperty("opacity", 0.8);
   m_NodeIsInited = true;
   emit Selected(m_BoundingObject);
-  Superclass::InitAction(action, event);
 }
 
 void InteractorEmitter::TranslateObject(

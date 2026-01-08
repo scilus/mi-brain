@@ -80,7 +80,7 @@ QVariant DataNodeAndPropertiesTableModel::data(
   const QModelIndex &index, int role) const
 {
   if (!index.isValid()
-    || (role != Qt::DisplayRole && role != Qt::BackgroundColorRole)
+    || (role != Qt::DisplayRole && role != Qt::BackgroundRole)
     || (role == Qt::DisplayRole
         && m_PropertyMap.find(index.column())->second.compare("color") == 0)
     )

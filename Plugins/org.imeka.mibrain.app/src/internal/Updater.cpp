@@ -23,7 +23,9 @@ UpdaterMenu::UpdaterMenu(QWidget* parent)
 
   auto manager = new QNetworkAccessManager(this);
   QNetworkRequest request(checkURL);
-  request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+  // Qt6: FollowRedirectsAttribute replaced with RedirectPolicyAttribute
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                       QNetworkRequest::NoLessSafeRedirectPolicy);
   connect(manager, &QNetworkAccessManager::finished,
     this, &UpdaterMenu::replyFinished);
 
@@ -34,9 +36,9 @@ UpdaterMenu::UpdaterMenu(QWidget* parent)
                   "with your Internet connetion.\n";
     return;
   }
-  const auto errorMethod =
-    QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error);
-  connect(m_Reply, errorMethod, this, &UpdaterMenu::replyError);
+  // Qt6: error signal renamed to errorOccurred
+  connect(m_Reply, &QNetworkReply::errorOccurred,
+          this, &UpdaterMenu::replyError);
 }
 
 void UpdaterMenu::replyFinished(QNetworkReply *reply)

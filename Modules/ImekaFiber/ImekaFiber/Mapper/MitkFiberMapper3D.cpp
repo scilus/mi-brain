@@ -133,20 +133,60 @@ void mitk::MitkFiberMapper3D::InternalGenerateData(mitk::BaseRenderer *renderer)
     localStorage->m_FiberMapper->AddClippingPlane(plane);
 
   localStorage->m_LastUpdateTime.Modified();
+  
+  // MITK 2025: Force VTK actor and assembly visibility
+  localStorage->m_FiberActor->SetVisibility(1);
+  localStorage->m_FiberAssembly->SetVisibility(1);
+  
+  // MITK 2025: Debug output to verify rendering setup
+  std::cout << "  InternalGenerateData complete:\n";
+  std::cout << "    Actor visibility: " << localStorage->m_FiberActor->GetVisibility() << "\n";
+  std::cout << "    Assembly visibility: " << localStorage->m_FiberAssembly->GetVisibility() << "\n";
+  std::cout << "    Assembly parts: " << localStorage->m_FiberAssembly->GetNumberOfPaths() << "\n";
+  std::cout << "    Mapper input points: " << (localStorage->m_FiberMapper->GetInput() ? localStorage->m_FiberMapper->GetInput()->GetNumberOfPoints() : -1) << "\n";
 }
 
 void mitk::MitkFiberMapper3D::GenerateDataForRenderer(mitk::BaseRenderer *renderer)
 {
+  std::cout << "MitkFiberMapper3D::GenerateDataForRenderer called\n";
+  
+  // MITK 2025: Force per-renderer AND global visibility to true FIRST
+  GetDataNode()->SetBoolProperty("visible", true, renderer);
+  GetDataNode()->SetBoolProperty("visible", true, nullptr);
+  
+  // Check visibility with fallback to global
   bool visible = true;
-  GetDataNode()->GetVisibility(visible, renderer, "visible");
+  bool hasPerRendererProperty = GetDataNode()->GetBoolProperty("visible", visible, renderer);
+  
+  if (hasPerRendererProperty)
+  {
+    std::cout << "  Per-renderer visibility property: " << visible << "\n";
+    if (!visible)
+    {
+      std::cout << "  ERROR: Visibility false even after forcing!\n";
+    }
+  }
+  else
+  {
+    // No per-renderer property, use global visibility (nullptr renderer)
+    visible = GetDataNode()->IsVisible(nullptr);
+    std::cout << "  Using global visibility: " << visible << "\n";
+  }
+  
   if (!visible)
+  {
+    std::cout << "  Node not visible, skipping render\n";
     return;
+  }
 
   const DataNode* node = this->GetDataNode();
   LocalStorage3D* localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
 
   m_FiberBundle = dynamic_cast<mitk::FiberBundle*>(node->GetData());
   m_FiberPolyData = m_FiberBundle->GetFiberPolyData();
+  
+  std::cout << "  FiberPolyData points: " << (m_FiberPolyData ? m_FiberPolyData->GetNumberOfPoints() : -1)
+            << ", lines: " << (m_FiberPolyData ? m_FiberPolyData->GetNumberOfLines() : -1) << "\n";
 
   // did any rendering properties change?
   float tubeRadius = 0;
@@ -253,7 +293,11 @@ void mitk::MitkFiberMapper3D::SetDefaultProperties(mitk::DataNode* node, mitk::B
 
 vtkProp* mitk::MitkFiberMapper3D::GetVtkProp(mitk::BaseRenderer *renderer)
 {
-  return m_LocalStorageHandler.GetLocalStorage(renderer)->m_FiberAssembly;
+  std::cout << "MitkFiberMapper3D::GetVtkProp called\n";
+  vtkPropAssembly* assembly = m_LocalStorageHandler.GetLocalStorage(renderer)->m_FiberAssembly;
+  std::cout << "  Returning assembly with visibility: " << assembly->GetVisibility() 
+            << ", parts: " << assembly->GetNumberOfPaths() << "\n";
+  return assembly;
 }
 
 mitk::MitkFiberMapper3D::LocalStorage3D::LocalStorage3D()

@@ -243,6 +243,7 @@ void BrainAnalysisView::DMSelectionChanged(
 
 void BrainAnalysisView::NodeAdded(const mitk::DataNode* node)
 {
+  std::cout << "BrainAnalysisView::NodeAdded called for: " << node->GetName() << "\n";
   auto nonConstNode = const_cast<mitk::DataNode*>(node);
 
   if (m_Groups.UpdateGroupIfRequired(nonConstNode))
@@ -283,9 +284,18 @@ void BrainAnalysisView::NodeAdded(const mitk::DataNode* node)
     {
       SetMaxFibersLength(newMax + 1, false);
     }
+    
+    // MITK 2025: Don't reinit - let user manually adjust camera
+    // The fibers render correctly but may be outside initial camera view
+    const bool alreadyReinited = IsReinited(node);
+    std::cout << "Fiber bundle loaded. IsReinited=" << alreadyReinited << "\n";
+    std::cout << "Fibers should be visible - use mouse wheel/reset camera if needed\n";
+    mitk::RenderingManager::GetInstance()->RequestUpdateAll();
   }
 
+  std::cout << "About to call m_FibersManager.NodeAdded for: " << nonConstNode->GetName() << "\n";
   m_FibersManager.NodeAdded(nonConstNode);
+  std::cout << "Returned from m_FibersManager.NodeAdded\n";
 }
 
 void BrainAnalysisView::PeaksImageAdded(

@@ -15,6 +15,7 @@ void TogglePeaksStatusAction::Run(
 
   const unsigned int nbNodes =
     Imeka::DataManager(m_DS).NumberOfVisibleObjects();
+  // MITK 2025: InitializeViewsByBoundingObjects only takes DataStorage parameter
   mitk::RenderingManager::GetInstance()
-    ->InitializeViewsByBoundingObjects(m_DS, nbNodes <= 1);
+    ->InitializeViewsByBoundingObjects(m_DS);
 }

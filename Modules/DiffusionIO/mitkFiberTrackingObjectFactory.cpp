@@ -15,6 +15,8 @@ See LICENSE.txt or http://www.mitk.org for details.
 ===================================================================*/
 
 #include "mitkFiberTrackingObjectFactory.h"
+#include "mitkFiberBundleTrackVisReader.h"
+#include "mitkFiberBundleTckReader.hpp"
 
 
 mitk::FiberTrackingObjectFactory::FiberTrackingObjectFactory()
@@ -28,6 +30,10 @@ mitk::FiberTrackingObjectFactory::~FiberTrackingObjectFactory()
 
 mitk::Mapper::Pointer mitk::FiberTrackingObjectFactory::CreateMapper(mitk::DataNode* node, MapperSlotId id)
 {
+  std::cout << "FiberTrackingObjectFactory::CreateMapper called for node: " 
+            << (node ? node->GetName() : "nullptr") 
+            << ", MapperSlotId: " << id << "\n";
+  
   mitk::Mapper::Pointer newMapper = nullptr;
   if (node->GetData())
   {
@@ -35,10 +41,14 @@ mitk::Mapper::Pointer mitk::FiberTrackingObjectFactory::CreateMapper(mitk::DataN
     const std::string ffb = "FilteredFiberBundle";
     const std::string pi = "PeakImage";
     const std::string className = node->GetData()->GetNameOfClass();
+    std::cout << "  Data class name: " << className << "\n";
+    
     if (id == mitk::BaseRenderer::Standard2D)
     {
+      std::cout << "  Mapper type: Standard2D\n";
       if (className == fb || className == ffb)
       {
+        std::cout << "  Creating FiberBundleMapper2D\n";
         newMapper = mitk::FiberBundleMapper2D::New();
         newMapper->SetDataNode(node);
       }
@@ -50,10 +60,13 @@ mitk::Mapper::Pointer mitk::FiberTrackingObjectFactory::CreateMapper(mitk::DataN
     }
     else if (id == mitk::BaseRenderer::Standard3D)
     {
+      std::cout << "  Mapper type: Standard3D\n";
       if (className == fb || className == ffb)
       {
+        std::cout << "  Creating FiberBundleMapper3D for " << className << "\n";
         newMapper = mitk::FiberBundleMapper3D::New();
         newMapper->SetDataNode(node);
+        std::cout << "  FiberBundleMapper3D created successfully\n";
       }
       else if (className == pi)
       {
@@ -62,7 +75,15 @@ mitk::Mapper::Pointer mitk::FiberTrackingObjectFactory::CreateMapper(mitk::DataN
       }
     }
   }
+  else
+  {
+    std::cout << "  ERROR: node->GetData() is nullptr!\n";
+  }
 
+  if (newMapper.IsNull())
+  {
+    std::cout << "  Returning nullptr mapper\n";
+  }
   return newMapper;
 }
 
@@ -88,11 +109,11 @@ void mitk::FiberTrackingObjectFactory::SetDefaultProperties(mitk::DataNode* node
   }
 }
 
-const char* mitk::FiberTrackingObjectFactory::GetFileExtensions()
+std::string mitk::FiberTrackingObjectFactory::GetFileExtensions()
 {
   std::string fileExtension;
   this->CreateFileExtensions(m_FileExtensionsMap, fileExtension);
-  return fileExtension.c_str();
+  return fileExtension;
 }
 
 mitk::CoreObjectFactoryBase::MultimapType mitk::FiberTrackingObjectFactory::GetFileExtensionsMap()
@@ -100,7 +121,7 @@ mitk::CoreObjectFactoryBase::MultimapType mitk::FiberTrackingObjectFactory::GetF
   return m_FileExtensionsMap;
 }
 
-const char* mitk::FiberTrackingObjectFactory::GetSaveFileExtensions()
+std::string mitk::FiberTrackingObjectFactory::GetSaveFileExtensions()
 {
   std::string fileExtension;
   this->CreateFileExtensions(m_SaveFileExtensionsMap, fileExtension);
@@ -119,17 +140,41 @@ void mitk::FiberTrackingObjectFactory::CreateFileExtensionsMap()
 
 void mitk::FiberTrackingObjectFactory::RegisterIOFactories()
 {
+  // Create instances of readers to trigger their self-registration
+  // The readers register themselves via RegisterService() in their constructors
+  std::cout << "RegisterIOFactories: Instantiating TRK and TCK readers\n";
+  
+  // TRK reader (TrackVis format)
+  auto trkReader = mitk::FiberBundleTrackVisReader();
+  std::cout << "  TRK reader instantiated\n";
+  
+  // TCK reader (MRtrix format)
+  auto tckReader = mitk::FiberBundleTckReader();
+  std::cout << "  TCK reader instantiated\n";
 }
 
 struct RegisterFiberTrackingObjectFactory{
   RegisterFiberTrackingObjectFactory()
     : m_Factory( mitk::FiberTrackingObjectFactory::New() )
   {
-    mitk::CoreObjectFactory::GetInstance()->RegisterExtraFactory( m_Factory );
+    std::cout << "FiberTrackingObjectFactory instance created\n";
+    auto coreFactory = mitk::CoreObjectFactory::GetInstance();
+    std::cout << "CoreObjectFactory instance: " << coreFactory << "\n";
+    if (coreFactory)
+    {
+      std::cout << "Registering FiberTrackingObjectFactory with CoreObjectFactory\n";
+      coreFactory->RegisterExtraFactory( m_Factory );
+      std::cout << "FiberTrackingObjectFactory registered successfully\n";
+    }
+    else
+    {
+      std::cout << "ERROR: CoreObjectFactory::GetInstance() returned null!\n";
+    }
   }
 
   ~RegisterFiberTrackingObjectFactory()
   {
+    std::cout << "Unregistering FiberTrackingObjectFactory\n";
     mitk::CoreObjectFactory::GetInstance()->UnRegisterExtraFactory( m_Factory );
   }
 

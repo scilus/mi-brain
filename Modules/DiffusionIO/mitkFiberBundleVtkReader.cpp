@@ -27,7 +27,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <vtkCellData.h>
 #include <vtkPointData.h>
 #include <itksys/SystemTools.hxx>
-#include <tinyxml.h>
+#include <tinyxml2.h>
 #include "FiberBundle/mitkTrackvis.h"
 #include <mitkCustomMimeType.h>
 #include <vtkXMLPolyDataReader.h>
@@ -52,10 +52,10 @@ mitk::FiberBundleVtkReader * mitk::FiberBundleVtkReader::Clone() const
 }
 
 
-std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleVtkReader::Read()
+std::vector<itk::SmartPointer<mitk::BaseData>> mitk::FiberBundleVtkReader::DoRead()
 {
 
-  std::vector<itk::SmartPointer<mitk::BaseData> > result;
+  std::vector<itk::SmartPointer<mitk::BaseData>> result;
 
   const std::string& locale = "C";
   const std::string& currLocale = setlocale( LC_ALL, nullptr );

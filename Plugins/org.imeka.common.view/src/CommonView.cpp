@@ -6,6 +6,10 @@
 #include <berryIWorkbenchWindow.h>
 #include <berryPlatform.h>
 
+#include <mitkIPreferences.h>
+#include <mitkIPreferencesService.h>
+
+#include <QmitkRenderWindow.h>
 #include <QmitkStdMultiWidget.h>
 #include <QmitkStdMultiWidgetEditor.h>
 
@@ -19,9 +23,9 @@ CommonView::CommonView()
   : m_ParentWidget(nullptr)
   , m_DM(GetDataStorage())
 {
-  berry::IPreferencesService* prefService = berry::Platform::GetPreferencesService();
-  berry::IPreferences::Pointer prefs =
-    prefService->GetSystemPreferences()->Node("org.mitk.editors.stdmultiwidget");
+  mitk::IPreferencesService* prefService = berry::Platform::GetPreferencesService();
+  mitk::IPreferences* prefs =
+    prefService->GetSystemPreferences()->Node("/org.mitk.views.stdmultiwidget");
   prefs->PutInt("crosshair gap size", 0);
 }
 
@@ -53,7 +57,7 @@ QmitkStdMultiWidget* CommonView::GetStdMultiWidget()
     auto stdmwe = dynamic_cast<QmitkStdMultiWidgetEditor*>(editor.GetPointer());
     if (stdmwe)
     {
-      return stdmwe->GetStdMultiWidget();
+      return dynamic_cast<QmitkStdMultiWidget*>(stdmwe->GetMultiWidget());
     }
   }
   return nullptr;
@@ -68,7 +72,7 @@ mitk::PlaneGeometry* CommonView::GetPlaneGeometry(
   QmitkRenderWindow* axisWin = renderWin->GetQmitkRenderWindow(axis);
   if (!axisWin) { return nullptr; }
 
-  const mitk::VtkPropRenderer* renderer = axisWin->GetRenderer();
+  const mitk::BaseRenderer* renderer = axisWin->GetRenderer();
   if (!renderer) { return nullptr; }
 
   return const_cast<mitk::PlaneGeometry*>(
@@ -78,13 +82,13 @@ mitk::PlaneGeometry* CommonView::GetPlaneGeometry(
 unsigned int CommonView::GetCurrentTimeStep() const
 {
   return mitk::RenderingManager::GetInstance()
-    ->GetTimeNavigationController()->GetTime()->GetPos();
+    ->GetTimeNavigationController()->GetSelectedTimeStep();
 }
 
 void CommonView::GlobalReinit()
 {
   mitk::RenderingManager::GetInstance()
-    ->InitializeViewsByBoundingObjects(GetDataStorage(), true);
+    ->InitializeViewsByBoundingObjects(GetDataStorage());
 }
 
 void CommonView::Reinit(const mitk::DataNode* node)
@@ -96,16 +100,30 @@ void CommonView::Reinit(const mitk::DataNode* node)
 
 bool CommonView::IsReinited(const mitk::DataNode* node) const
 {
-  const auto nodeGeo = node->GetData()->GetGeometry();
+  // MITK 2025: Add null checks for node data and geometry
+  if (!node) { return false; }
+  
+  const auto nodeData = node->GetData();
+  if (!nodeData) { return false; }
+  
+  const auto nodeGeo = nodeData->GetGeometry();
+  if (!nodeGeo) { return false; }
+  
   const auto nodeBB = nodeGeo->GetBoundingBox();
+  if (!nodeBB) { return false; }
 
-  auto _3DRenderer = mitk::BaseRenderer::GetInstance(
-    mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4"));
+  auto renderWindow = mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4");
+  if (!renderWindow) { return false; }
+  
+  auto _3DRenderer = mitk::BaseRenderer::GetInstance(renderWindow);
+  if (!_3DRenderer) { return false; }
+  
   const auto worldGeo =
     _3DRenderer->GetSliceNavigationController()->GetCurrentGeometry3D();
   if (!worldGeo) { return false; }
 
   const auto worldBB = worldGeo->GetBoundingBox();
+  if (!worldBB) { return false; }
 
   return mitk::Equal(*nodeBB, *worldBB, mitk::eps, false);
 }

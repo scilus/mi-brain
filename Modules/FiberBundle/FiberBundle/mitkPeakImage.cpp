@@ -173,7 +173,7 @@ void mitk::PeakImage::ColorByOrientation()
   fiberList->InitTraversal();
   for (int fi=0; fi<num_peaks; ++fi)
   {
-    vtkIdType* idList; // contains the point id's of the line
+    const vtkIdType* idList; // contains the point id's of the line
     vtkIdType num_points; // number of points for current line
     fiberList->GetNextCell(num_points, idList);
 

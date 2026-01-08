@@ -26,7 +26,7 @@ DataNodeGroupReader* DataNodeGroupReader::Clone() const
   return new DataNodeGroupReader(*this);
 }
 
-std::vector<itk::SmartPointer<mitk::BaseData>> DataNodeGroupReader::Read()
+std::vector<itk::SmartPointer<mitk::BaseData>> DataNodeGroupReader::DoRead()
 {
   std::vector<itk::SmartPointer<mitk::BaseData>> result;
   result.push_back(Imeka::Common::DataNodeGroup::New().GetPointer());

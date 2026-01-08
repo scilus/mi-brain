@@ -1,26 +1,49 @@
 MI-Brain
 ========
 
-Medical imaging application based on MITK 2018.04, focused on diffusion MRI 
+Medical imaging application based on MITK 2025.10, focused on diffusion MRI 
 and tractography visualisation and interaction.
 
 Based on code originally developed at Imeka Solutions Inc.
+
+**Current Status**: MITK 2025 migration in progress on ``update-mitk-2025`` branch.
+
+Known Issues
+------------
+
+- **Fiber visibility**: TRK files load successfully but fibers remain invisible when 
+  loaded with anatomy. Rendering pipeline is functional (confirmed via debugging), 
+  but unknown issue prevents display. See ``MITK_2025_FIBER_VISIBILITY_FIXES.md`` 
+  for details on attempted fixes.
 
 Requirements
 ------------
 
 - `CMake
-  <http://www.cmake.org/>`_ == 3.12.x or 3.13.x
+  <http://www.cmake.org/>`_ >= 3.18
 - `Qt
-  <https://download.qt.io/archive/qt/>`_ == 5.12.x up to 5.12.5 excluded
-- (recommended) `MITK`_ == dev2018
+  <https://download.qt.io/archive/qt/>`_ == 6.5.x
+- `MITK`_ == 2025.10 (with VTK 9.4)
 
 How-to build
 ------------
 
-You must build the MITK's development branch before building this project.
-The documentation to build MITK and this project (MI-Brain) can be found in
-those documents. Contact Imeka if needed.
+Build instructions for MITK 2025 migration:
+
+#. Build MITK 2025.10 with VTK 9.4 following MITK's official build instructions.
+
+#. Configure MI-Brain build::
+
+    > mkdir build-2025 && cd build-2025
+    > cmake -DMITK_DIR=/path/to/MITK-2025-build ..
+
+#. Build MI-Brain::
+
+    > cmake --build . -j8
+
+The built application will be in ``build-2025/MI-Brain-<version>-<platform>/``.
+
+**Note**: Legacy MITK 2018 build instructions have been superseded by the above.
 
 How-to run the tests
 --------------------

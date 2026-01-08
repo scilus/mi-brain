@@ -21,7 +21,8 @@ void FiberMapperData::SetIndices(
 {
   unsigned int totalNbPoints = 0;
   auto polyData = fiberBundle->GetFiberPolyData();
-  vtkIdType nPts, *indices;
+  vtkIdType nPts;
+  const vtkIdType* indices;
   for (const auto cellID : visibility)
   {
     polyData->GetCellPoints(cellID, nPts, indices);
@@ -149,7 +150,8 @@ void PartMapperData::FiberBundleFromData(
   vtkCellData* newProperties,
   QSet<const float*>* alreadyDone) const
 {
-  vtkIdType nbPoints, *pts;
+  vtkIdType nbPoints;
+  const vtkIdType* pts;
   auto oldPolyData = rawFibers->GetFiberPolyData();
   auto points = static_cast<float*>(oldPolyData->GetPoints()->GetVoidPointer(0));
   auto colors = static_cast<unsigned char*>(

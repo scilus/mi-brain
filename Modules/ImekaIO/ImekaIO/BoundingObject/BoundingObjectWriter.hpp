@@ -6,7 +6,7 @@
 
 #include "ImekaIOExports.h"
 
-class TiXmlElement;
+namespace tinyxml2 { class XMLElement; class XMLDocument; }
 namespace mitk { class BaseGeometry; };
 
 namespace Imeka
@@ -28,8 +28,8 @@ public:
   virtual void Write();
 
 private:
-  void WriteOrigin(TiXmlElement* mainXML, const mitk::BaseGeometry*);
-  void WriteWorldTransform(TiXmlElement* mainXML, const mitk::BaseGeometry*);
+  void WriteOrigin(tinyxml2::XMLElement* mainXML, const mitk::BaseGeometry*, tinyxml2::XMLDocument* doc);
+  void WriteWorldTransform(tinyxml2::XMLElement* mainXML, const mitk::BaseGeometry*, tinyxml2::XMLDocument* doc);
 };
 
 } // namespace IO

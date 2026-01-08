@@ -342,7 +342,7 @@ void RegionOfInterestWidget::UpdateUI(const UI_STATE state)
 unsigned int RegionOfInterestWidget::GetTime()
 {
   return mitk::RenderingManager::GetInstance()->
-    GetTimeNavigationController()->GetTime()->GetPos();
+    GetTimeNavigationController()->GetSelectedTimeStep();
 }
 
 } // namespace Widgets

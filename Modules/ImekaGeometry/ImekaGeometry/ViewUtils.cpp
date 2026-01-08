@@ -18,7 +18,7 @@ mitk::BaseRenderer* GetRenderer(const ViewDirection viewDir)
   {
   case ViewDirection::Axial: return GetAxialRenderer();
   case ViewDirection::Sagittal: return GetSagittalRenderer();
-  case ViewDirection::Frontal: return GetCoronalRenderer();
+  case ViewDirection::Coronal: return GetCoronalRenderer();
   case ViewDirection::Original: return Get3DRenderer();
   }
   return nullptr;

@@ -2,7 +2,7 @@
 #include "BoundingObjectWriter.hpp"
 
 #include <mitkBoundingObject.h>
-#include <tinyxml.h>
+#include <tinyxml2.h>
 
 #include "../MimeType.hpp"
 #include "ImekaBoundingObject/BoundingObjectFactory.hpp"
@@ -42,54 +42,55 @@ void BoundingObjectWriter::Write()
 
   mitk::BaseGeometry* geo = GetInput()->GetGeometry();
 
-  TiXmlDocument documentXML;
-  {
-    TiXmlDeclaration* declXML = new TiXmlDeclaration("1.0", "", "");
-    documentXML.LinkEndChild(declXML);
+  tinyxml2::XMLDocument documentXML;
+  tinyxml2::XMLDeclaration* declXML = documentXML.NewDeclaration("xml version=\"1.0\"");
+  documentXML.InsertFirstChild(declXML);
 
-    TiXmlElement* mainXML = new TiXmlElement("mitkBoundingObject");
-    mainXML->SetAttribute("type", type);
-    documentXML.LinkEndChild(mainXML);
+  tinyxml2::XMLElement* mainXML = documentXML.NewElement("mitkBoundingObject");
+  mainXML->SetAttribute("type", type.c_str());
+  documentXML.InsertEndChild(mainXML);
 
-    WriteOrigin(mainXML, geo);
-    WriteWorldTransform(mainXML, geo);
-  }
-  documentXML.SaveFile(GetOutputLocation());
+  WriteOrigin(mainXML, geo, &documentXML);
+  WriteWorldTransform(mainXML, geo, &documentXML);
+
+  documentXML.SaveFile(GetOutputLocation().c_str());
 
   MITK_INFO << "Fiber bundle written";
 }
 
 void BoundingObjectWriter::WriteOrigin(
-  TiXmlElement* mainXML,
-  const mitk::BaseGeometry* geo)
+  tinyxml2::XMLElement* mainXML,
+  const mitk::BaseGeometry* geo,
+  tinyxml2::XMLDocument* doc)
 {
   const mitk::Point3D origin = geo->GetOrigin();
-  TiXmlElement* originXML = new TiXmlElement("origin");
+  tinyxml2::XMLElement* originXML = doc->NewElement("origin");
 
-  originXML->SetAttribute("x", std::to_string(origin[0]));
-  originXML->SetAttribute("y", std::to_string(origin[1]));
-  originXML->SetAttribute("z", std::to_string(origin[2]));
+  originXML->SetAttribute("x", std::to_string(origin[0]).c_str());
+  originXML->SetAttribute("y", std::to_string(origin[1]).c_str());
+  originXML->SetAttribute("z", std::to_string(origin[2]).c_str());
 
-  mainXML->LinkEndChild(originXML);
+  mainXML->InsertEndChild(originXML);
 }
 
 void BoundingObjectWriter::WriteWorldTransform(
-  TiXmlElement* mainXML,
-  const mitk::BaseGeometry* geo)
+  tinyxml2::XMLElement* mainXML,
+  const mitk::BaseGeometry* geo,
+  tinyxml2::XMLDocument* doc)
 {
   const itk::MatrixOffsetTransformBase<mitk::ScalarType>::MatrixType matrix =
     geo->GetIndexToWorldTransform()->GetMatrix();
 
-  TiXmlElement* transformXML = new TiXmlElement("WorldTransformMatrix");
+  tinyxml2::XMLElement* transformXML = doc->NewElement("WorldTransformMatrix");
   for (unsigned int i = 0; i < 3; ++i)
   {
-    TiXmlElement* row = new TiXmlElement("Row");
-    row->SetAttribute("col1", std::to_string(matrix(i, 0)));
-    row->SetAttribute("col2", std::to_string(matrix(i, 1)));
-    row->SetAttribute("col3", std::to_string(matrix(i, 2)));
-    transformXML->LinkEndChild(row);
+    tinyxml2::XMLElement* row = doc->NewElement("Row");
+    row->SetAttribute("col1", std::to_string(matrix(i, 0)).c_str());
+    row->SetAttribute("col2", std::to_string(matrix(i, 1)).c_str());
+    row->SetAttribute("col3", std::to_string(matrix(i, 2)).c_str());
+    transformXML->InsertEndChild(row);
   }
-  mainXML->LinkEndChild(transformXML);
+  mainXML->InsertEndChild(transformXML);
 }
 
 } // namespace IO

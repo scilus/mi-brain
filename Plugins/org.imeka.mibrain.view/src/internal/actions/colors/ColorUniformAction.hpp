@@ -52,7 +52,7 @@ public:
         Imeka::Fiber::GetSingleInitialColor(selectedNodes));
       if (!color.isValid()) { return; }
 
-      for (const auto node : selectedNodes)
+      for (const auto& node : selectedNodes)
       {
         Imeka::Color::Apply(node, color);
       }

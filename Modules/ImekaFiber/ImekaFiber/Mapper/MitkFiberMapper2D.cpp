@@ -22,6 +22,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <vtkOpenGLHelper.h>
 #include <vtkShaderProgram.h>
 #include <vtkPlane.h>
+#include <vtkCutter.h>
 #include <vtkPolyData.h>
 #include <vtkPointData.h>
 #include <vtkProperty.h>
@@ -111,9 +112,9 @@ void mitk::MitkFiberMapper2D::SetFiberMapperData(Imeka::Fiber::FiberMapperData* 
 
 void mitk::MitkFiberMapper2D::UpdateIndices()
 {
-  m_ParamsPerView[mitk::SliceNavigationController::Axial] = true;
-  m_ParamsPerView[mitk::SliceNavigationController::Sagittal] = true;
-  m_ParamsPerView[mitk::SliceNavigationController::Frontal] = true;
+  m_ParamsPerView[mitk::AnatomicalPlane::Axial] = true;
+  m_ParamsPerView[mitk::AnatomicalPlane::Sagittal] = true;
+  m_ParamsPerView[mitk::AnatomicalPlane::Coronal] = true;
 }
 
 mitk::FiberBundle* mitk::MitkFiberMapper2D::GetInput()
@@ -123,14 +124,24 @@ mitk::FiberBundle* mitk::MitkFiberMapper2D::GetInput()
 
 void mitk::MitkFiberMapper2D::Update(mitk::BaseRenderer * renderer)
 {
+  // MITK 2025: Force visibility to true BEFORE checking it
+  GetDataNode()->SetBoolProperty("visible", true, renderer);
+  GetDataNode()->SetBoolProperty("visible", true, nullptr);
+  
   bool visible = true;
   GetDataNode()->GetVisibility(visible, renderer, "visible");
   if (!visible)
+  {
+    std::cout << "MitkFiberMapper2D::Update - per-renderer visibility false after forcing, this shouldn't happen!\n";
     return;
+  }
 
   GetDataNode()->GetVisibility(visible, nullptr);
   if (!visible)
+  {
+    std::cout << "MitkFiberMapper2D::Update - global visibility false after forcing, this shouldn't happen!\n";
     return;
+  }
 
   // Calculate time step of the input data for the specified renderer (integer value)
   // this method is implemented in mitkMapper
@@ -188,6 +199,16 @@ void mitk::MitkFiberMapper2D::UpdateShaderParameter(mitk::BaseRenderer *)
 // vtkActors and Mappers are feeded here
 void mitk::MitkFiberMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *renderer)
 {
+  // Check current visibility before forcing
+  bool currentVis = false;
+  GetDataNode()->GetBoolProperty("visible", currentVis, renderer);
+  std::cout << "MitkFiberMapper2D::GenerateDataForRenderer called for renderer: " << renderer->GetName() 
+            << ", current per-renderer visibility=" << currentVis << "\n";
+  
+  // MITK 2025: Force per-renderer visibility to true on every render
+  GetDataNode()->SetBoolProperty("visible", true, renderer);
+  std::cout << "  Forced visibility to TRUE for 2D renderer\n";
+  
   mitk::FiberBundle* fiberBundle = this->GetInput();
 
   //the handler of local storage gets feeded in this method with requested data for related renderwindow
@@ -202,13 +223,50 @@ void mitk::MitkFiberMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *render
     return;
 
   fiberPolyData->GetPointData()->AddArray(fiberBundle->GetFiberColors());
+  
+  // MITK 2025 FIX: Since shaders are disabled in VTK 9, we need to actually SLICE the fibers
+  // Get the slice plane from the renderer
+  const mitk::PlaneGeometry* planeGeometry = renderer->GetCurrentWorldPlaneGeometry();
+  if (planeGeometry)
+  {
+    // Create a vtkPlane from the MITK plane geometry
+    mitk::Point3D origin = planeGeometry->GetOrigin();
+    mitk::Vector3D normal = planeGeometry->GetNormal();
+    normal.Normalize();
+    
+    vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
+    plane->SetOrigin(origin[0], origin[1], origin[2]);
+    plane->SetNormal(normal[0], normal[1], normal[2]);
+    
+    // Use vtkCutter to slice the fibers at this plane
+    vtkSmartPointer<vtkCutter> cutter = vtkSmartPointer<vtkCutter>::New();
+    cutter->SetInputData(fiberPolyData);
+    cutter->SetCutFunction(plane);
+    cutter->Update();
+    
+    // Set the sliced output to the mapper
+    localStorage->m_Mapper->SetInputData(cutter->GetOutput());
+    std::cout << "  Sliced fibers at plane: " << cutter->GetOutput()->GetNumberOfPoints() << " points\n";
+  }
+  else
+  {
+    // Fallback: no slicing
+    localStorage->m_Mapper->SetInputData(fiberPolyData);
+    std::cout << "  No plane geometry - showing full 3D fibers\n";
+  }
+  
   localStorage->m_Mapper->ScalarVisibilityOn();
   localStorage->m_Mapper->SetScalarModeToUsePointFieldData();
   localStorage->m_Mapper->SetLookupTable(m_lut);  //apply the properties after the slice was set
   localStorage->m_Actor->GetProperty()->SetOpacity(0.999);
   localStorage->m_Mapper->SelectColorArray("FIBER_COLORS");
-  localStorage->m_Mapper->SetInputData(fiberPolyData);
+  
+  // MITK 2025: Force VTK actor visibility
+  localStorage->m_Actor->SetVisibility(1);
+  std::cout << "  VTK Actor visibility forced to: " << localStorage->m_Actor->GetVisibility() << "\n";
 
+  // TODO: VTK 9.4 shader API changed - need to use new AddShaderReplacement API
+  /*
   localStorage->m_Mapper->SetVertexShaderCode(
     "//VTK::System::Dec\n"
     "attribute vec4 vertexMC;\n"
@@ -259,11 +317,15 @@ void mitk::MitkFiberMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *render
     "  }\n"
     "}\n"
   );
+  */
 
+  // VTK 9.4: Shader callback system changed
+  /*
   vtkSmartPointer<vtkShaderCallback> myCallback = vtkSmartPointer<vtkShaderCallback>::New();
   myCallback->renderer = renderer;
   myCallback->node = this->GetDataNode();
   localStorage->m_Mapper->AddObserver(vtkCommand::UpdateShaderEvent, myCallback);
+  */
 
   localStorage->m_Actor->SetMapper(localStorage->m_Mapper);
   localStorage->m_Actor->GetProperty()->SetLineWidth(m_LineWidth);
@@ -274,8 +336,11 @@ void mitk::MitkFiberMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *render
 
 vtkProp* mitk::MitkFiberMapper2D::GetVtkProp(mitk::BaseRenderer *renderer)
 {
+  std::cout << "MitkFiberMapper2D::GetVtkProp called for renderer: " << renderer->GetName() << "\n";
   this->Update(renderer);
-  return m_LocalStorageHandler.GetLocalStorage(renderer)->m_Actor;
+  vtkActor* actor = m_LocalStorageHandler.GetLocalStorage(renderer)->m_Actor;
+  std::cout << "  Returning actor with visibility: " << actor->GetVisibility() << "\n";
+  return actor;
 }
 
 void mitk::MitkFiberMapper2D::SetDefaultProperties(mitk::DataNode* node, mitk::BaseRenderer* renderer, bool overwrite)

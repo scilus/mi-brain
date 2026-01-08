@@ -20,6 +20,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <mitkCommon.h>
 #include <mitkBaseRenderer.h>
 #include <mitkVtkMapper.h>
+#include <mitkAnatomicalPlanes.h>
 #include "FiberBundle/mitkFiberBundle.h"
 #include <vtkSmartPointer.h>
 
@@ -75,7 +76,7 @@ namespace mitk {
     void UpdateShaderParameter(mitk::BaseRenderer*);
 
     Imeka::Fiber::FiberMapperData* m_FiberMapperData;
-    std::map<int, bool> m_ParamsPerView;
+    std::map<mitk::AnatomicalPlane, bool> m_ParamsPerView;
 
   private:
     bool m_UpdateIndices;

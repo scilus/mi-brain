@@ -140,12 +140,12 @@ public:
       m_FM->GetFiberNodeData(m_FibersNode).fiberMapperData;
     const auto& pmd = mapperData.partsMapperData.at(TGNode);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), mapperData.GetIBO().size());
-    CPPUNIT_ASSERT_EQUAL(0, pmd.GetIndices().size());
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(pmd.GetIndices().size()));
 
     m_FibersNode->SetIntProperty("MirrorFibers", 0);
 
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(8), mapperData.GetIBO().size());
-    CPPUNIT_ASSERT_EQUAL(4, pmd.GetIndices().size());
+    CPPUNIT_ASSERT_EQUAL(4, static_cast<int>(pmd.GetIndices().size()));
   }
 };
 

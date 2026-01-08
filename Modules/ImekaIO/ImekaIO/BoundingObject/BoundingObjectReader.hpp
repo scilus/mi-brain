@@ -6,8 +6,7 @@
 
 #include "ImekaIOExports.h"
 
-class TiXmlHandle;
-
+namespace tinyxml2 { class XMLElement; }
 namespace mitk { class BoundingObject; }
 
 namespace Imeka
@@ -25,13 +24,15 @@ public:
 
   virtual BoundingObjectReader* Clone() const;
   using mitk::AbstractFileReader::Read;
-  virtual std::vector<itk::SmartPointer<mitk::BaseData>> Read();
+
+protected:
+  virtual std::vector<itk::SmartPointer<mitk::BaseData>> DoRead();
 
 private:
   us::ServiceRegistration<mitk::IFileReader> m_ServiceReg;
 
-  void ReadOrigin(mitk::BoundingObject*, TiXmlHandle);
-  void ReadWorldTransform(mitk::BoundingObject*, TiXmlHandle);
+  void ReadOrigin(mitk::BoundingObject*, tinyxml2::XMLElement*);
+  void ReadWorldTransform(mitk::BoundingObject*, tinyxml2::XMLElement*);
 };
 
 } // namespace IO

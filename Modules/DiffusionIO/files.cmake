@@ -4,14 +4,16 @@ set(CPP_FILES
 
   mitkDiffusionIOMimeTypes.cpp
 
-  mitkFiberBundleDicomReader.cpp
-  mitkFiberBundleDicomWriter.cpp
+  # TODO MITK 2025: Fix TinyXML2 migration
+  # mitkFiberBundleDicomReader.cpp
+  # mitkFiberBundleDicomWriter.cpp
   mitkFiberBundleTckReader.cpp
   mitkFiberBundleTckWriter.cpp
   mitkFiberBundleTrackVisReader.cpp
   mitkFiberBundleTrackVisWriter.cpp
-  mitkFiberBundleVtkReader.cpp
-  mitkFiberBundleVtkWriter.cpp
+  # TODO MITK 2025: Fix TinyXML2 migration
+  # mitkFiberBundleVtkReader.cpp
+  # mitkFiberBundleVtkWriter.cpp
   mitkFiberBundleSerializer.cpp
   mitkFilteredFiberBundleSerializer.cpp
   mitkFiberBundleMapper2D.cpp

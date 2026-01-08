@@ -37,15 +37,36 @@ set(_plugins
   org.imeka.property.eager
 )
 
+# Add Qt6 library directory for packaging (MITK 2025 Qt6 migration)
+set(_qt6_library_dirs)
+if(Qt6_DIR)
+  get_filename_component(_qt6_lib_dir "${Qt6_DIR}/../../../lib" ABSOLUTE)
+  if(EXISTS "${_qt6_lib_dir}")
+    list(APPEND _qt6_library_dirs "${_qt6_lib_dir}")
+  endif()
+endif()
+
 mitkFunctionCreateBlueBerryApplication(
   NAME ${MY_APP_NAME}
   DESCRIPTION "MITK - ${MY_APP_NAME} Application"
   PLUGINS ${_plugins}
+  LIBRARY_DIRS ${_qt6_library_dirs}
   ${_app_options}
 )
+
+# Add Qt6 library directory for packaging (MITK 2025 Qt6 migration)
+if(Qt6_DIR)
+  get_filename_component(_qt6_lib_dir "${Qt6_DIR}/../../../lib" ABSOLUTE)
+  if(EXISTS "${_qt6_lib_dir}")
+    set_target_properties(${MY_APP_NAME} PROPERTIES
+      MITK_ADDITIONAL_LIBRARY_SEARCH_PATHS "${_qt6_lib_dir}"
+    )
+  endif()
+endif()
+
 mitk_use_modules(TARGET ${MY_APP_NAME}
   MODULES MitkAppUtil
-  PACKAGES Qt5|Widgets
+  PACKAGES Qt6|Widgets
 )
 
 #Setting application icon for mac os x systems
