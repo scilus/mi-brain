@@ -578,9 +578,24 @@ void mitk::FiberBundle::UpdateFiberGeometry()
   m_LengthStDev = std::sqrt(m_LengthStDev);
   m_MedianFiberLength = sortedLengths.at(m_NumFibers/2);
 
-  mitk::Geometry3D::Pointer geometry = mitk::Geometry3D::New();
-  geometry->SetFloatBounds(b);
-  this->SetGeometry(geometry);
+  // [IMK FIX]
+  // The original code created a new Geometry3D and set it, which would
+  // destroy any existing transform information (e.g., from a file reader).
+  // This was causing the fibers to be recentered at the origin after any
+  // operation that triggered this method.
+  // The new code preserves the existing geometry and its transform, and only
+  // updates the bounds. If no geometry exists, it creates a new one.
+  BaseGeometry* geometry = this->GetGeometry();
+  if (geometry)
+  {
+    geometry->SetFloatBounds(b);
+  }
+  else
+  {
+    mitk::Geometry3D::Pointer newGeometry = mitk::Geometry3D::New();
+    newGeometry->SetFloatBounds(b);
+    this->SetGeometry(newGeometry);
+  }
 
   m_UpdateTime3D.Modified();
   m_UpdateTime2D.Modified();

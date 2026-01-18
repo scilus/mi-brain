@@ -281,6 +281,7 @@ void FibersManager::FibersAdded(
   m_Filtering.AddDataset(node, fiber);
 
   // Then we recompute the total visibility with the new fiber selections.
+  // Then we recompute the total visibility with the new fiber selections.
   ComputeFibersVisibility(node, true);
   fiber->CalculateStatsUsingVisibility();
   emit DisplayStats();

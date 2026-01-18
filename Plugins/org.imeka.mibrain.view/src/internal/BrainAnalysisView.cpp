@@ -1,5 +1,6 @@
 #include "BrainAnalysisView.h"
 
+#include <mitkLog.h>
 
 #include "ImekaBoundingObject/InteractorEmitter.hpp"
 #include "ImekaCommon/RGBMapper.hpp"
@@ -279,6 +280,16 @@ void BrainAnalysisView::NodeAdded(const mitk::DataNode* node)
   else if (auto fibers =
     dynamic_cast<mitk::FilteredFiberBundle*>(node->GetData()))
   {
+    // After a fiber bundle is loaded, its geometry is corrected inside the reader,
+    // but this change might not be fully propagated through the rendering pipeline.
+    // This can leave the DataNode with an outdated bounding box, causing it to be
+    // culled or positioned incorrectly (e.g., at the origin).
+    // Calling Modified() on the node forces a re-evaluation of all its properties
+    // and data, ensuring the mappers receive the updated geometry. This mimics
+    // the effect of manually changing a property like color, which was observed to fix the issue.
+    nonConstNode->Modified();
+    MITK_INFO << "BrainAnalysisView: Called Modified() on fiber bundle node '" << nonConstNode->GetName() << "' to ensure geometry update.";
+
     const auto newMax = fibers->GetMaxFiberLength();
     if (newMax > m_Controls.sldMaxFiberLength->maximum())
     {

@@ -1,6 +1,7 @@
 #include "Filtering.hpp"
 
 #include <QtConcurrentRun>
+#include <limits>
 
 #include "common.hpp"
 
@@ -24,6 +25,8 @@ vtkSmartPointer<vtkOctreePointLocator> GetReadyOctree(
 Filtering::Filtering(Imeka::Fiber::NodeDataMap& ndm)
   : m_NodeDataMap(ndm)
   , m_LastMovedSO(nullptr)
+  , m_MinLength(0.0f)
+  , m_MaxLength(std::numeric_limits<float>::max())
 {
   m_Rng.seed(std::random_device()());
 }
