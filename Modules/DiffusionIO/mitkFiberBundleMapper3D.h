@@ -45,6 +45,7 @@ public:
   vtkProp *GetVtkProp(mitk::BaseRenderer *renderer) override; //looks like depricated.. should be replaced bz GetViewProp()
   static void SetDefaultProperties(DataNode* node, BaseRenderer* renderer = nullptr, bool overwrite = false );
   void GenerateDataForRenderer(mitk::BaseRenderer* renderer) override;
+  void Update(mitk::BaseRenderer* renderer) override;
   
   // MITK 2025: Override to force visibility check to always return true
   void MitkRenderOpaqueGeometry(BaseRenderer *renderer) override;

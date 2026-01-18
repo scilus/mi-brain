@@ -13,7 +13,6 @@ set(_plugins
 
   org.commontk.configadmin
 
-  org.mitk.core.ext
   org.mitk.core.services
   org.mitk.gui.common
   org.mitk.gui.qt.common
@@ -54,14 +53,25 @@ mitkFunctionCreateBlueBerryApplication(
   ${_app_options}
 )
 
+set(_additional_search_paths)
+
 # Add Qt6 library directory for packaging (MITK 2025 Qt6 migration)
 if(Qt6_DIR)
   get_filename_component(_qt6_lib_dir "${Qt6_DIR}/../../../lib" ABSOLUTE)
   if(EXISTS "${_qt6_lib_dir}")
-    set_target_properties(${MY_APP_NAME} PROPERTIES
-      MITK_ADDITIONAL_LIBRARY_SEARCH_PATHS "${_qt6_lib_dir}"
-    )
+    list(APPEND _additional_search_paths "${_qt6_lib_dir}")
   endif()
+endif()
+
+# Add MITK plugin directory
+if(MITK_DIR)
+  list(APPEND _additional_search_paths "${MITK_DIR}/lib/plugins")
+endif()
+
+if(_additional_search_paths)
+  set_target_properties(${MY_APP_NAME} PROPERTIES
+    MITK_ADDITIONAL_LIBRARY_SEARCH_PATHS "${_additional_search_paths}"
+  )
 endif()
 
 mitk_use_modules(TARGET ${MY_APP_NAME}

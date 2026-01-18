@@ -346,8 +346,8 @@ endif()
 
 set(PLITK_VERSION ${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}${PACKAGE_VERSION_PATCH})
 set(PLITK_VERSION_NOHASH "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
-set(MIBRAIN_VERSION_CHECK "https://www.imeka.ca/version/VERSION")
-set(MIBRAIN_VERSION_UPDATE "https://www.imeka.ca/mi-brain")
+#set(MIBRAIN_VERSION_CHECK "https://www.imeka.ca/version/VERSION")
+#set(MIBRAIN_VERSION_UPDATE "https://www.imeka.ca/mi-brain")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/PlitkVersion.hpp.in
   ${CMAKE_BINARY_DIR}/PlitkVersion.hpp @ONLY)

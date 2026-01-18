@@ -63,12 +63,6 @@ void mitk::FiberBundleMapper3D::InternalGenerateData(mitk::BaseRenderer *rendere
   m_FiberPolyData->GetPointData()->AddArray(m_FiberBundle->GetFiberColors());
   LocalStorage3D *localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
 
-  // Debug: Check fiber data before rendering
-  const int numPoints = m_FiberPolyData->GetNumberOfPoints();
-  const int numLines = m_FiberPolyData->GetNumberOfLines();
-  std::cout << "FiberBundleMapper3D: Rendering " << numLines << " fibers with " 
-            << numPoints << " points for renderer: " << renderer->GetName() << "\n";
-
   if (m_TubeRadius>0.0)
   {
     vtkSmartPointer<vtkTubeFilter> tubeFilter = vtkSmartPointer<vtkTubeFilter>::New();
@@ -147,30 +141,30 @@ void mitk::FiberBundleMapper3D::InternalGenerateData(mitk::BaseRenderer *rendere
 
 
 
-void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *renderer )
+void mitk::FiberBundleMapper3D::Update(mitk::BaseRenderer* renderer)
 {
-  std::cout << "FiberBundleMapper3D::GenerateDataForRenderer called\n";
-  
   bool visible = true;
   GetDataNode()->GetVisibility(visible, renderer, "visible");
-  std::cout << "Node visibility: " << visible << "\n";
-  
-  if ( !visible )
+  if (!visible)
   {
-    std::cout << "Node not visible, returning\n";
+    m_LocalStorageHandler.GetLocalStorage(renderer)->m_FiberAssembly->SetVisibility(false);
     return;
   }
+  m_LocalStorageHandler.GetLocalStorage(renderer)->m_FiberAssembly->SetVisibility(true);
 
   const DataNode* node = this->GetDataNode();
   LocalStorage3D* localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
 
   m_FiberBundle = dynamic_cast<mitk::FiberBundle*>(node->GetData());
+  if (m_FiberBundle == nullptr)
+    return;
+
   m_FiberPolyData = m_FiberBundle->GetFiberPolyData();
 
   // did any rendering properties change?
   float tubeRadius = 0;
   node->GetFloatProperty("shape.tuberadius", tubeRadius);
-  if (m_TubeRadius!=tubeRadius)
+  if (m_TubeRadius != tubeRadius)
   {
     m_TubeRadius = tubeRadius;
     m_FiberBundle->RequestUpdate3D();
@@ -178,7 +172,7 @@ void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *ren
 
   int tubeSides = 0;
   node->GetIntProperty("shape.tubesides", tubeSides);
-  if (m_TubeSides!=tubeSides)
+  if (m_TubeSides != tubeSides)
   {
     m_TubeSides = tubeSides;
     m_FiberBundle->RequestUpdate3D();
@@ -186,7 +180,7 @@ void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *ren
 
   int lineWidth = 0;
   node->GetIntProperty("shape.linewidth", lineWidth);
-  if (m_LineWidth!=lineWidth)
+  if (m_LineWidth != lineWidth)
   {
     m_LineWidth = lineWidth;
     m_FiberBundle->RequestUpdate3D();
@@ -194,7 +188,7 @@ void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *ren
 
   float ribbonWidth = 0;
   node->GetFloatProperty("shape.ribbonwidth", ribbonWidth);
-  if (m_RibbonWidth!=ribbonWidth)
+  if (m_RibbonWidth != ribbonWidth)
   {
     m_RibbonWidth = ribbonWidth;
     m_FiberBundle->RequestUpdate3D();
@@ -202,7 +196,8 @@ void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *ren
 
   float opacity;
   this->GetDataNode()->GetOpacity(opacity, nullptr);
-  vtkProperty *property = localStorage->m_FiberActor->GetProperty();
+  vtkProperty* property = localStorage->m_FiberActor->GetProperty();
+  property->SetOpacity(opacity);
 
   float v = 1;
   node->GetFloatProperty("light.ambient", v);
@@ -218,16 +213,19 @@ void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *ren
   property->SetSpecularPower(v);
 
   property->SetLighting(true);
-  property->SetOpacity(opacity);
 
-  // Debug: Check update times
-  std::cout << "FiberBundleMapper3D::GenerateDataForRenderer - LastUpdateTime: " 
-            << localStorage->m_LastUpdateTime.GetMTime() 
-            << ", FiberBundle UpdateTime3D: " << m_FiberBundle->GetUpdateTime3D().GetMTime() << "\n";
+  if (localStorage->m_LastUpdateTime < m_FiberBundle->GetUpdateTime3D())
+  {
+    this->GenerateDataForRenderer(renderer);
+  }
+}
+
+void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *renderer )
+{
+  LocalStorage3D* localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
 
   if (localStorage->m_LastUpdateTime>=m_FiberBundle->GetUpdateTime3D())
   {
-    std::cout << "Skipping render - already up to date\n";
     return;
   }
 
@@ -244,24 +242,12 @@ void mitk::FiberBundleMapper3D::UpdateShaderParameter(mitk::BaseRenderer * )
 
 void mitk::FiberBundleMapper3D::SetDefaultProperties(mitk::DataNode* node, mitk::BaseRenderer* renderer, bool overwrite)
 {
-  // Debug: Check visibility BEFORE calling Superclass
-  bool visibleBefore = node->IsVisible(nullptr);
-  std::cout << "FiberBundleMapper3D::SetDefaultProperties BEFORE Superclass - global visibility: " << visibleBefore << "\n";
-  
   Superclass::SetDefaultProperties(node, renderer, overwrite);
-
-  // Debug: Check visibility AFTER Superclass
-  bool visibleAfter = node->IsVisible(nullptr);
-  std::cout << "FiberBundleMapper3D::SetDefaultProperties AFTER Superclass - global visibility: " << visibleAfter << "\n";
 
   // MITK 2025: Superclass may have set visible=false, explicitly set it to true
   // Set for BOTH the specified renderer AND global (nullptr)
   node->SetBoolProperty("visible", true, renderer);
   node->SetBoolProperty("visible", true, nullptr);  // Force global visibility
-  
-  // Debug: Check what visibility is after setting it
-  bool checkVisible = node->IsVisible(nullptr);
-  std::cout << "FiberBundleMapper3D::SetDefaultProperties FINAL - global visibility: " << checkVisible << "\n";
 
   mitk::Vector3D plane_vec; plane_vec.Fill(0.0);
   mitk::Point3D plane_origin; plane_origin.Fill(0.0);
@@ -291,20 +277,16 @@ void mitk::FiberBundleMapper3D::SetDefaultProperties(mitk::DataNode* node, mitk:
 // MITK 2025: Override to bypass visibility check that may incorrectly return false
 void mitk::FiberBundleMapper3D::MitkRenderOpaqueGeometry(BaseRenderer *renderer)
 {
-  std::cout << "FiberBundleMapper3D::MitkRenderOpaqueGeometry called for renderer: " << renderer->GetName() << "\n";
   if (this->GetVtkProp(renderer)->GetVisibility())
   {
-    std::cout << "  Rendering opaque fibers...\n";
     GetVtkProp(renderer)->RenderOpaqueGeometry(renderer->GetVtkRenderer());
   }
 }
 
 void mitk::FiberBundleMapper3D::MitkRenderTranslucentGeometry(BaseRenderer *renderer)
 {
-  std::cout << "FiberBundleMapper3D::MitkRenderTranslucentGeometry called for renderer: " << renderer->GetName() << "\n";
   if (this->GetVtkProp(renderer)->GetVisibility())
   {
-    std::cout << "  Rendering translucent fibers...\n";
     GetVtkProp(renderer)->RenderTranslucentPolygonalGeometry(renderer->GetVtkRenderer());
   }
 }
