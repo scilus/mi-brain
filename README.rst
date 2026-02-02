@@ -22,8 +22,13 @@ Requirements
 - `CMake
   <http://www.cmake.org/>`_ >= 3.18
 - `Qt
+<<<<<<< Updated upstream
   <https://download.qt.io/archive/qt/>`_ == 6.5.x
 - `MITK`_ == 2025.10 (with VTK 9.4)
+=======
+  <https://download.qt.io/archive/qt/>`_ >= 6.5.x
+- `MITK <https://github.com/MITK/MITK>`_ == 25.12
+>>>>>>> Stashed changes
 
 How-to build
 ------------
@@ -35,7 +40,13 @@ Build instructions for MITK 2025 migration:
 #. Configure MI-Brain build::
 
     > mkdir build-2025 && cd build-2025
-    > cmake -DMITK_DIR=/path/to/MITK-2025-build ..
+    cmake -DMITK_DIR=/path/to/MITK-2025-build ..
+
+**Note:** If CMake struggles to find Qt6, you might need to explicitly provide the path to your Qt6 CMake configuration, like so:
+
+.. code-block:: bash
+
+    cmake -DQt6_DIR:PATH=/home/local/USHERBROOKE/rhef1902/Libraries/Qt/6.10.2/gcc_64/lib/cmake/Qt6 -DMITK_DIR=/home/local/USHERBROOKE/rhef1902/Libraries/MITK/MITK-superbuild/MITK-build ..
 
 #. Build MI-Brain::
 
