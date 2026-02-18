@@ -214,7 +214,16 @@ void mitk::FiberBundleMapper3D::Update(mitk::BaseRenderer* renderer)
 
   property->SetLighting(true);
 
-  if (localStorage->m_LastUpdateTime < m_FiberBundle->GetUpdateTime3D())
+  bool clippingChanged = false;
+  mitk::BaseProperty* prop = node->GetProperty("3DClipping");
+  if (prop && localStorage->m_LastUpdateTime < prop->GetMTime())
+    clippingChanged = true;
+  
+  prop = node->GetProperty("3DClippingPlaneFlip");
+  if (prop && localStorage->m_LastUpdateTime < prop->GetMTime())
+    clippingChanged = true;
+
+  if (localStorage->m_LastUpdateTime < m_FiberBundle->GetUpdateTime3D() || clippingChanged)
   {
     this->GenerateDataForRenderer(renderer);
   }

@@ -21,6 +21,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <vtkOpenGLPolyDataMapper.h>
 #include <vtkOpenGLHelper.h>
 #include <vtkShaderProgram.h>
+#include <vtkCutter.h>
 #include <vtkPlane.h>
 #include <vtkPolyData.h>
 #include <vtkPointData.h>
@@ -37,63 +38,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <mitkSliceNavigationController.h>
 #include <mitkCoreServices.h>
 
-class vtkShaderCallback : public vtkCommand
-{
-public:
-  static vtkShaderCallback *New()
-  {
-    return new vtkShaderCallback;
-  }
-  mitk::BaseRenderer *renderer;
-  mitk::DataNode *node;
-
-  void Execute(vtkObject *, unsigned long, void*cbo) override
-  {
-    vtkShaderProgram *program = reinterpret_cast<vtkShaderProgram*>(cbo);
-
-    float fiberOpacity;
-    bool fiberFading = false;
-    float fiberThickness = 0.0;
-
-    node->GetOpacity(fiberOpacity, nullptr);
-    node->GetFloatProperty("Fiber2DSliceThickness", fiberThickness);
-    node->GetBoolProperty("Fiber2DfadeEFX", fiberFading);
-
-    program->SetUniformf("fiberOpacity", fiberOpacity);
-    program->SetUniformi("fiberFadingON", fiberFading);
-    program->SetUniformf("fiberThickness", fiberThickness);
-
-    if (this->renderer)
-    {
-      //get information about current position of views
-      mitk::SliceNavigationController::Pointer sliceContr = renderer->GetSliceNavigationController();
-      mitk::PlaneGeometry::ConstPointer planeGeo = sliceContr->GetCurrentPlaneGeometry();
-
-      //generate according cutting planes based on the view position
-      float planeNormal[3];
-      planeNormal[0] = planeGeo->GetNormal()[0];
-      planeNormal[1] = planeGeo->GetNormal()[1];
-      planeNormal[2] = planeGeo->GetNormal()[2];
-
-      float tmp1 = planeGeo->GetOrigin()[0] * planeNormal[0];
-      float tmp2 = planeGeo->GetOrigin()[1] * planeNormal[1];
-      float tmp3 = planeGeo->GetOrigin()[2] * planeNormal[2];
-      float thickness = tmp1 + tmp2 + tmp3; //attention, correct normalvector
-
-      float a[4];
-      for (int i = 0; i < 3; ++i)
-        a[i] = planeNormal[i];
-
-      a[3] = thickness;
-      program->SetUniform4f("slicingPlane", a);
-
-    }
-  }
-
-  vtkShaderCallback() { this->renderer = nullptr; }
-};
-
-
+// VTK 9 Migration: vtkShaderCallback removed as we switched to geometric slicing via vtkCutter
 
 mitk::FiberBundleMapper2D::FiberBundleMapper2D()
   : m_LineWidth(1)
@@ -156,20 +101,21 @@ void mitk::FiberBundleMapper2D::Update(mitk::BaseRenderer * renderer)
 
   if ( localStorage->m_LastUpdateTime<renderer->GetCurrentWorldPlaneGeometryUpdateTime() || localStorage->m_LastUpdateTime<fiberBundle->GetUpdateTime2D() )
   {
-    this->UpdateShaderParameter(renderer);
     this->GenerateDataForRenderer( renderer );
   }
 }
 
 void mitk::FiberBundleMapper2D::UpdateShaderParameter(mitk::BaseRenderer *)
 {
-  // see new vtkShaderCallback
+  // VTK 9 Migration: No longer using shaders, this method is obsolete
 }
 
 // vtkActors and Mappers are feeded here
 void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *renderer)
 {
   mitk::FiberBundle* fiberBundle = this->GetInput();
+  if (fiberBundle == nullptr)
+    return;
 
   //the handler of local storage gets feeded in this method with requested data for related renderwindow
   FBXLocalStorage *localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
@@ -179,37 +125,51 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
     return;
 
   // MITK 2025: Ensure visibility is true for this renderer
-  // SetDefaultProperties may have been called with nullptr, leaving per-renderer visibility unset
   node->SetBoolProperty("visible", true, renderer);
-  std::cout << "FiberBundleMapper2D: Setting visibility=true for renderer: " << renderer->GetName() << "\n";
+  
+  // Get current world plane geometry
+  const mitk::PlaneGeometry* planeGeo = renderer->GetCurrentWorldPlaneGeometry();
+  if (planeGeo == nullptr)
+    return;
+
+  // Update slicing plane
+  mitk::Point3D planeOrigin = planeGeo->GetOrigin();
+  mitk::Vector3D planeNormal = planeGeo->GetNormal();
+  
+  localStorage->m_SlicingPlane->SetOrigin(planeOrigin.GetDataPointer());
+  localStorage->m_SlicingPlane->SetNormal(planeNormal.GetDataPointer());
 
   vtkSmartPointer<vtkPolyData> fiberPolyData = fiberBundle->GetFiberPolyData();
   if (fiberPolyData == nullptr)
     return;
 
   fiberPolyData->GetPointData()->AddArray(fiberBundle->GetFiberColors());
+  
+  // Setup Cutter
+  localStorage->m_Cutter->SetInputData(fiberPolyData);
+  localStorage->m_Cutter->SetCutFunction(localStorage->m_SlicingPlane);
+  
+  // Setup Mapper with Cutter output
   localStorage->m_Mapper->ScalarVisibilityOn();
   localStorage->m_Mapper->SetScalarModeToUsePointFieldData();
   localStorage->m_Mapper->SetLookupTable(m_lut);  //apply the properties after the slice was set
-  localStorage->m_Actor->GetProperty()->SetOpacity(0.999);
   localStorage->m_Mapper->SelectColorArray("FIBER_COLORS");
-  localStorage->m_Mapper->SetInputData(fiberPolyData);
-
-  // VTK 9.4: Custom shader code disabled - VTK removed SetVertexShaderCode/SetFragmentShaderCode
-  // TODO: Migrate to new VTK shader replacement API if custom shaders are needed
-  // Original shader code implemented fiber thickness and fading based on slicing plane
-  /*
-  localStorage->m_Mapper->SetVertexShaderCode(...);
-  localStorage->m_Mapper->SetFragmentShaderCode(...);
-  */
-
-  vtkSmartPointer<vtkShaderCallback> myCallback = vtkSmartPointer<vtkShaderCallback>::New();
-  myCallback->renderer = renderer;
-  myCallback->node = this->GetDataNode();
-  localStorage->m_Mapper->AddObserver(vtkCommand::UpdateShaderEvent,myCallback);
+  localStorage->m_Mapper->SetInputConnection(localStorage->m_Cutter->GetOutputPort());
 
   localStorage->m_Actor->SetMapper(localStorage->m_Mapper);
+  
+  float opacity = 1.0f;
+  node->GetOpacity(opacity, renderer);
+  localStorage->m_Actor->GetProperty()->SetOpacity(opacity);
+
+  // Set visual properties
+  float thickness = 1.0f;
+  node->GetFloatProperty("Fiber2DSliceThickness", thickness);
+  if (thickness < 1.0f) thickness = 1.0f;
+  
+  localStorage->m_Actor->GetProperty()->SetPointSize(thickness);
   localStorage->m_Actor->GetProperty()->SetLineWidth(m_LineWidth);
+  localStorage->m_Actor->GetProperty()->SetLighting(false);
 
   // We have been modified => save this for next Update()
   localStorage->m_LastUpdateTime.Modified();
@@ -264,4 +224,6 @@ mitk::FiberBundleMapper2D::FBXLocalStorage::FBXLocalStorage()
 {
   m_Actor = vtkSmartPointer<vtkActor>::New();
   m_Mapper = vtkSmartPointer<MITKFIBERBUNDLEMAPPER2D_POLYDATAMAPPER>::New();
+  m_Cutter = vtkSmartPointer<vtkCutter>::New();
+  m_SlicingPlane = vtkSmartPointer<vtkPlane>::New();
 }

@@ -3,3 +3,5 @@ MITK_CREATE_MODULE( FiberBundle
   DEPENDS MitkCore
   WARNINGS_NO_ERRORS
 )
+
+add_subdirectory(Testing)

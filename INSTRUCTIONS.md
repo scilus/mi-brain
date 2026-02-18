@@ -57,11 +57,31 @@ During the CMake configuration, the following optional dependencies might be rep
 
 ## Running Tests
 
-To run the test suite, execute the following command from the build directory:
+To run the full test suite, execute the following command from the build directory:
 
 ```bash
 ctest -j8
 ```
+
+### Fiber Bundle Fidelity & Performance Test
+
+A specialized test suite has been established to verify coordinate fidelity (TCK vs TRK) and measure slicing performance with the new `vtkCutter` implementation.
+
+1.  **Build the specific test**:
+    ```bash
+    cd build-2025
+    make DiffusionIO mitkFiberBundleFidelityTest
+    ```
+
+2.  **Run the test driver**:
+    ```bash
+    ./bin/mitkFiberBundleFidelityTest
+    ```
+
+**Success Criteria:**
+*   `VerifyGeneratePolyDataByIds`: PASS (confirms fiber subset extraction).
+*   `BenchmarkVtkCutter`: Reported speed for 100k fibers (Goal is < 33ms for 30 FPS).
+*   `VerifyIOFidelity`: PASS (confirms TRK coordinate shifts are resolved).
 
 ## Packaging
 

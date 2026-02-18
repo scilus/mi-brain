@@ -54,6 +54,8 @@ public:
   public:
     vtkSmartPointer<vtkActor> m_Actor;
     vtkSmartPointer<MITKFIBERBUNDLEMAPPER2D_POLYDATAMAPPER> m_Mapper;
+    vtkSmartPointer<vtkCutter> m_Cutter;
+    vtkSmartPointer<vtkPlane> m_SlicingPlane;
     itk::TimeStamp m_LastUpdateTime;
     FBXLocalStorage();
 

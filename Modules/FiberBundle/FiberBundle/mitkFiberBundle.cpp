@@ -56,9 +56,60 @@ mitk::FiberBundle::Pointer mitk::FiberBundle::GetDeepCopy()
   return newFib;
 }
 
-vtkSmartPointer<vtkPolyData> mitk::FiberBundle::GeneratePolyDataByIds(std::vector<long>)
+vtkSmartPointer<vtkPolyData> mitk::FiberBundle::GeneratePolyDataByIds(std::vector<long> fiberIds)
 {
-  return nullptr;
+  vtkSmartPointer<vtkPolyData> newPolyData = vtkSmartPointer<vtkPolyData>::New();
+  vtkSmartPointer<vtkPoints> newPoints = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> newLines = vtkSmartPointer<vtkCellArray>::New();
+
+  // If we have colors, we should probably copy them too
+  vtkSmartPointer<vtkUnsignedCharArray> newColors = nullptr;
+  if (m_FiberColors)
+  {
+      newColors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+      newColors->SetNumberOfComponents(4);
+      newColors->SetName("FIBER_COLORS");
+  }
+
+  for (long id : fiberIds)
+  {
+      if (id < 0 || id >= m_FiberPolyData->GetNumberOfLines())
+          continue;
+
+      vtkCell* cell = m_FiberPolyData->GetCell(id);
+      vtkPoints* points = cell->GetPoints();
+      int numPoints = cell->GetNumberOfPoints();
+
+      vtkSmartPointer<vtkPolyLine> newFiber = vtkSmartPointer<vtkPolyLine>::New();
+      newFiber->GetPointIds()->SetNumberOfIds(numPoints);
+
+      for (int i = 0; i < numPoints; ++i)
+      {
+          double p[3];
+          points->GetPoint(i, p);
+          vtkIdType newId = newPoints->InsertNextPoint(p);
+          newFiber->GetPointIds()->SetId(i, newId);
+
+          if (m_FiberColors)
+          {
+               vtkIdType originalPointId = cell->GetPointId(i);
+               unsigned char rgba[4];
+               m_FiberColors->GetTypedTuple(originalPointId, rgba);
+               newColors->InsertNextTypedTuple(rgba);
+          }
+      }
+      newLines->InsertNextCell(newFiber);
+  }
+
+  newPolyData->SetPoints(newPoints);
+  newPolyData->SetLines(newLines);
+  
+  if (newColors)
+  {
+    newPolyData->GetPointData()->AddArray(newColors);
+  }
+
+  return newPolyData;
 }
 
 itk::Point<float, 3> mitk::FiberBundle::GetItkPoint(double point[3])
