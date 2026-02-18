@@ -34,6 +34,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <vtkCellArray.h>
 #include <vtkMatrix4x4.h>
 #include <vtkTubeFilter.h>
+#include <vtkCleanPolyData.h>
 #include <mitkPlaneGeometry.h>
 #include <mitkSliceNavigationController.h>
 #include <mitkCoreServices.h>
@@ -56,6 +57,13 @@ mitk::FiberBundleMapper2D::~FiberBundleMapper2D()
 mitk::FiberBundle* mitk::FiberBundleMapper2D::GetInput()
 {
   return dynamic_cast< mitk::FiberBundle * > ( GetDataNode()->GetData() );
+}
+
+void mitk::FiberBundleMapper2D::UpdateVtkTransform(mitk::BaseRenderer *)
+{
+  // MITK 2025: Don't apply transform since the fiber polydata is now correctly in LPS world coordinates
+  // immediately after loading.
+  return;
 }
 
 
@@ -149,12 +157,17 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
   localStorage->m_Cutter->SetInputData(fiberPolyData);
   localStorage->m_Cutter->SetCutFunction(localStorage->m_SlicingPlane);
   
-  // Setup Mapper with Cutter output
+  // MITK 2025: Setup Cleaner to fix "stitching" at coincident endpoints
+  localStorage->m_Cleaner->SetInputConnection(localStorage->m_Cutter->GetOutputPort());
+  localStorage->m_Cleaner->SetTolerance(1e-5);
+  localStorage->m_Cleaner->SetToleranceIsAbsolute(false);
+  
+  // Setup Mapper with Cleaner output
   localStorage->m_Mapper->ScalarVisibilityOn();
   localStorage->m_Mapper->SetScalarModeToUsePointFieldData();
   localStorage->m_Mapper->SetLookupTable(m_lut);  //apply the properties after the slice was set
   localStorage->m_Mapper->SelectColorArray("FIBER_COLORS");
-  localStorage->m_Mapper->SetInputConnection(localStorage->m_Cutter->GetOutputPort());
+  localStorage->m_Mapper->SetInputConnection(localStorage->m_Cleaner->GetOutputPort());
 
   localStorage->m_Actor->SetMapper(localStorage->m_Mapper);
   
@@ -225,5 +238,6 @@ mitk::FiberBundleMapper2D::FBXLocalStorage::FBXLocalStorage()
   m_Actor = vtkSmartPointer<vtkActor>::New();
   m_Mapper = vtkSmartPointer<MITKFIBERBUNDLEMAPPER2D_POLYDATAMAPPER>::New();
   m_Cutter = vtkSmartPointer<vtkCutter>::New();
+  m_Cleaner = vtkSmartPointer<vtkCleanPolyData>::New();
   m_SlicingPlane = vtkSmartPointer<vtkPlane>::New();
 }

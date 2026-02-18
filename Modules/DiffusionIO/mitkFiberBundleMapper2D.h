@@ -31,6 +31,7 @@ class MITKFIBERBUNDLEMAPPER2D_POLYDATAMAPPER;
 class vtkCutter;
 class vtkPlane;
 class vtkPolyData;
+class vtkCleanPolyData;
 
 namespace mitk {
 
@@ -46,6 +47,7 @@ public:
 
   mitk::FiberBundle* GetInput();
   void Update(mitk::BaseRenderer * renderer) override;
+  void UpdateVtkTransform(mitk::BaseRenderer *renderer) override;
   static void SetDefaultProperties(DataNode* node, BaseRenderer* renderer = nullptr, bool overwrite = false );
   vtkProp* GetVtkProp(mitk::BaseRenderer* renderer) override;
 
@@ -55,6 +57,7 @@ public:
     vtkSmartPointer<vtkActor> m_Actor;
     vtkSmartPointer<MITKFIBERBUNDLEMAPPER2D_POLYDATAMAPPER> m_Mapper;
     vtkSmartPointer<vtkCutter> m_Cutter;
+    vtkSmartPointer<vtkCleanPolyData> m_Cleaner;
     vtkSmartPointer<vtkPlane> m_SlicingPlane;
     itk::TimeStamp m_LastUpdateTime;
     FBXLocalStorage();

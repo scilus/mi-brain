@@ -229,6 +229,11 @@ vtkIdType TrackVisFiberReader::Read(mitk::FilteredFiberBundle *fiber)
   const size_t nbBytesPerPoint = (3 + m_Header.nbScalars) * sizeof(float);
   auto vtkNewPoints = vtkSmartPointer<vtkPoints>::New();
   auto vtkNewCells = vtkSmartPointer<vtkCellArray>::New();
+  
+  auto voxToRas = MatrixFromHeader();
+  auto rasToVox = vtkSmartPointer<vtkMatrix4x4>::New();
+  vtkMatrix4x4::Invert(voxToRas, rasToVox);
+
   while (m_File.read(reinterpret_cast<char *>(&nbPoints), sizeof(int)))
   {
     if (nbPoints <= 0)
@@ -263,7 +268,13 @@ vtkIdType TrackVisFiberReader::Read(mitk::FilteredFiberBundle *fiber)
       pt[1] = tmp[1];
       pt[2] = tmp[2];
 
-      // All files should have a header creating an appropriate geometry
+      // Points in TrackVis binary file are in VoxMM space (Index * Spacing) + 0.5*Spacing.
+      // We convert to Index space and subtract 0.5 to align with MITK corner-based indexing.
+      pt[0] = (pt[0] / m_Header.voxelSize[0]) - 0.5;
+      pt[1] = (pt[1] / m_Header.voxelSize[1]) - 0.5;
+      pt[2] = (pt[2] / m_Header.voxelSize[2]) - 0.5;
+
+      // Transform from Index space to MITK LPS World Space
       if (validGeometry)
       {
         transform->IndexToWorld(pt, pt);
@@ -364,33 +375,20 @@ void TrackVisFiberReader::WriteHdr()
     MITK_ERROR << "[ERROR] Problems saving the fiber!";
 }
 
-// Compute the right header to go from VoxMM to WorldSpace
+// Compute the right header to go from Voxels to WorldSpace (LPS)
 // -------------------------------------------------------------
 vtkSmartPointer<vtkMatrix4x4> TrackVisFiberReader::ConvertAffine()
 {
-  // Corect the voxel shift (from center to corner of the voxel)
-  auto affine = vtkSmartPointer<vtkMatrix4x4>::New();
-  affine->SetElement(0, 0, 1.0 / m_Header.voxelSize[0]);
-  affine->SetElement(1, 1, 1.0 / m_Header.voxelSize[1]);
-  affine->SetElement(2, 2, 1.0 / m_Header.voxelSize[2]);
-  affine->SetElement(0, 3, -0.5);
-  affine->SetElement(1, 3, -0.5);
-  affine->SetElement(2, 3, -0.5);
-
-  // Correct the affine, now this new matrix represent VOXMM->RASMM
-  auto unflippedVoxmmToWorld = vtkSmartPointer<vtkMatrix4x4>::New();
-  vtkMatrix4x4::Multiply4x4(MatrixFromHeader(), affine, unflippedVoxmmToWorld);
-
-  // Flip the affine to get VOXMM->LPSMM
+  // Flip the affine to get VOX->LPSMM
   auto flipAffine = vtkSmartPointer<vtkMatrix4x4>::New();
   flipAffine->SetElement(0, 0, -1);
   flipAffine->SetElement(1, 1, -1);
   flipAffine->SetElement(2, 2, 1);
 
-  auto voxmmToWorld = vtkSmartPointer<vtkMatrix4x4>::New();
-  vtkMatrix4x4::Multiply4x4(flipAffine, unflippedVoxmmToWorld, voxmmToWorld);
+  auto voxToWorld = vtkSmartPointer<vtkMatrix4x4>::New();
+  vtkMatrix4x4::Multiply4x4(flipAffine, MatrixFromHeader(), voxToWorld);
 
-  return voxmmToWorld;
+  return voxToWorld;
 }
 
 // Convert the array representing the affine to a more friendly format

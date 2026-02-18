@@ -97,102 +97,24 @@ std::vector<itk::SmartPointer<mitk::BaseData>> mitk::FiberBundleTrackVisReader::
         throw std::length_error(noReadPropertiesWarning);
       }
       
-      // MITK 2025 FIX: reader.Read() calls SetFiberPolyData() which calls UpdateFiberGeometry()
-      // which replaces the geometry (with vox_to_ras transform from TRK header) with a simple 
-      // bounding-box geometry. We must restore the proper geometry from the reference geometry.
-      // Additionally, we correct the 0.5 voxel shift and scaling issue introduced by the reader.
-      if (auto refGeometry = fiber->GetReferenceGeometry())
-      {
-        MITK_INFO << "MITK 2025: Restoring proper TRK geometry with vox_to_ras transform";
-
-        // 1. Get current transform (T_bad) from reference geometry
-        auto tBad = vtkSmartPointer<vtkMatrix4x4>::New();
-        const auto& itkMat = refGeometry->GetIndexToWorldTransform()->GetMatrix();
-        const auto& itkOff = refGeometry->GetIndexToWorldTransform()->GetOffset();
-        for(int i=0; i<3; ++i) {
-          for(int j=0; j<3; ++j) tBad->SetElement(i,j, itkMat(i,j));
-          tBad->SetElement(i,3, itkOff[i]);
-        }
-
-        // 2. Get voxel size from metadata to construct correction matrix
-        double spacing[3] = {1.0, 1.0, 1.0};
-        bool hasVS = true;
-        const auto& dictionary = refGeometry->GetMetaDataDictionary();
-        for (int i=0; i<3; ++i) {
-             std::string key = "vs" + std::to_string(i);
-             if (dictionary.Find(key) == dictionary.End()) {
-                 hasVS = false; break;
-             }
-             itk::MetaDataObject<double>::ConstPointer entry = 
-                 dynamic_cast<const itk::MetaDataObject<double>*>(dictionary[key]);
-             if (entry) spacing[i] = entry->GetMetaDataObjectValue();
-        }
-
-        if (hasVS) {
-            MITK_INFO << "Applying voxel-shift correction for TrackVis format";
-            
-            // 3. Construct affine_inv to undo the scaling and shifting:
-            // affine was: Scale(1/vs) * Translate(-0.5)
-            // affine_inv: Translate(0.5) * Scale(vs)
-            auto affineInv = vtkSmartPointer<vtkMatrix4x4>::New();
-            affineInv->Identity();
-            affineInv->SetElement(0, 0, spacing[0]);
-            affineInv->SetElement(1, 1, spacing[1]);
-            affineInv->SetElement(2, 2, spacing[2]);
-            affineInv->SetElement(0, 3, 0.5 * spacing[0]);
-            affineInv->SetElement(1, 3, 0.5 * spacing[1]);
-            affineInv->SetElement(2, 3, 0.5 * spacing[2]);
-            
-            // 4. Compute T_good = T_bad * affineInv
-            // T_bad = Flip * VoxToWorld * affine
-            // T_good = T_bad * affineInv = Flip * VoxToWorld
-            auto tGood = vtkSmartPointer<vtkMatrix4x4>::New();
-            vtkMatrix4x4::Multiply4x4(tBad, affineInv, tGood);
-            
-            // 5. Compute correction for points: P_good = T_good * T_bad^-1 * P_bad
-            auto tBadInv = vtkSmartPointer<vtkMatrix4x4>::New();
-            vtkMatrix4x4::Invert(tBad, tBadInv);
-            
-            auto correction = vtkSmartPointer<vtkMatrix4x4>::New();
-            vtkMatrix4x4::Multiply4x4(tGood, tBadInv, correction);
-            
-            // 6. Apply correction to all points
-            auto points = fiber->GetFiberPolyData()->GetPoints();
-            auto transformFilter = vtkSmartPointer<vtkTransform>::New();
-            transformFilter->SetMatrix(correction);
-            for (vtkIdType i = 0; i < points->GetNumberOfPoints(); ++i)
-            {
-                double p[3];
-                points->GetPoint(i, p);
-                double pNew[3];
-                transformFilter->TransformPoint(p, pNew);
-                points->SetPoint(i, pNew);
-            }
-            
-            // 7. Set corrected geometry
-            auto newGeometry = refGeometry->Clone();
-            newGeometry->SetIndexToWorldTransformByVtkMatrix(tGood);
-            fiber->SetReferenceGeometry(newGeometry);
-            fiber->SetGeometry(newGeometry);
-        }
-        else
-        {
-             MITK_WARN << "Could not find voxel size metadata. Skipping TrackVis shift correction.";
-             fiber->SetGeometry(refGeometry->Clone());
-        }
-      }
-      else
-      {
-        MITK_WARN << "MITK 2025: No reference geometry found after TRK read - fibers may not align with anatomy";
-      }
+      // MITK 2025 FIX: The previous fix here (attempting to restore geometry and apply shift correction)
+      // was incorrect because SetFiberPolyData resets the geometry to a bounding box, making the
+      // 'tBad' transform irrelevant. The correctness of the coordinates relies solely on
+      // TrackVisFiberReader::Read() applying the correct transform.
       
       // Debug: Check fiber bundle contents
       MITK_INFO << "TRK loaded successfully. Fiber count: " << fiber->GetNumFibers() 
                 << ", Points: " << fiber->GetNumberOfPoints();
       
-      // MITK 2025: Request 3D update so mapper knows to render the fibers
+      if (fiber->GetReferenceGeometry())
+      {
+          auto geo = fiber->GetReferenceGeometry();
+          MITK_INFO << "TRK Geometry Origin: " << geo->GetOrigin();
+          MITK_INFO << "TRK Geometry Spacing: " << geo->GetSpacing();
+      }
+      
+      // Request 3D update so mapper knows to render the fibers
       fiber->RequestUpdate3D();
-      MITK_INFO << "Requested 3D update for fiber bundle";
       
       result.push_back(fiber.GetPointer());
       return result;
