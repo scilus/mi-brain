@@ -18,7 +18,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "mitkBaseRenderer.h"
 #include "mitkDataNode.h"
 #include <vtkActor.h>
-#include "vtkFiberMapper.hpp"
+#include <vtkOpenGLPolyDataMapper.h>
 #include <vtkOpenGLHelper.h>
 #include <vtkShaderProgram.h>
 #include <vtkPlane.h>
@@ -34,6 +34,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <vtkCellArray.h>
 #include <vtkMatrix4x4.h>
 #include <vtkTubeFilter.h>
+#include <vtkCleanPolyData.h>
 #include <mitkPlaneGeometry.h>
 #include <mitkSliceNavigationController.h>
 #include <mitkCoreServices.h>
@@ -175,15 +176,6 @@ void mitk::MitkFiberMapper2D::Update(mitk::BaseRenderer * renderer)
   vtkProperty *property = localStorage->m_Actor->GetProperty();
   property->SetLighting(false);
 
-  localStorage->m_Mapper->SetFiberMapperData(m_FiberMapperData);
-  const auto view = renderer->GetSliceNavigationController()->GetDefaultViewDirection();
-  auto& updateIndices = m_ParamsPerView[view];
-  if (updateIndices)
-  {
-    localStorage->m_Mapper->UpdateIBO();
-    updateIndices = false;
-  }
-
   if (localStorage->m_LastUpdateTime<renderer->GetCurrentWorldPlaneGeometryUpdateTime() || localStorage->m_LastUpdateTime<fiberBundle->GetUpdateTime2D())
   {
     this->UpdateShaderParameter(renderer);
@@ -244,9 +236,49 @@ void mitk::MitkFiberMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *render
     cutter->SetCutFunction(plane);
     cutter->Update();
     
+    // MITK 2025: Clean polydata to merge coincident points (stitching fix)
+    vtkSmartPointer<vtkCleanPolyData> cleaner = vtkSmartPointer<vtkCleanPolyData>::New();
+    cleaner->SetInputConnection(cutter->GetOutputPort());
+    cleaner->PointMergingOn();
+    cleaner->SetTolerance(1e-5);
+    cleaner->SetToleranceIsAbsolute(false);
+    cleaner->Update();
+    
+    vtkSmartPointer<vtkPolyData> cleanedData = cleaner->GetOutput();
+    
+    // MITK 2025: Manually decompose polylines into independent segments (2 points)
+    vtkSmartPointer<vtkCellArray> newLines = vtkSmartPointer<vtkCellArray>::New();
+    vtkCellArray* lines = cleanedData->GetLines();
+    
+    if (lines)
+    {
+      vtkSmartPointer<vtkIdList> idList = vtkSmartPointer<vtkIdList>::New();
+      lines->InitTraversal();
+      while(lines->GetNextCell(idList))
+      {
+        for(vtkIdType i=0; i < idList->GetNumberOfIds()-1; ++i)
+        {
+          newLines->InsertNextCell(2);
+          newLines->InsertCellPoint(idList->GetId(i));
+          newLines->InsertCellPoint(idList->GetId(i+1));
+        }
+      }
+    }
+    
+    vtkSmartPointer<vtkPolyData> decomposedData = vtkSmartPointer<vtkPolyData>::New();
+    decomposedData->SetPoints(cleanedData->GetPoints());
+    decomposedData->GetPointData()->PassData(cleanedData->GetPointData());
+    decomposedData->SetLines(newLines);
+    
+    // MITK 2025: Critical fix - include Verts to render points that didn't form lines
+    if (cleanedData->GetVerts() && cleanedData->GetVerts()->GetNumberOfCells() > 0)
+    {
+      decomposedData->SetVerts(cleanedData->GetVerts());
+    }
+    
     // Set the sliced output to the mapper
-    localStorage->m_Mapper->SetInputData(cutter->GetOutput());
-    std::cout << "  Sliced fibers at plane: " << cutter->GetOutput()->GetNumberOfPoints() << " points\n";
+    localStorage->m_Mapper->SetInputData(decomposedData);
+    std::cout << "  Sliced and decomposed fibers at plane: " << decomposedData->GetNumberOfPoints() << " points\n";
   }
   else
   {
@@ -357,5 +389,5 @@ void mitk::MitkFiberMapper2D::SetDefaultProperties(mitk::DataNode* node, mitk::B
 mitk::MitkFiberMapper2D::FBXLocalStorage::FBXLocalStorage()
 {
   m_Actor = vtkSmartPointer<vtkActor>::New();
-  m_Mapper = vtkSmartPointer<vtkFiberMapper>::New();
+  m_Mapper = vtkSmartPointer<vtkOpenGLPolyDataMapper>::New();
 }

@@ -15,6 +15,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 ===================================================================*/
 
 #include "mitkFiberBundleTrackVisWriter.h"
+#include "DataStorageUtils.hpp"
 #include <vtkSmartPointer.h>
 #include <vtkCleanPolyData.h>
 #include <itksys/SystemTools.hxx>
@@ -76,8 +77,8 @@ void mitk::FiberBundleTrackVisWriter::Write()
 
         std::string filename = this->GetOutputLocation().c_str();
 
-        mitk::FilteredFiberBundle::ConstPointer input =
-          dynamic_cast<const mitk::FilteredFiberBundle *>(this->GetInput());
+        mitk::FiberBundle::ConstPointer input =
+          dynamic_cast<const mitk::FiberBundle *>(this->GetInput());
         std::string ext = itksys::SystemTools::GetFilenameLastExtension(this->GetOutputLocation().c_str());
 
         if(ext == "")
@@ -156,10 +157,12 @@ void mitk::FiberBundleTrackVisWriter::Write()
           out = nullptr;
           outStream.close();
           remove(filename.c_str());
-          mitkThrow() <<
-			      "\nCan't write a .trk file from a .tck file without loading a "
-            "reference anatomy.\nPlease load one if you want to save to .trk, "
-            "or save to .tck.";
+          
+          std::string errorMsg = "\nCan't write a .trk file without a valid reference geometry or reference anatomy node.\n";
+          if (!input->GetReferenceGeometry()) errorMsg += "Reason: FiberBundle has no ReferenceGeometry.\n";
+          if (!mitk::GetAnatNode()) errorMsg += "Reason: No anatomy node found in DataStorage (DataStorageSingleton::dataStorage).\n";
+          
+          mitkThrow() << errorMsg;
         }
 
         setlocale(LC_ALL, currLocale.c_str());

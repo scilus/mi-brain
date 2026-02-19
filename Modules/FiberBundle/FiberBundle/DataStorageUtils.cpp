@@ -9,6 +9,8 @@
 
 mitk::DataStorage* DataStorageSingleton::dataStorage = nullptr;
 
+namespace mitk {
+
 mitk::DataNode* GetAnatNode()
 {
   if (!DataStorageSingleton::dataStorage) { return nullptr; }
@@ -25,6 +27,8 @@ mitk::DataNode* GetAnatNode()
 
 mitk::BaseGeometry::Pointer GetTransformFromTrk()
 {
+  if (!DataStorageSingleton::dataStorage) { return nullptr; }
+
   const auto fiberNodes = DataStorageSingleton::dataStorage->GetSubset(
     mitk::NodePredicateDataType::New("FilteredFiberBundle"));
   for (const auto& node : *fiberNodes)
@@ -48,8 +52,7 @@ mitk::BaseGeometry::Pointer GetTransformFromTrk()
   return nullptr;
 }
 
-mitk::BaseGeometry::Pointer FiberBundle_EXPORT
-GetTransformFromAnat()
+mitk::BaseGeometry::Pointer GetTransformFromAnat()
 {
   mitk::DataNode* anatNode = GetAnatNode();
   if (!anatNode) { return nullptr; }
@@ -58,3 +61,5 @@ GetTransformFromAnat()
 
   return anat->GetGeometry()->Clone();
 }
+
+} // namespace mitk

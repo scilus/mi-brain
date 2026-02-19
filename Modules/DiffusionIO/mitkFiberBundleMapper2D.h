@@ -33,11 +33,13 @@ class vtkPlane;
 class vtkPolyData;
 class vtkCleanPolyData;
 
+#include "DiffusionIOExports.h"
+
 namespace mitk {
 
 struct IShaderRepository;
 
-class FiberBundleMapper2D : public VtkMapper
+class DiffusionIO_EXPORT FiberBundleMapper2D : public VtkMapper
 {
 
 public:

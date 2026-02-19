@@ -16,8 +16,10 @@ public:
   static mitk::DataStorage* dataStorage;
 };
 
-mitk::DataNode* GetAnatNode();
-mitk::BaseGeometry::Pointer GetTransformFromTrk();
-mitk::BaseGeometry::Pointer FiberBundle_EXPORT GetTransformFromAnat();
+namespace mitk {
+  FiberBundle_EXPORT mitk::DataNode* GetAnatNode();
+  FiberBundle_EXPORT mitk::BaseGeometry::Pointer GetTransformFromTrk();
+  FiberBundle_EXPORT mitk::BaseGeometry::Pointer GetTransformFromAnat();
+}
 
 #endif // DATA_STORAGE_SINGLETON_HPP_INCLUDED

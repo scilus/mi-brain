@@ -28,7 +28,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 
 class vtkActor;
 class mitkBaseRenderer;
-class vtkFiberMapper;
+class vtkOpenGLPolyDataMapper;
 class vtkCutter;
 class vtkPlane;
 class vtkPolyData;
@@ -57,7 +57,7 @@ namespace mitk {
     {
     public:
       vtkSmartPointer<vtkActor> m_Actor;
-      vtkSmartPointer<vtkFiberMapper> m_Mapper;
+      vtkSmartPointer<vtkOpenGLPolyDataMapper> m_Mapper;
       itk::TimeStamp m_LastUpdateTime;
       FBXLocalStorage();
       ~FBXLocalStorage() override { }

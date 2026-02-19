@@ -136,9 +136,19 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
   node->SetBoolProperty("visible", true, renderer);
   
   // Get current world plane geometry
-  const mitk::PlaneGeometry* planeGeo = renderer->GetCurrentWorldPlaneGeometry();
+  const mitk::PlaneGeometry* planeGeo = nullptr;
+  if (renderer)
+  {
+    planeGeo = renderer->GetCurrentWorldPlaneGeometry();
+  }
+  
   if (planeGeo == nullptr)
+  {
+    // If no planeGeo is available, we can't slice, but we might be in a test
+    // where we want to verify the rest of the pipeline if cutter already has data.
+    // However, cutter needs a plane.
     return;
+  }
 
   // Update slicing plane
   mitk::Point3D planeOrigin = planeGeo->GetOrigin();
@@ -161,13 +171,46 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
   localStorage->m_Cleaner->SetInputConnection(localStorage->m_Cutter->GetOutputPort());
   localStorage->m_Cleaner->SetTolerance(1e-5);
   localStorage->m_Cleaner->SetToleranceIsAbsolute(false);
+
+  // MITK 2025: Manually decompose polylines into independent segments
+  // This ensures the shader treats them as GL_LINES, eliminating cross-stitching artifacts.
+  localStorage->m_Cleaner->Update();
+  vtkSmartPointer<vtkPolyData> cleanedData = localStorage->m_Cleaner->GetOutput();
   
-  // Setup Mapper with Cleaner output
+  vtkSmartPointer<vtkCellArray> newLines = vtkSmartPointer<vtkCellArray>::New();
+  vtkCellArray* lines = cleanedData->GetLines();
+  
+  if (lines)
+  {
+    vtkSmartPointer<vtkIdList> idList = vtkSmartPointer<vtkIdList>::New();
+    lines->InitTraversal();
+    while (lines->GetNextCell(idList))
+    {
+      for (vtkIdType i = 0; i < idList->GetNumberOfIds() - 1; ++i)
+      {
+        newLines->InsertNextCell(2);
+        newLines->InsertCellPoint(idList->GetId(i));
+        newLines->InsertCellPoint(idList->GetId(i+1));
+      }
+    }
+  }
+  
+  vtkSmartPointer<vtkPolyData> decomposedData = vtkSmartPointer<vtkPolyData>::New();
+  decomposedData->SetPoints(cleanedData->GetPoints());
+  decomposedData->GetPointData()->PassData(cleanedData->GetPointData());
+  decomposedData->SetLines(newLines);
+  
+  if (cleanedData->GetVerts() && cleanedData->GetVerts()->GetNumberOfCells() > 0)
+  {
+    decomposedData->SetVerts(cleanedData->GetVerts());
+  }
+  
+  // Setup Mapper with decomposed output
   localStorage->m_Mapper->ScalarVisibilityOn();
   localStorage->m_Mapper->SetScalarModeToUsePointFieldData();
   localStorage->m_Mapper->SetLookupTable(m_lut);  //apply the properties after the slice was set
   localStorage->m_Mapper->SelectColorArray("FIBER_COLORS");
-  localStorage->m_Mapper->SetInputConnection(localStorage->m_Cleaner->GetOutputPort());
+  localStorage->m_Mapper->SetInputData(decomposedData);
 
   localStorage->m_Actor->SetMapper(localStorage->m_Mapper);
   

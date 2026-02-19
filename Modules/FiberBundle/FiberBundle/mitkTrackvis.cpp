@@ -26,7 +26,7 @@ TrackVisFiberReader::~TrackVisFiberReader()
 // ---------------------------------------------------------------------------------------
 bool TrackVisFiberReader::Create(
   const std::string &filename,
-  const mitk::FilteredFiberBundle *fib)
+  const mitk::FiberBundle *fib)
 {
   // Some informations aren't set to default value
   FillHeaderWithGeometry(fib);
@@ -108,7 +108,7 @@ void TrackVisFiberReader::Open(const std::string &filename)
 
 // Append a fiber to the file
 // --------------------------
-short TrackVisFiberReader::Append(const mitk::FilteredFiberBundle *fiber)
+short TrackVisFiberReader::Append(const mitk::FiberBundle *fiber)
 {
   auto polydata = fiber->GetFiberPolyData();
   const int nbFibers = fiber->GetNumFibers();
@@ -155,6 +155,12 @@ short TrackVisFiberReader::Append(const mitk::FilteredFiberBundle *fiber)
       if (transform)
       {
         transform->WorldToIndex(pt, pt);
+        
+        // TRK convention: points are stored as (Index + 0.5) * Spacing.
+        // WorldToIndex gives us raw Index, so we add 0.5 before writing.
+        pt[0] += 0.5;
+        pt[1] += 0.5;
+        pt[2] += 0.5;
       }
 
       floatsToWrite.push_back(pt[0]);
@@ -183,7 +189,7 @@ short TrackVisFiberReader::Append(const mitk::FilteredFiberBundle *fiber)
 
 //// Read one fiber from the file
 //// ----------------------------
-vtkIdType TrackVisFiberReader::Read(mitk::FilteredFiberBundle *fiber)
+vtkIdType TrackVisFiberReader::Read(mitk::FiberBundle *fiber)
 {
   if (!DataStorageSingleton::dataStorage)
   {
@@ -337,7 +343,7 @@ vtkIdType TrackVisFiberReader::Read(mitk::FilteredFiberBundle *fiber)
   return fiberPolyData->GetNumberOfPoints();
 }
 
-mitk::Geometry3D::Pointer TrackVisFiberReader::GetTransform(mitk::FilteredFiberBundle *fiber)
+mitk::Geometry3D::Pointer TrackVisFiberReader::GetTransform(mitk::FiberBundle *fiber)
 {
   auto geometry = mitk::Geometry3D::New();
   fiber->SetReferenceGeometry(geometry.GetPointer());
@@ -433,7 +439,7 @@ itk::MetaDataDictionary TrackVisFiberReader::CreateDictionary()
 }
 
 // Trk needs an appropriate header, but there are many possible situations.
-void TrackVisFiberReader::FillHeaderWithGeometry(const mitk::FilteredFiberBundle *fiber)
+void TrackVisFiberReader::FillHeaderWithGeometry(const mitk::FiberBundle *fiber)
 {
   /*
   We procede in this order to create the header so it makes sense
@@ -457,7 +463,7 @@ void TrackVisFiberReader::FillHeaderWithGeometry(const mitk::FilteredFiberBundle
     }
   }
 
-  if (auto geo = GetTransformFromAnat())
+  if (auto geo = mitk::GetTransformFromAnat())
   {
     // Case 2
     ExtractHeaderDataFromBaseGeometry(geo);
@@ -465,7 +471,7 @@ void TrackVisFiberReader::FillHeaderWithGeometry(const mitk::FilteredFiberBundle
     return;
   }
 
-  if (auto geo = GetTransformFromTrk())
+  if (auto geo = mitk::GetTransformFromTrk())
   {
     // Just making sure the trk's reference geometry have a valid dictionary
     const auto dictionary = geo->GetMetaDataDictionary();
@@ -483,7 +489,7 @@ void TrackVisFiberReader::FillHeaderWithGeometry(const mitk::FilteredFiberBundle
 }
 
 // Get the appropriate geometry depending on its source
-mitk::BaseGeometry::Pointer TrackVisFiberReader::GetTransformUsedWhenLoading(const mitk::FilteredFiberBundle *fiber)
+mitk::BaseGeometry::Pointer TrackVisFiberReader::GetTransformUsedWhenLoading(const mitk::FiberBundle *fiber)
 {
   // The case where no geometry is available cannot reach this function
 
@@ -500,14 +506,14 @@ mitk::BaseGeometry::Pointer TrackVisFiberReader::GetTransformUsedWhenLoading(con
     // header, but to write in VoxMM, it needs to be corrected like when
     // we load a trk, necessary for compatibility with Dipy_horizon,
     // TrackVis or FiberNavigator
-    auto geo = GetTransformFromAnat();
+    auto geo = mitk::GetTransformFromAnat();
     geo->SetIndexToWorldTransformByVtkMatrix(ConvertAffine());
     return geo;
   }
 
   if (m_ReferenceGeometryOrigin == OTHERTRK)
   {
-    return GetTransformFromTrk();
+    return mitk::GetTransformFromTrk();
   }
 
   return nullptr;

@@ -52,23 +52,23 @@ public:
   TrackVisFiberReader();
   ~TrackVisFiberReader();
 
-  bool Create(const std::string &filename, const mitk::FilteredFiberBundle *);
+  bool Create(const std::string &filename, const mitk::FiberBundle *);
   void Open(const std::string &filename);
-  vtkIdType Read(mitk::FilteredFiberBundle *);
-  short Append(const mitk::FilteredFiberBundle *);
+  vtkIdType Read(mitk::FiberBundle *);
+  short Append(const mitk::FiberBundle *);
   void WriteHdr();
 
 private:
   // Loading
-  mitk::Geometry3D::Pointer GetTransform(mitk::FilteredFiberBundle *);
+  mitk::Geometry3D::Pointer GetTransform(mitk::FiberBundle *);
   itk::MetaDataDictionary CreateDictionary();
   bool IsGeometryValid(mitk::BaseGeometry *);
 
   // Saving
-  void FillHeaderWithGeometry(const mitk::FilteredFiberBundle *);
+  void FillHeaderWithGeometry(const mitk::FiberBundle *);
   void ExtractHeaderDataFromDictionary(const itk::MetaDataDictionary &);
   void ExtractHeaderDataFromBaseGeometry(const mitk::BaseGeometry *);
-  mitk::BaseGeometry::Pointer GetTransformUsedWhenLoading(const mitk::FilteredFiberBundle *);
+  mitk::BaseGeometry::Pointer GetTransformUsedWhenLoading(const mitk::FiberBundle *);
 
   // Both
   vtkSmartPointer<vtkMatrix4x4> ConvertAffine();
