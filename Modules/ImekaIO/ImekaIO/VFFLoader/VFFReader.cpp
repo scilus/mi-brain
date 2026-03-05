@@ -33,7 +33,8 @@ VFFReader* VFFReader::Clone() const
   return new VFFReader(*this);
 }
 
-std::vector<itk::SmartPointer<mitk::BaseData>> VFFReader::Read()
+std::vector<itk::SmartPointer<mitk::BaseData>>
+VFFReader::DoRead()
 {
   std::vector<itk::SmartPointer<mitk::BaseData>> result;
 

@@ -8,13 +8,11 @@
 void TogglePeaksStatusAction::Run(
   const QList<mitk::DataNode::Pointer> &selectedNodes)
 {
-  for (const auto node : selectedNodes)
+  for (const auto& node : selectedNodes)
   {
     node->SetBoolProperty("TogglePeaks", true);
   }
 
-  const unsigned int nbNodes =
-    Imeka::DataManager(m_DS).NumberOfVisibleObjects();
   mitk::RenderingManager::GetInstance()
-    ->InitializeViewsByBoundingObjects(m_DS, nbNodes <= 1);
+    ->InitializeViewsByBoundingObjects(m_DS);
 }

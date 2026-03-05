@@ -278,12 +278,12 @@ void FibersManager::FibersAdded(
     [](){},
     [](){},
     [node](){
-      const auto visible = node->IsVisible(nullptr)
-        && Mappers2DSettingsWidget::Instance->IsEnabled();
       for (auto renderer : Imeka::View::Get2DRenderers())
       {
-        node->SetBoolProperty("visible", visible, renderer);
+        node->SetBoolProperty("visible", true, renderer);
       }
+      node->SetBoolProperty("visible", true, Imeka::View::Get3DRenderer());
+      node->SetBoolProperty("visible", true);
     }, m_DM);
 
   m_FilteringUI.AddActionsToDataset(node);

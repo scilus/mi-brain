@@ -74,14 +74,34 @@ void InteractorEmitter::DeselectObject(
   }
 }
 
-void InteractorEmitter::InitAction(
+void InteractorEmitter::InitTranslate(
   mitk::StateMachineAction* action,
   mitk::InteractionEvent* event)
 {
   GetDataNode()->SetFloatProperty("opacity", 0.8);
   m_NodeIsInited = true;
   emit Selected(m_BoundingObject);
-  Superclass::InitAction(action, event);
+  Superclass::InitTranslate(action, event);
+}
+
+void InteractorEmitter::InitRotate(
+  mitk::StateMachineAction* action,
+  mitk::InteractionEvent* event)
+{
+  GetDataNode()->SetFloatProperty("opacity", 0.8);
+  m_NodeIsInited = true;
+  emit Selected(m_BoundingObject);
+  Superclass::InitRotate(action, event);
+}
+
+void InteractorEmitter::InitDeformation(
+  mitk::StateMachineAction* action,
+  mitk::InteractionEvent* event)
+{
+  GetDataNode()->SetFloatProperty("opacity", 0.8);
+  m_NodeIsInited = true;
+  emit Selected(m_BoundingObject);
+  Superclass::InitDeformation(action, event);
 }
 
 void InteractorEmitter::TranslateObject(

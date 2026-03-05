@@ -88,11 +88,11 @@ void mitk::FiberTrackingObjectFactory::SetDefaultProperties(mitk::DataNode* node
   }
 }
 
-const char* mitk::FiberTrackingObjectFactory::GetFileExtensions()
+std::string mitk::FiberTrackingObjectFactory::GetFileExtensions()
 {
   std::string fileExtension;
   this->CreateFileExtensions(m_FileExtensionsMap, fileExtension);
-  return fileExtension.c_str();
+  return fileExtension;
 }
 
 mitk::CoreObjectFactoryBase::MultimapType mitk::FiberTrackingObjectFactory::GetFileExtensionsMap()
@@ -100,11 +100,11 @@ mitk::CoreObjectFactoryBase::MultimapType mitk::FiberTrackingObjectFactory::GetF
   return m_FileExtensionsMap;
 }
 
-const char* mitk::FiberTrackingObjectFactory::GetSaveFileExtensions()
+std::string mitk::FiberTrackingObjectFactory::GetSaveFileExtensions()
 {
   std::string fileExtension;
   this->CreateFileExtensions(m_SaveFileExtensionsMap, fileExtension);
-  return fileExtension.c_str();
+  return fileExtension;
 }
 
 mitk::CoreObjectFactoryBase::MultimapType mitk::FiberTrackingObjectFactory::GetSaveFileExtensionsMap()

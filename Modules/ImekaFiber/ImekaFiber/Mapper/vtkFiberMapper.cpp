@@ -33,7 +33,7 @@ bool vtkFiberMapper::GetNeedToRebuildBufferObjects(vtkRenderer *ren, vtkActor *)
   // We only send the complete points data the first time. On all other times, it's totally
   // useless and wasteful. Even when filtering, we only update the IBO.
   auto polyData = this->CurrentInput;
-  if (m_FirstTime || m_FiberMapperData->fiberBundle->IsRTT())
+  if (m_FirstTime || m_FiberMapperData->fiberBundle->IsRTT() || this->VBOBuildTime < polyData->GetPoints()->GetMTime())
   {
     m_FirstTime = false;
     return true;

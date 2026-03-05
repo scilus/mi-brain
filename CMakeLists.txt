@@ -127,6 +127,7 @@ endif()
 set(${PROJECT_NAME}_MODULES_PACKAGE_DEPENDS_DIR "${PROJECT_SOURCE_DIR}/CMake/PackageDepends")
 set(MODULES_PACKAGE_DEPENDS_DIRS ${${PROJECT_NAME}_MODULES_PACKAGE_DEPENDS_DIR})
 
+add_definitions(-DBOOST_TIMER_ENABLE_DEPRECATED)
 find_package(MITK 2016.11.00 REQUIRED)
 
 if(COMMAND mitkFunctionCheckMitkCompatibility)
@@ -376,4 +377,4 @@ set(CPACK_PROJECT_CONFIG_FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}CPackOptions
 include(CPack)
 
 # Additional installation rules
-include(mitkInstallRules)
+# include(mitkInstallRules)

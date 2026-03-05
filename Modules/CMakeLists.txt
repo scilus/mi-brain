@@ -12,5 +12,6 @@ set(module_dirs
 )
 
 foreach(module_dir ${module_dirs})
+  message("DEBUG: Adding module subdirectory: ${module_dir}")
   add_subdirectory(${module_dir})
 endforeach()

@@ -1,6 +1,9 @@
 
 #include "PluginActivator.hpp"
 
+#include <usModuleInitialization.h>
+US_INITIALIZE_MODULE
+
 #include <mitkNodePredicateDataType.h>
 #include <mitkNodePredicateProperty.h>
 #include <QmitkNodeDescriptorManager.h>

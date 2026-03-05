@@ -111,7 +111,7 @@ void BrainAnalysisView::CreateQtPartControl(QWidget *parent)
     m_FibersManager.SelectionObjectMoved(so, true);
   });
 
-  connect(m_Controls.chkShowAll, &QCheckBox::stateChanged, [this](){
+  connect(m_Controls.chkShowAll, &QCheckBox::checkStateChanged, [this](){
     TractGroupVisibilityChanged(false);
   });
   connect(this, &BrainAnalysisView::RequestUpdateUI,
@@ -320,8 +320,7 @@ void BrainAnalysisView::PeaksImageAdded(
         const bool visible = node->IsVisible(nullptr);
         if (!visible) { return; }
 
-        const auto anatNode = m_Controls.cboAnatImage->GetSelectedNode();
-        if (!IsReinited(anatNode) && !IsReinited(node)) { Reinit(anatNode); }
+        mitk::RenderingManager::GetInstance()->RequestUpdateAll();
       });
 
       m_MaximaData.Add(node);

@@ -13,7 +13,7 @@ void ColorAbstractAction::Run(
     if (!GetAnatNodeWarn(DM, true)) { return; }
   }
 
-  for (const auto node : selectedNodes)
+  for (const auto& node : selectedNodes)
   {
     node->SetIntProperty("ColorType", GetColoring());
   }

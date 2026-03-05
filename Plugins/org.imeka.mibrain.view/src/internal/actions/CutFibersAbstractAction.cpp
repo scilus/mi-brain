@@ -27,7 +27,7 @@ void CutFibersAbstractAction::Run(
   }
 
   ROI->SetBoolProperty("CutWithMeSenpai!", true);
-  for (const auto datasetNode : datasetNodes)
+  for (const auto& datasetNode : datasetNodes)
   {
     datasetNode->SetStringProperty("Cut", GetCutName().c_str());
   }

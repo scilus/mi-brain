@@ -138,6 +138,7 @@ void mitk::FiberBundleMapper3D::InternalGenerateData(mitk::BaseRenderer *rendere
 
 void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *renderer )
 {
+  GetDataNode()->SetVisibility(true, renderer, "visible");
   bool visible = true;
   GetDataNode()->GetVisibility(visible, renderer, "visible");
   if ( !visible )

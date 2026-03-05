@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QWidget>
 
@@ -74,10 +75,10 @@ QString SaveDialog::ExtensionFromFilter(const QString &filter)
   QString extension;
 
   const char *extensionRE = "\\*(\\.\\w+)";
-  QRegExp r(QString::fromLatin1(extensionRE));
+  QRegularExpression r(QString::fromLatin1(extensionRE));
 
-  const int index = r.indexIn(filter);
-  if (index >= 0) { extension = r.cap(1); }
+  const QRegularExpressionMatch match = r.match(filter);
+  if (match.hasMatch()) { extension = match.captured(1); }
   return extension.simplified();
 }
 

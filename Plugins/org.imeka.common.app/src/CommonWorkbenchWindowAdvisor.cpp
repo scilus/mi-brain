@@ -4,8 +4,8 @@
 #include <berryCommandContributionItem.h>
 #include <berryCommandContributionItemParameter.h>
 #include <berryFileEditorInput.h>
-#include <berryIPreferences.h>
-#include <berryIPreferencesService.h>
+#include <mitkIPreferences.h>
+#include <mitkIPreferencesService.h>
 #include <berryIQtStyleManager.h>
 #include <berryMenuManager.h>
 #include <berryPlatformUI.h>
@@ -31,8 +31,11 @@ struct StdMultiWidgetPartListener : public berry::IPartListener
     , m_WasDisplayed(false)
   {
     auto _3dView =
-      mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4");
-    m_MarkerWidget->SetInteractor(_3dView->GetInteractor());
+      mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget3");
+    if (_3dView)
+    {
+      m_MarkerWidget->SetInteractor(_3dView->GetInteractor());
+    }
   }
 
   Events::Types GetPartEventTypes() const override
@@ -50,7 +53,11 @@ struct StdMultiWidgetPartListener : public berry::IPartListener
     if (shouldDisplay ^ m_WasDisplayed)
     {
       m_MarkerWidget->SetEnabled(shouldDisplay);
-      mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4")->Render();
+      auto _3dView = mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget3");
+      if (_3dView)
+      {
+        _3dView->Render();
+      }
 
       m_WasDisplayed = shouldDisplay;
     }
@@ -106,7 +113,7 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
   // that's why it's currently separated in 2 groups.
   auto prefService = berry::WorkbenchPlugin::GetDefault()->GetPreferencesService();
 
-  {
+  /*{
     auto prefs = prefService->GetSystemPreferences()
       ->Node(berry::QtPreferences::QT_STYLES_NODE);
     const bool showCategoryNames = prefs->GetBool(
@@ -115,15 +122,15 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     {
       prefs->PutBool(berry::QtPreferences::QT_SHOW_TOOLBAR_CATEGORY_NAMES, false);
     }
-  }
+  }*/
 
   {
     auto prefs = prefService->GetSystemPreferences()->Node("/org.mitk.views.datamanager");
     const QString pref = "Call global reinit if node is deleted";
-    const bool reinitOnDelete = prefs->GetBool(pref, false);
+    const bool reinitOnDelete = prefs->GetBool(pref.toStdString(), false);
     if (reinitOnDelete)
     {
-      prefs->PutBool(pref, true);
+      prefs->PutBool(pref.toStdString(), true);
     }
   }
 
@@ -187,15 +194,14 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     m_MarkerWidget = vtkSmartPointer<vtkOrientationMarkerWidget>::New();
     m_MarkerWidget->SetOrientationMarker(m_AnnotatedCube);
     m_MarkerWidget->SetOutlineColor(0.9300, 0.5700, 0.1300);
-    m_MarkerWidget->SetInteractor(
-      mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4")
-      ->GetInteractor());
+    auto renderWindow = mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget3");
+    if (renderWindow)
+    {
+      m_MarkerWidget->SetInteractor(renderWindow->GetInteractor());
+      m_MarkerWidget->SetEnabled(1);
+    }
 
     m_Listener.reset(new StdMultiWidgetPartListener(m_MarkerWidget));
-    GetWindowConfigurer()->GetWindow()->GetActivePage()->AddPartListener(
-      m_Listener.data());
-
-    m_MarkerWidget->SetEnabled(1);
   }
 
   // We modified MITK's code to NOT add the Help menu because it's

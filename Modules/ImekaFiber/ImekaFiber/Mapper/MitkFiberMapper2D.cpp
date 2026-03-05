@@ -24,6 +24,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <vtkPlane.h>
 #include <vtkPolyData.h>
 #include <vtkPointData.h>
+#include <vtkShaderProperty.h>
 #include <vtkProperty.h>
 #include <vtkLookupTable.h>
 #include <vtkPoints.h>
@@ -37,61 +38,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <mitkSliceNavigationController.h>
 #include <mitkCoreServices.h>
 
-class vtkShaderCallback : public vtkCommand
-{
-public:
-  static vtkShaderCallback *New()
-  {
-    return new vtkShaderCallback;
-  }
-  mitk::BaseRenderer *renderer;
-  mitk::DataNode *node;
-
-  void Execute(vtkObject *, unsigned long, void*cbo) override
-  {
-    vtkShaderProgram *program = reinterpret_cast<vtkShaderProgram*>(cbo);
-
-    float fiberOpacity;
-    bool fiberFading = false;
-    float fiberThickness = 0.0;
-
-    node->GetOpacity(fiberOpacity, nullptr);
-    node->GetFloatProperty("Fiber2DSliceThickness", fiberThickness);
-    node->GetBoolProperty("Fiber2DfadeEFX", fiberFading);
-
-    program->SetUniformf("fiberOpacity", fiberOpacity);
-    program->SetUniformi("fiberFadingON", fiberFading);
-    program->SetUniformf("fiberThickness", fiberThickness);
-
-    if (this->renderer)
-    {
-      //get information about current position of views
-      mitk::SliceNavigationController::Pointer sliceContr = renderer->GetSliceNavigationController();
-      mitk::PlaneGeometry::ConstPointer planeGeo = sliceContr->GetCurrentPlaneGeometry();
-
-      //generate according cutting planes based on the view position
-      float planeNormal[3];
-      planeNormal[0] = planeGeo->GetNormal()[0];
-      planeNormal[1] = planeGeo->GetNormal()[1];
-      planeNormal[2] = planeGeo->GetNormal()[2];
-
-      float tmp1 = planeGeo->GetOrigin()[0] * planeNormal[0];
-      float tmp2 = planeGeo->GetOrigin()[1] * planeNormal[1];
-      float tmp3 = planeGeo->GetOrigin()[2] * planeNormal[2];
-      float thickness = tmp1 + tmp2 + tmp3; //attention, correct normalvector
-
-      float a[4];
-      for (int i = 0; i < 3; ++i)
-        a[i] = planeNormal[i];
-
-      a[3] = thickness;
-      program->SetUniform4f("slicingPlane", a);
-
-    }
-  }
-
-  vtkShaderCallback() { this->renderer = nullptr; }
-};
+#include "mitkFiberShaderController.h"
 
 mitk::MitkFiberMapper2D::MitkFiberMapper2D()
   : m_UpdateIndices(false)
@@ -111,11 +58,11 @@ void mitk::MitkFiberMapper2D::SetFiberMapperData(Imeka::Fiber::FiberMapperData* 
 
 void mitk::MitkFiberMapper2D::UpdateIndices()
 {
-  m_ParamsPerView[mitk::SliceNavigationController::Axial] = true;
-  m_ParamsPerView[mitk::SliceNavigationController::Sagittal] = true;
-  m_ParamsPerView[mitk::SliceNavigationController::Frontal] = true;
+  m_ParamsPerView[(int)mitk::AnatomicalPlane::Axial] = true;
+  m_ParamsPerView[(int)mitk::AnatomicalPlane::Sagittal] = true;
+  m_ParamsPerView[(int)mitk::AnatomicalPlane::Coronal] = true;
+  m_UpdateIndices = true;
 }
-
 mitk::FiberBundle* mitk::MitkFiberMapper2D::GetInput()
 {
   return dynamic_cast< mitk::FiberBundle * > (GetDataNode()->GetData());
@@ -123,6 +70,8 @@ mitk::FiberBundle* mitk::MitkFiberMapper2D::GetInput()
 
 void mitk::MitkFiberMapper2D::Update(mitk::BaseRenderer * renderer)
 {
+  GetDataNode()->SetVisibility(true, renderer, "visible");
+  GetDataNode()->SetVisibility(true, nullptr);
   bool visible = true;
   GetDataNode()->GetVisibility(visible, renderer, "visible");
   if (!visible)
@@ -166,7 +115,7 @@ void mitk::MitkFiberMapper2D::Update(mitk::BaseRenderer * renderer)
 
   localStorage->m_Mapper->SetFiberMapperData(m_FiberMapperData);
   const auto view = renderer->GetSliceNavigationController()->GetDefaultViewDirection();
-  auto& updateIndices = m_ParamsPerView[view];
+  auto& updateIndices = m_ParamsPerView[(int)view];
   if (updateIndices)
   {
     localStorage->m_Mapper->UpdateIBO();
@@ -188,6 +137,7 @@ void mitk::MitkFiberMapper2D::UpdateShaderParameter(mitk::BaseRenderer *)
 // vtkActors and Mappers are feeded here
 void mitk::MitkFiberMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *renderer)
 {
+  GetDataNode()->SetVisibility(true, renderer, "visible");
   mitk::FiberBundle* fiberBundle = this->GetInput();
 
   //the handler of local storage gets feeded in this method with requested data for related renderwindow
@@ -209,60 +159,12 @@ void mitk::MitkFiberMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *render
   localStorage->m_Mapper->SelectColorArray("FIBER_COLORS");
   localStorage->m_Mapper->SetInputData(fiberPolyData);
 
-  localStorage->m_Mapper->SetVertexShaderCode(
-    "//VTK::System::Dec\n"
-    "attribute vec4 vertexMC;\n"
+  localStorage->m_Actor->GetShaderProperty()->SetVertexShaderCode(mitkFiberShaderController::GetVertexShaderCode().c_str());
+  localStorage->m_Actor->GetShaderProperty()->SetFragmentShaderCode(mitkFiberShaderController::GetFragmentShaderCode().c_str());
 
-    "//VTK::Normal::Dec\n"
-    "uniform mat4 MCDCMatrix;\n"
-
-    "//VTK::Color::Dec\n"
-
-    "varying vec4 positionWorld;\n"
-    "varying vec4 colorVertex;\n"
-
-    "void main(void)\n"
-    "{\n"
-    "  colorVertex = scalarColor;\n"
-    "  positionWorld = vertexMC;\n"
-    "  gl_Position = MCDCMatrix * vertexMC;\n"
-    "}\n"
-  );
-
-  localStorage->m_Mapper->SetFragmentShaderCode(
-    "//VTK::System::Dec\n"  // always start with this line
-    "//VTK::Output::Dec\n"  // always have this line in your FS
-    "uniform vec4 slicingPlane;\n"
-    "uniform float fiberThickness;\n"
-    "uniform int fiberFadingON;\n"
-    "uniform float fiberOpacity;\n"
-
-    "varying vec4 positionWorld;\n"
-    "varying vec4 colorVertex;\n"
-    "out vec4 out_Color;\n"
-
-    "void main(void)\n"
-    "{\n"
-    "  float r1 = dot(positionWorld.xyz, slicingPlane.xyz) - slicingPlane.w;\n"
-
-    "  if (abs(r1) >= fiberThickness)\n"
-    "    discard;\n"
-
-    "  if (fiberFadingON != 0)\n"
-    "  {\n"
-    "    float x = (r1 + fiberThickness) / (fiberThickness*2.0);\n"
-    "    x = 1.0 - x;\n"
-    "    out_Color = vec4(colorVertex.xyz*x, fiberOpacity);\n"
-    "  }\n"
-    "  else{\n"
-    "    out_Color = vec4(colorVertex.xyz, fiberOpacity);\n"
-    "  }\n"
-    "}\n"
-  );
-
-  vtkSmartPointer<vtkShaderCallback> myCallback = vtkSmartPointer<vtkShaderCallback>::New();
-  myCallback->renderer = renderer;
-  myCallback->node = this->GetDataNode();
+  vtkSmartPointer<mitkFiberShaderController> myCallback = vtkSmartPointer<mitkFiberShaderController>::New();
+  myCallback->SetRenderer(renderer);
+  myCallback->SetDataNode(this->GetDataNode());
   localStorage->m_Mapper->AddObserver(vtkCommand::UpdateShaderEvent, myCallback);
 
   localStorage->m_Actor->SetMapper(localStorage->m_Mapper);

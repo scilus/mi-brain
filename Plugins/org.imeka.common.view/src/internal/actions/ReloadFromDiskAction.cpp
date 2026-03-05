@@ -11,7 +11,7 @@ void ReloadFromDiskAction::Run(
   const QList<mitk::DataNode::Pointer> &selectedNodes)
 {
   std::vector<std::string> paths;
-  for (const auto node: selectedNodes)
+  for (const auto& node: selectedNodes)
   {
     std::string path;
     if (node->GetStringProperty("full_path", path))

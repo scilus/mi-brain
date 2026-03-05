@@ -1,6 +1,7 @@
 
 #include "Colors.hpp"
 
+#include <QRandomGenerator>
 #include <QTime>
 
 #include <mitkDataNode.h>
@@ -17,9 +18,9 @@ GetNColors(const unsigned int nbColors)
   std::vector<QColor> colors;
   colors.reserve(nbColors);
 
-  qsrand(15); // Colors are beautiful with this seed
-  double rndInit = qrand();
-  qsrand(QTime::currentTime().msec());
+  QRandomGenerator generator(15); // Colors are beautiful with this seed
+  double rndInit = generator.generateDouble();
+  generator.seed(QTime::currentTime().msec());
 
   for (unsigned int i = 0; i < nbColors; ++i)
   {

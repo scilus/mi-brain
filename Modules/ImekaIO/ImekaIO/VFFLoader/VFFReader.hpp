@@ -31,10 +31,8 @@ public:
   VFFReader();
   virtual ~VFFReader(){}
   VFFReader(const VFFReader& other);
-  virtual VFFReader* Clone() const;
-
-  using mitk::AbstractFileReader::Read;
-  virtual std::vector<itk::SmartPointer<mitk::BaseData>> Read();
+  virtual VFFReader* Clone() const override;
+  virtual std::vector<itk::SmartPointer<mitk::BaseData>> DoRead() override;
 
 private:
   us::ServiceRegistration<mitk::IFileReader> m_ServiceReg;

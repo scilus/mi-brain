@@ -3,10 +3,10 @@
 #define IMEKA_BOUNDING_OBJECT_WRITER_HPP_INCLUDED
 
 #include <mitkAbstractFileWriter.h>
+#include <tinyxml2.h>
 
 #include "ImekaIOExports.h"
 
-class TiXmlElement;
 namespace mitk { class BaseGeometry; };
 
 namespace Imeka
@@ -21,15 +21,14 @@ public:
   BoundingObjectWriter();
   BoundingObjectWriter(const BoundingObjectWriter& other);
 
-  virtual BoundingObjectWriter* Clone() const;
+  virtual BoundingObjectWriter* Clone() const override;
   virtual ~BoundingObjectWriter() {}
 
-  using mitk::AbstractFileWriter::Write;
-  virtual void Write();
+  virtual void Write() override;
 
 private:
-  void WriteOrigin(TiXmlElement* mainXML, const mitk::BaseGeometry*);
-  void WriteWorldTransform(TiXmlElement* mainXML, const mitk::BaseGeometry*);
+  void WriteOrigin(tinyxml2::XMLElement* mainXML, const mitk::BaseGeometry*);
+  void WriteWorldTransform(tinyxml2::XMLElement* mainXML, const mitk::BaseGeometry*);
 };
 
 } // namespace IO

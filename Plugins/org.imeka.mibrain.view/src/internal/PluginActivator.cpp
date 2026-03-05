@@ -1,6 +1,9 @@
 
 #include "PluginActivator.hpp"
 
+#include <usModuleInitialization.h>
+US_INITIALIZE_MODULE
+
 #include "BrainAnalysisView.h"
 #include "actions/colors/ColorEndPointsAction.hpp"
 #include "actions/colors/ColorFromAnatomyAction.hpp"

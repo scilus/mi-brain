@@ -42,7 +42,9 @@ protected:
     mitk::StateMachineAction*, mitk::InteractionEvent*) override;
   virtual void DeselectObject(
     mitk::StateMachineAction*, mitk::InteractionEvent*) override;
-  virtual void InitAction(mitk::StateMachineAction*, mitk::InteractionEvent*) override;
+  virtual void InitTranslate(mitk::StateMachineAction*, mitk::InteractionEvent*) override;
+  virtual void InitRotate(mitk::StateMachineAction*, mitk::InteractionEvent*) override;
+  virtual void InitDeformation(mitk::StateMachineAction*, mitk::InteractionEvent*) override;
   virtual void TranslateObject(
     mitk::StateMachineAction*, mitk::InteractionEvent*) override;
   virtual void RotateObject(

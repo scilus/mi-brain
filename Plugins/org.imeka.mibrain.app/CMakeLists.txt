@@ -2,7 +2,7 @@ project(org_imeka_mibrain_app)
 
 include_directories(${CMAKE_BINARY_DIR})
 
-set(PACKAGES Qt5|Network)
+set(PACKAGES Qt6|Network)
 if(WIN32)
   find_package(OpenSSL)
   if(NOT OPENSSL_FOUND AND NOT SSL_EAY_RELEASE AND NOT LIB_EAY_RELEASE)

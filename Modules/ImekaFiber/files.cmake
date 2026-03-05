@@ -15,6 +15,7 @@ set(CPP_FILES
   ImekaFiber/Mapper/MitkFiberMapper3D.cpp
   ImekaFiber/Mapper/Mappers2DSettingsWidget.cpp
   ImekaFiber/Mapper/PeakImageMapper2D.cpp
+  ImekaFiber/Mapper/mitkFiberShaderController.cpp
   ImekaFiber/Mapper/vtkFiberMapper.cpp
   ImekaFiber/FibersManager.cpp
   ImekaFiber/FiberNodeData.cpp

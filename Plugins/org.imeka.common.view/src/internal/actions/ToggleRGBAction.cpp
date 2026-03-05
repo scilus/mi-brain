@@ -5,8 +5,8 @@
 
 void ToggleRGBAction::Run(const QList<mitk::DataNode::Pointer> &selectedNodes)
 {
-  mitk::Image::Pointer img = 0;
-  for (const auto node : selectedNodes)
+  mitk::Image::Pointer img = nullptr;
+  for (const auto& node : selectedNodes)
   {
     img = dynamic_cast<mitk::Image*>(node->GetData());
     if (img->GetDimension() == 4 && img->GetDimension(3) == 3)

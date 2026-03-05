@@ -40,11 +40,11 @@ class FiberTrackingObjectFactory : public CoreObjectFactoryBase
 
     void SetDefaultProperties(mitk::DataNode* node) override;
 
-    const char* GetFileExtensions() override;
+    std::string GetFileExtensions() override;
 
     mitk::CoreObjectFactoryBase::MultimapType GetFileExtensionsMap() override;
 
-    const char* GetSaveFileExtensions() override;
+    std::string GetSaveFileExtensions() override;
 
     mitk::CoreObjectFactoryBase::MultimapType GetSaveFileExtensionsMap() override;
 

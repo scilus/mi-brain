@@ -23,7 +23,7 @@ public:
   itkNewMacro(Self);
 
   void SetDataNode(mitk::DataNode*) override;
-  virtual const mitk::Image* GetInput() override;
+  virtual const mitk::Image* GetInput();
 
 protected:
   ImekaRGBMapper();
