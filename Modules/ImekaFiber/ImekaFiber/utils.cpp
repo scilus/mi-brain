@@ -203,6 +203,7 @@ mitk::FilteredFiberBundle::Pointer Union(const ConstNodes& nodes)
     colors = mitk::FilteredFiberBundle::GetNewColorArray(nbPoints);
   }
 
+  std::cout << "Fibers::Union: Merging " << fiberBundles.size() << " fiber bundles, total points: " << nbPoints << "\n";
   auto lines = vtkSmartPointer<vtkCellArray>::New();
   auto points = vtkSmartPointer<vtkPoints>::New();
 
@@ -215,6 +216,7 @@ mitk::FilteredFiberBundle::Pointer Union(const ConstNodes& nodes)
   if (points->GetNumberOfPoints() > 0)
   {
     newFibers = mitk::FilteredFiberBundle::New(lines, points, colors);
+    std::cout << "Fibers::Union: Resulting bundle has " << newFibers->GetNumFibers() << " fibers\n";
   }
 
   if (!newFibers || newFibers->GetNumberOfPoints() == 0)

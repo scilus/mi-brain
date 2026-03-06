@@ -51,7 +51,9 @@ mitk::FiberBundle::~FiberBundle()
 
 mitk::FiberBundle::Pointer mitk::FiberBundle::GetDeepCopy()
 {
-  mitk::FiberBundle::Pointer newFib = mitk::FiberBundle::New(m_FiberPolyData);
+  auto polyData = vtkSmartPointer<vtkPolyData>::New();
+  polyData->DeepCopy(m_FiberPolyData);
+  mitk::FiberBundle::Pointer newFib = mitk::FiberBundle::New(polyData);
   newFib->SetFiberColors(this->m_FiberColors);
   return newFib;
 }
@@ -76,9 +78,13 @@ itk::Point<float, 3> mitk::FiberBundle::GetItkPoint(double point[3])
 void mitk::FiberBundle::SetFiberPolyData(vtkSmartPointer<vtkPolyData> fiberPD, bool updateGeometry)
 {
   if (fiberPD == nullptr)
+  {
     this->m_FiberPolyData = vtkSmartPointer<vtkPolyData>::New();
-  else
+  }
+  else if (m_FiberPolyData != fiberPD)
+  {
     m_FiberPolyData->DeepCopy(fiberPD);
+  }
 
   m_NumFibers = m_FiberPolyData->GetNumberOfLines();
 

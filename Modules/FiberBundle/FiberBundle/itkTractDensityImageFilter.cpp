@@ -124,10 +124,14 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
   }
 
   MITK_INFO << "TractDensityImageFilter: starting image generation";
+  bool firstPoint = true;
 
   vtkSmartPointer<vtkPolyData> fiberPolyData = m_FiberBundle->GetFiberPolyData();
 
   int numFibers = m_FiberBundle->GetNumFibers();
+  MITK_INFO << "Number of fibers to process: " << numFibers;
+  MITK_INFO << "Output image size: " << w << " x " << h << " x " << d;
+
   boost::progress_display disp(numFibers);
   for( int i=0; i<numFibers; i++ )
   {
@@ -135,6 +139,8 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
     vtkCell* cell = fiberPolyData->GetCell(i);
     int numPoints = cell->GetNumberOfPoints();
     vtkPoints* points = cell->GetPoints();
+
+    if (i == 0) { MITK_INFO << "Fiber 0 points count: " << numPoints; }
 
     float weight = 1.0;
 
@@ -147,15 +153,24 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
       outImage->TransformPhysicalPointToIndex(vertex, index);
       outImage->TransformPhysicalPointToContinuousIndex(vertex, contIndex);
 
-      if (!m_UseTrilinearInterpolation && outImage->GetLargestPossibleRegion().IsInside(index))
+      if (firstPoint)
       {
-        if (outImage->GetPixel(index)==0)
-          m_NumCoveredVoxels++;
+        MITK_INFO << "First fiber point: " << vertex[0] << ", " << vertex[1] << ", " << vertex[2] << " -> Index: " << index[0] << ", " << index[1] << ", " << index[2];
+        firstPoint = false;
+      }
 
-        if (m_BinaryOutput)
-          outImage->SetPixel(index, 1);
-        else
-          outImage->SetPixel(index, outImage->GetPixel(index)+weight);
+      if (!m_UseTrilinearInterpolation)
+      {
+        if (outImage->GetLargestPossibleRegion().IsInside(index))
+        {
+          if (outImage->GetPixel(index)==0)
+            m_NumCoveredVoxels++;
+
+          if (m_BinaryOutput)
+            outImage->SetPixel(index, 1);
+          else
+            outImage->SetPixel(index, outImage->GetPixel(index)+weight);
+        }
         continue;
       }
 
@@ -254,5 +269,7 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
       outImageBufferPointer[i] = 1-outImageBufferPointer[i];
   }
   MITK_INFO << "TractDensityImageFilter: finished processing";
+  MITK_INFO << "TractDensityImageFilter: Max density = " << m_MaxDensity;
+  MITK_INFO << "TractDensityImageFilter: Covered voxels = " << m_NumCoveredVoxels;
 }
 }
