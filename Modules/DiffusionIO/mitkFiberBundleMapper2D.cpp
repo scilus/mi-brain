@@ -187,7 +187,8 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
   localStorage->m_Mapper->ScalarVisibilityOn();
   localStorage->m_Mapper->SetScalarModeToUsePointFieldData();
   localStorage->m_Mapper->SetLookupTable(m_lut);  //apply the properties after the slice was set
-  localStorage->m_Actor->GetProperty()->SetOpacity(0.999);
+  localStorage->m_Actor->GetProperty()->SetOpacity(1.0);
+  localStorage->m_Actor->SetPosition(0, 0, 0.01);
   localStorage->m_Mapper->SelectColorArray("FIBER_COLORS");
   localStorage->m_Mapper->SetInputData(fiberPolyData);
 
@@ -230,11 +231,10 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
         "  if (abs(r1) >= fiberThickness)\n"
         "    discard;\n"
 
-        "  if (fiberFadingON != 0)\n"
+        "  if (fiberFadingON != 0 && fiberThickness > 0.0)\n"
         "  {\n"
-        "    float x = (r1 + fiberThickness) / (fiberThickness*2.0);\n"
-        "    x = 1.0 - x;\n"
-        "    out_Color = vec4(colorVertex.xyz*x, fiberOpacity);\n"
+        "    float x = 1.0 - (abs(r1) / fiberThickness);\n"
+        "    out_Color = vec4(colorVertex.xyz * x, fiberOpacity);\n"
         "  }\n"
         "  else{\n"
         "    out_Color = vec4(colorVertex.xyz, fiberOpacity);\n"

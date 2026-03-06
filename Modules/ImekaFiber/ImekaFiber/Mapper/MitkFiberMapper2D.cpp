@@ -155,7 +155,8 @@ void mitk::MitkFiberMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *render
   localStorage->m_Mapper->ScalarVisibilityOn();
   localStorage->m_Mapper->SetScalarModeToUsePointFieldData();
   localStorage->m_Mapper->SetLookupTable(m_lut);  //apply the properties after the slice was set
-  localStorage->m_Actor->GetProperty()->SetOpacity(0.999);
+  localStorage->m_Actor->GetProperty()->SetOpacity(1.0);
+  localStorage->m_Actor->SetPosition(0, 0, 0.01);
   localStorage->m_Mapper->SelectColorArray("FIBER_COLORS");
   localStorage->m_Mapper->SetInputData(fiberPolyData);
 
