@@ -130,6 +130,12 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     node->GetBoolProperty("binary", binary);
     if (binary || Imeka::Fiber::IsLabelsImage(image))
     {
+      if (binary)
+      {
+        node->SetBoolProperty("segmentation", true);
+        node->SetBoolProperty("org.mitk.views.segmentation.ismask", true);
+      }
+
       std::cout <<
         "Binary or labels image laoded; setting interpolation to NN.\n";
       auto interpolation =

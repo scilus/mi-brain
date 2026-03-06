@@ -226,6 +226,11 @@
 	  icon=""
 	  class="DuplicateSubset" />-->
     <contextMenuAction
+      nodeDescriptorName="MultiLabelSegmentation"
+      label="Convert to binary ROI"
+      icon="resources/GenerateBinary.png"
+      class="ConvertToBinaryROIAction" />
+    <contextMenuAction
       nodeDescriptorName="PeaksImage"
       label="Toggle peaks image"
       class="TogglePeaksStatusAction" />
