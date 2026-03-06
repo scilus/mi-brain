@@ -114,7 +114,11 @@ mitk::FiberBundle* mitk::FiberBundleMapper2D::GetInput()
   return dynamic_cast< mitk::FiberBundle * > ( GetDataNode()->GetData() );
 }
 
-
+void mitk::FiberBundleMapper2D::UpdateVtkTransform(mitk::BaseRenderer *)
+{
+  // don't apply transform since the fiber polydata is already in world coordinates.
+  return;
+}
 
 void mitk::FiberBundleMapper2D::Update(mitk::BaseRenderer * renderer)
 {

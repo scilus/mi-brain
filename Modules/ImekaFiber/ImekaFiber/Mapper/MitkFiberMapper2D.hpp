@@ -46,6 +46,7 @@ namespace mitk {
 
     mitk::FiberBundle* GetInput();
     void Update(mitk::BaseRenderer * renderer) override;
+    void UpdateVtkTransform(mitk::BaseRenderer *renderer) override;
     static void SetDefaultProperties(DataNode* node, BaseRenderer* renderer = nullptr, bool overwrite = false);
     vtkProp* GetVtkProp(mitk::BaseRenderer* renderer) override;
 

@@ -45,9 +45,11 @@ namespace mitk {
     const FiberBundle* GetInput();
     vtkProp *GetVtkProp(mitk::BaseRenderer *renderer) override; //looks like depricated.. should be replaced bz GetViewProp()
     static void SetDefaultProperties(DataNode* node, BaseRenderer* renderer = nullptr, bool overwrite = false);
-    void GenerateDataForRenderer(mitk::BaseRenderer* renderer) override;
+    void GenerateDataForRenderer(mitk::BaseRenderer*) override;
+    void UpdateVtkTransform(mitk::BaseRenderer *renderer) override;
 
     void SetFiberMapperData(Imeka::Fiber::FiberMapperData* data);
+
     void UpdateIndices();
 
     class  LocalStorage3D : public mitk::Mapper::BaseLocalStorage

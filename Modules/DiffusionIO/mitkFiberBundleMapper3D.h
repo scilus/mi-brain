@@ -43,6 +43,7 @@ public:
 
   const FiberBundle* GetInput();
   vtkProp *GetVtkProp(mitk::BaseRenderer *renderer) override; //looks like depricated.. should be replaced bz GetViewProp()
+  void UpdateVtkTransform(mitk::BaseRenderer *renderer) override;
   static void SetDefaultProperties(DataNode* node, BaseRenderer* renderer = nullptr, bool overwrite = false );
   void GenerateDataForRenderer(mitk::BaseRenderer* renderer) override;
 

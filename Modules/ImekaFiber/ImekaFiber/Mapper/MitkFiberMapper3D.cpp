@@ -60,6 +60,12 @@ const mitk::FiberBundle* mitk::MitkFiberMapper3D::GetInput()
   return static_cast<const mitk::FiberBundle * > (GetDataNode()->GetData());
 }
 
+void mitk::MitkFiberMapper3D::UpdateVtkTransform(mitk::BaseRenderer *)
+{
+  // don't apply transform since the fiber polydata is already in world coordinates.
+  return;
+}
+
 /*
 This method is called once the mapper gets new input,
 for UI rotation or changes in colorcoding this method is NOT called

@@ -53,6 +53,11 @@ const mitk::FiberBundle* mitk::FiberBundleMapper3D::GetInput()
   return static_cast<const mitk::FiberBundle * > ( GetDataNode()->GetData() );
 }
 
+void mitk::FiberBundleMapper3D::UpdateVtkTransform(mitk::BaseRenderer *)
+{
+  // don't apply transform since the fiber polydata is already in world coordinates.
+  return;
+}
 
 /*
  This method is called once the mapper gets new input,
