@@ -67,21 +67,25 @@ ctest -j8
 
 A specialized test suite has been established to verify coordinate fidelity (TCK vs TRK) and measure slicing performance with the new `vtkCutter` implementation.
 
-1.  **Build the specific test**:
+1.  **Build the specific tests**:
     ```bash
     cd build-2025
-    make DiffusionIO mitkFiberBundleFidelityTest
+    # Ensure BUILD_TESTING=ON was used during cmake
+    make ImekaFiberTestDriver
     ```
 
-2.  **Run the test driver**:
+2.  **Run the IO test driver**:
     ```bash
-    ./bin/mitkFiberBundleFidelityTest
+    ./bin/ImekaFiberTestDriver ImekaIOTest
     ```
 
-**Success Criteria:**
-*   `VerifyGeneratePolyDataByIds`: PASS (confirms fiber subset extraction).
-*   `BenchmarkVtkCutter`: Reported speed for 100k fibers (Goal is < 33ms for 30 FPS).
-*   `VerifyIOFidelity`: PASS (confirms TRK coordinate shifts are resolved).
+**Success Criteria for IO:**
+*   `TestNiftiLoading`: PASS (Checks 5x10x20 dimensions and 4x2x1 spacing).
+*   `TestTrkLoading` & `TestTckLoading`: PASS (Checks world coordinates against RASmm ground truth `.txt` files).
+*   `TestTrkTckEquality`: PASS (Confirms memory representation and statistics are identical).
+*   `TestTrkRoundTrip` & `TestTckRoundTrip`: PASS (Confirms Save -> Load preserves all streamlines and statistics).
+
+### Legacy mitkFiberBundleFidelityTest
 
 ## Packaging
 

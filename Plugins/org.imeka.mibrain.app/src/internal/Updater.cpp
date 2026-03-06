@@ -20,6 +20,10 @@ UpdaterMenu::UpdaterMenu(QWidget* parent)
   this->setTitle("Update available!");
 
   const QUrl checkURL(MIBRAIN_VERSION_CHECK);
+  if (checkURL.isEmpty())
+  {
+    return;
+  }
 
   auto manager = new QNetworkAccessManager(this);
   QNetworkRequest request(checkURL);

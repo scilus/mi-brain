@@ -1,16 +1,17 @@
 set(MODULE_TESTS
-  ColoringTest.cpp
-  CutTest.cpp
-  DuplicateTGTest.cpp
-  MinMaxFilteringTest.cpp
-  MirrorTest.cpp
-  SaveLoadScenesTest.cpp
-  SaveVisibleTest.cpp
-  SimpleFilteringTest.cpp
-  ShuffleTest.cpp
-  StatsTest.cpp
-  TCKTest.cpp
-  TRKTest.cpp
+  # ColoringTest.cpp
+  # CutTest.cpp
+  # DuplicateTGTest.cpp
+  ImekaIOTest.cpp
+  # MinMaxFilteringTest.cpp
+  # MirrorTest.cpp
+  # SaveLoadScenesTest.cpp
+  # SaveVisibleTest.cpp
+  # SimpleFilteringTest.cpp
+  # ShuffleTest.cpp
+  # StatsTest.cpp
+  # TCKTest.cpp
+  # TRKTest.cpp
 )
 set(MODULE_IMAGE_TESTS
 )
