@@ -277,13 +277,8 @@ void FibersManager::FibersAdded(
     node,
     [](){},
     [](){},
-    [node](){
-      for (auto renderer : Imeka::View::Get2DRenderers())
-      {
-        node->SetBoolProperty("visible", true, renderer);
-      }
-      node->SetBoolProperty("visible", true, Imeka::View::Get3DRenderer());
-      node->SetBoolProperty("visible", true);
+    [](){
+      mitk::RenderingManager::GetInstance()->RequestUpdateAll();
     }, m_DM);
 
   m_FilteringUI.AddActionsToDataset(node);

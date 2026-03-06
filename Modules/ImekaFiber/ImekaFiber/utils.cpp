@@ -155,6 +155,7 @@ void SetupNodeDataAndMappers(
 {
   node->SetBoolProperty("pickable", false);
   node->SetBoolProperty("Fiber2DfadeEFX", false);
+  node->SetVisibility(true); // Global visibility master switch
 
   Mappers2DSettingsWidget::SetVisibility(node);
   Mappers2DSettingsWidget::SetFiberThickness(node);

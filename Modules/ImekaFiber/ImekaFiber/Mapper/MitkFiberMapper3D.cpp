@@ -142,13 +142,14 @@ void mitk::MitkFiberMapper3D::InternalGenerateData(mitk::BaseRenderer *renderer)
 
 void mitk::MitkFiberMapper3D::GenerateDataForRenderer(mitk::BaseRenderer *renderer)
 {
-  bool visible = true;
-  GetDataNode()->GetVisibility(visible, renderer, "visible");
+  LocalStorage3D* localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
+  bool visible = GetDataNode()->IsVisible(nullptr) && GetDataNode()->IsVisible(renderer);
+
+  localStorage->m_FiberAssembly->SetVisibility(visible);
   if (!visible)
     return;
 
   const DataNode* node = this->GetDataNode();
-  LocalStorage3D* localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
 
   m_FiberBundle = dynamic_cast<mitk::FiberBundle*>(node->GetData());
   m_FiberPolyData = m_FiberBundle->GetFiberPolyData();

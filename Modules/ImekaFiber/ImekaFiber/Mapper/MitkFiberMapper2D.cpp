@@ -70,14 +70,10 @@ mitk::FiberBundle* mitk::MitkFiberMapper2D::GetInput()
 
 void mitk::MitkFiberMapper2D::Update(mitk::BaseRenderer * renderer)
 {
-  GetDataNode()->SetVisibility(true, renderer, "visible");
-  GetDataNode()->SetVisibility(true, nullptr);
-  bool visible = true;
-  GetDataNode()->GetVisibility(visible, renderer, "visible");
-  if (!visible)
-    return;
+  FBXLocalStorage *localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
+  bool visible = GetDataNode()->IsVisible(nullptr) && GetDataNode()->IsVisible(renderer);
 
-  GetDataNode()->GetVisibility(visible, nullptr);
+  localStorage->m_Actor->SetVisibility(visible);
   if (!visible)
     return;
 
@@ -86,8 +82,6 @@ void mitk::MitkFiberMapper2D::Update(mitk::BaseRenderer * renderer)
   this->CalculateTimeStep(renderer);
 
   //check if updates occured in the node or on the display
-  FBXLocalStorage *localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
-
   //set renderer independent shader properties
   const DataNode::Pointer node = this->GetDataNode();
   float thickness = 2.0;
@@ -137,7 +131,6 @@ void mitk::MitkFiberMapper2D::UpdateShaderParameter(mitk::BaseRenderer *)
 // vtkActors and Mappers are feeded here
 void mitk::MitkFiberMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *renderer)
 {
-  GetDataNode()->SetVisibility(true, renderer, "visible");
   mitk::FiberBundle* fiberBundle = this->GetInput();
 
   //the handler of local storage gets feeded in this method with requested data for related renderwindow

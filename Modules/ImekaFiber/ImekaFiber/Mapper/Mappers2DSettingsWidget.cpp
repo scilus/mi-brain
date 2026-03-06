@@ -120,12 +120,14 @@ void Mappers2DSettingsWidget::SetThicknessParameters(
 
 void Mappers2DSettingsWidget::Modified(const bool checked)
 {
+  MITK_INFO << "Mappers2DSettingsWidget::Modified(" << checked << ")";
   btn2D->setChecked(checked);
   const auto renderers = Imeka::View::Get2DRenderers();
   for (auto map : m_Maps)
   {
-    ForEachFiberNode(*map, [this, checked, renderers](mitk::DataNode* node, FiberNodeData&)
+    ForEachFiberNode(*map, [this, checked, renderers](mitk::DataNode* node, FiberNodeData& fiberNodeData)
     {
+      MITK_INFO << "Setting visibility for node: " << node->GetName() << " to " << checked;
       float oldThickness = 0.0;
       node->GetFloatProperty("Fiber2DSliceThickness", oldThickness);
       if (oldThickness != spnThickness->value())
@@ -133,13 +135,17 @@ void Mappers2DSettingsWidget::Modified(const bool checked)
         node->SetFloatProperty("Fiber2DSliceThickness", spnThickness->value());
       }
 
-      // Do not make the node visible in all 2D renderers if the node is
-      // actually invisible.
-      if (node->IsVisible(nullptr))
+      for (auto renderer : renderers)
       {
-        for (auto renderer : renderers)
+        node->SetBoolProperty("visible", checked, renderer);
+      }
+
+      if (fiberNodeData.fiberMapper2D.IsNotNull())
+      {
+        auto fiberBundle = dynamic_cast<mitk::FiberBundle*>(node->GetData());
+        if (fiberBundle)
         {
-          node->SetBoolProperty("visible", checked, renderer);
+          fiberBundle->RequestUpdate2D();
         }
       }
     });

@@ -118,9 +118,11 @@ mitk::FiberBundle* mitk::FiberBundleMapper2D::GetInput()
 
 void mitk::FiberBundleMapper2D::Update(mitk::BaseRenderer * renderer)
 {
-  bool visible = true;
-  GetDataNode()->GetVisibility(visible, renderer, "visible");
-  if ( !visible )
+  FBXLocalStorage *localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
+  bool visible = GetDataNode()->IsVisible(nullptr) && GetDataNode()->IsVisible(renderer);
+
+  localStorage->m_Actor->SetVisibility(visible);
+  if (!visible)
     return;
 
   // Calculate time step of the input data for the specified renderer (integer value)
@@ -128,8 +130,6 @@ void mitk::FiberBundleMapper2D::Update(mitk::BaseRenderer * renderer)
   this->CalculateTimeStep( renderer );
 
   //check if updates occured in the node or on the display
-  FBXLocalStorage *localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
-
   //set renderer independent shader properties
   const DataNode::Pointer node = this->GetDataNode();
   float thickness = 2.0;
