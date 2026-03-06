@@ -12,8 +12,6 @@ set(_plugins
   org.blueberry.ui.qt
 
   org.commontk.configadmin
-
-  org.mitk.core.ext
   org.mitk.core.services
   org.mitk.gui.common
   org.mitk.gui.qt.common

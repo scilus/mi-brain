@@ -22,9 +22,14 @@ const char* ActiveROIName = "ActiveROI";
 
 mitk::NodePredicateAnd::Pointer GetAnatPredicate()
 {
-  return mitk::NodePredicateAnd::New(
-    mitk::NodePredicateDataType::New("Image"),
-    Imeka::Predicate::NotHelperObject());
+  auto isAnat = mitk::NodePredicateAnd::New();
+  isAnat->AddPredicate(mitk::NodePredicateDataType::New("Image"));
+  isAnat->AddPredicate(Imeka::Predicate::NotHelperObject());
+  isAnat->AddPredicate(Imeka::Predicate::NotProperty("binary", true));
+  isAnat->AddPredicate(Imeka::Predicate::NotProperty("segmentation", true));
+  isAnat->AddPredicate(Imeka::Predicate::NotProperty("org.mitk.views.segmentation.ismask", true));
+
+  return isAnat;
 }
 
 mitk::NodePredicateImageInfo::Pointer GetRGBPredicate()

@@ -9,7 +9,7 @@
 #include "FiberBundle/DataStorageUtils.hpp"
 
 const std::string BrainAnalysisView::VIEW_ID =
-  "org.mitk.views.brainanalysisview";
+  "org.imeka.views.brainanalysisview";
 
 BrainAnalysisView::BrainAnalysisView()
   : m_Callback()
