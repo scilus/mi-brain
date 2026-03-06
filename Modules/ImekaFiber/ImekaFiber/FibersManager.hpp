@@ -100,7 +100,7 @@ private:
   SurfaceColors m_SurfaceColors;
   GroupNodes& m_Groups;
 
-  mitk::DataNode* m_AnatNode;
+  mitk::DataNode::Pointer m_AnatNode;
   NodeDataMap m_FibersNodeData;
 
   Filtering m_Filtering;

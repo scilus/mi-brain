@@ -139,10 +139,12 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     }
     if (Imeka::Fiber::GetROIPredicate()->CheckNode(node))
     {
+      if (!m_DM.GetDataStorage()->Exists(m_Groups.ROIs)) { m_DM.AddNode(m_Groups.ROIs); }
       ROIAdded(node);
     }
     else
     {
+      if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)) { m_DM.AddNode(m_Groups.Anatomies); }
       m_DM.ChangeParent(node, m_Groups.Anatomies);
     }
   }
@@ -153,6 +155,12 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     node->GetBoolProperty("helper object", helperObject);
     if (!helperObject) // Not RTT
     {
+      std::cout << "FibersManager: Adding fibers node " << node->GetName() << "\n";
+      if (!m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
+      {
+        std::cout << "FibersManager: Tracts group missing, adding it back.\n";
+        m_DM.AddNode(m_Groups.Tracts);
+      }
       m_DM.ChangeParent(node, m_Groups.Tracts);
       FibersAdded(node, fiber);
 
@@ -267,6 +275,10 @@ void FibersManager::FibersAdded(
   });
 
   m_Filtering.AddDataset(node, fiber);
+
+  // Centering and updating views
+  mitk::RenderingManager::GetInstance()->InitializeViews(fiber->GetGeometry());
+  mitk::RenderingManager::GetInstance()->RequestUpdateAll();
 
   // Then we recompute the total visibility with the new fiber selections.
   ComputeFibersVisibility(node, true);

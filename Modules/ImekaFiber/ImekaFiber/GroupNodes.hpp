@@ -24,9 +24,9 @@ public:
   static const char* ROIsCategoryName;
   static const char* TractsCategoryName;
 
-  mitk::DataNode* Anatomies;
-  mitk::DataNode* Tracts;
-  mitk::DataNode* ROIs;
+  mitk::DataNode::Pointer Anatomies;
+  mitk::DataNode::Pointer Tracts;
+  mitk::DataNode::Pointer ROIs;
 
   GroupNodes(ROIAction , Imeka::Callback&, Imeka::DataManager&);
   bool UpdateGroupIfRequired(mitk::DataNode*);

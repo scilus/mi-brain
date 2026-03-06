@@ -19,7 +19,7 @@ namespace Fiber
 {
 
 struct DataSetInfo {
-  const mitk::FilteredFiberBundle* fiber;
+  mitk::FilteredFiberBundle::Pointer fiber;
 
   // Sent to m_SOFiltering and m_SurfaceFiltering when filtering
   DatasetFilteringData data;
@@ -103,7 +103,7 @@ public:
 
 private:
   void FillDatasetInfo(
-    const mitk::DataNode*, const mitk::FilteredFiberBundle*);
+    const mitk::DataNode*, mitk::FilteredFiberBundle*);
   void RecalculateSubsetOfAllDatasets();
   FiberIndexes SubsetOf(const mitk::FilteredFiberBundle*);
 

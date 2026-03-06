@@ -93,17 +93,17 @@ std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleTrackVisReader:
         throw std::length_error(noReadPropertiesWarning);
       }
 
-      if (auto refGeometry = fiber->GetReferenceGeometry())
+      /*if (auto refGeometry = fiber->GetReferenceGeometry())
       {
         fiber->SetGeometry(refGeometry->Clone());
-      }
+      }*/
 
       result.push_back(fiber.GetPointer());
-      return result;
     }
 
     setlocale(LC_ALL, currLocale.c_str());
     MITK_INFO << "Fiber bundle read";
+    return result;
   }
   catch(...)
   {
