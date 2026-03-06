@@ -203,10 +203,11 @@ void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *ren
   property->SetLighting(true);
   property->SetOpacity(opacity);
 
-  if (localStorage->m_LastUpdateTime>=m_FiberBundle->GetUpdateTime3D())
+  if (localStorage->m_LastUpdateTime >= m_FiberBundle->GetUpdateTime3D() && localStorage->m_FiberMapper->GetInput() != nullptr)
     return;
 
   // Calculate time step of the input data for the specified renderer (integer value)
+
   // this method is implemented in mitkMapper
   this->CalculateTimeStep( renderer );
   this->InternalGenerateData(renderer);

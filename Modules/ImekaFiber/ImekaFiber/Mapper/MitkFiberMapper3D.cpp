@@ -33,13 +33,13 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <mitkClippingProperty.h>
 
 mitk::MitkFiberMapper3D::MitkFiberMapper3D()
-  : m_UpdateIndices(false)
-  , m_TubeRadius(0.0)
+  : m_TubeRadius(0.0)
   , m_TubeSides(15)
   , m_LineWidth(1)
 {
   m_lut = vtkSmartPointer<vtkLookupTable>::New();
   m_lut->Build();
+  m_IBOTime.Modified();
 }
 
 mitk::MitkFiberMapper3D::~MitkFiberMapper3D()
@@ -48,6 +48,11 @@ mitk::MitkFiberMapper3D::~MitkFiberMapper3D()
 void mitk::MitkFiberMapper3D::SetFiberMapperData(Imeka::Fiber::FiberMapperData* data)
 {
   m_FiberMapperData = data;
+}
+
+void mitk::MitkFiberMapper3D::UpdateIndices()
+{
+  m_IBOTime.Modified();
 }
 
 const mitk::FiberBundle* mitk::MitkFiberMapper3D::GetInput()
@@ -202,13 +207,13 @@ void mitk::MitkFiberMapper3D::GenerateDataForRenderer(mitk::BaseRenderer *render
   property->SetOpacity(opacity);
 
   localStorage->m_FiberMapper->SetFiberMapperData(m_FiberMapperData);
-  if (m_UpdateIndices)
+  if (localStorage->m_LastIBOTime < m_IBOTime)
   {
     localStorage->m_FiberMapper->UpdateIBO();
-    m_UpdateIndices = false;
+    localStorage->m_LastIBOTime.Modified();
   }
 
-  if (localStorage->m_LastUpdateTime >= m_FiberBundle->GetUpdateTime3D())
+  if (localStorage->m_LastUpdateTime >= m_FiberBundle->GetUpdateTime3D() && localStorage->m_FiberMapper->GetInput() != nullptr)
     return;
 
   // Calculate time step of the input data for the specified renderer (integer value)

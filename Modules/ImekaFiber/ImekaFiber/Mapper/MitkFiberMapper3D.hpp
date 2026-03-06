@@ -48,7 +48,7 @@ namespace mitk {
     void GenerateDataForRenderer(mitk::BaseRenderer* renderer) override;
 
     void SetFiberMapperData(Imeka::Fiber::FiberMapperData* data);
-    void UpdateIndices() { m_UpdateIndices = true; }
+    void UpdateIndices();
 
     class  LocalStorage3D : public mitk::Mapper::BaseLocalStorage
     {
@@ -58,6 +58,7 @@ namespace mitk {
       vtkSmartPointer<vtkPropAssembly> m_FiberAssembly;
 
       itk::TimeStamp m_LastUpdateTime;
+      itk::TimeStamp m_LastIBOTime;
       LocalStorage3D();
 
       ~LocalStorage3D() override
@@ -78,9 +79,9 @@ namespace mitk {
     void UpdateShaderParameter(mitk::BaseRenderer*);
 
     Imeka::Fiber::FiberMapperData* m_FiberMapperData;
+    itk::TimeStamp m_IBOTime;
 
   private:
-    bool m_UpdateIndices;
     vtkSmartPointer<vtkLookupTable> m_lut;
     float   m_TubeRadius;
     int     m_TubeSides;
