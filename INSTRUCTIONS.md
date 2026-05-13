@@ -34,7 +34,7 @@ During the CMake configuration, the following optional dependencies might be rep
     Run the following command from within the `build-2025` directory. This command points to the MITK and Qt6 dependency locations.
 
     ```bash
-    cmake -DMITK_DIR=/home/local/USHERBROOKE/rhef1902/Libraries/MITK-2025.12/MITK-superbuild/MITK-build -DQt6_DIR=/home/local/USHERBROOKE/rhef1902/Libraries/Qt/6.10.1/gcc_64/lib/cmake/Qt6 ..
+    cmake -DMITK_DIR=$HOME/Libraries/build/MITK-2025.12/MITK-build -DQt6_DIR=$HOME/Libraries/install/Qt6.8.3/lib/cmake/Qt6 ..
     ```
 
 3.  **Build the project:**
@@ -42,6 +42,10 @@ During the CMake configuration, the following optional dependencies might be rep
 
     ```bash
     cmake --build . -j8
+    ```
+    or
+    ```bash
+    cmake --build . --parallel
     ```
 
 4.  **Run the application:**

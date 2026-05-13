@@ -1,14 +1,21 @@
 #!/bin/bash
 
 # Set the path to the MITK plugins directory
-MITK_PLUGINS_DIR="/home/local/USHERBROOKE/rhef1902/Libraries/MITK/MITK-superbuild/MITK-build/lib/plugins"
-MITK_BIN_DIR="/home/local/USHERBROOKE/rhef1902/Libraries/MITK/MITK-superbuild/MITK-build/bin"
+MITK_PLUGINS_DIR="$HOME/Libraries/build/mitk-2025.12-build/MITK-build/lib/plugins"
+MITK_BIN_DIR="$HOME/Libraries/build/mitk-2025.12-build/MITK-build/bin"
 
 # Set the path to the MI-Brain executable directory
-MI_BRAIN_BIN_DIR="/home/local/USHERBROOKE/rhef1902/Libraries/mi-brain/build-2025/bin"
+MI_BRAIN_BIN_DIR="$HOME/mi-brain/mi-brain/build-2025/bin"
+
+QT_DIR="$HOME/Libraries/install/qt-6.8.3"
 
 # Export LD_LIBRARY_PATH to include all necessary directories
-export LD_LIBRARY_PATH="${MITK_PLUGINS_DIR}:${MITK_BIN_DIR}:${MI_BRAIN_BIN_DIR}:${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${MITK_PLUGINS_DIR}:${MITK_BIN_DIR}:${MI_BRAIN_BIN_DIR}:${QT_DIR}/lib:${LD_LIBRARY_PATH}"
+
+# Export QT_PLUGIN_PATH and QT_QPA_PLATFORM_PLUGIN_PATH to include the MITK plugins directory
+export QT_PLUGIN_PATH=${QT_DIR}/plugins
+export QT_QPA_PLATFORM_PLUGIN_PATH=${QT_DIR}/plugins/platforms
+export QT_QPA_PLATFORM=xcb
 
 # Execute the MI-Brain application
 exec "${MI_BRAIN_BIN_DIR}/MI-Brain"
