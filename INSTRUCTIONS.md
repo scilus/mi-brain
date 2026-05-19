@@ -37,6 +37,10 @@ During the CMake configuration, the following optional dependencies might be rep
     cmake -DMITK_DIR=$HOME/Libraries/build/MITK-2025.12/MITK-build -DQt6_DIR=$HOME/Libraries/install/Qt6.8.3/lib/cmake/Qt6 ..
     ```
 
+    ```bash
+    cmake -DCMAKE_EXPORT_COMPILE_COMMAND=ON -DMITK_DIR=$HOME/Libraries/build/mitk-2025.12-build/MITK-build -DQt6_DIR=$HOME/Libraries/install/qt-6.8.3/lib/cmake/Qt6 ..
+    ```
+
 3.  **Build the project:**
     After CMake has finished configuring, you can build the project using the following command. The `-j` flag specifies the number of parallel jobs to use for building. Adjust it based on your system's capabilities.
 

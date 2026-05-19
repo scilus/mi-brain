@@ -192,6 +192,8 @@ public:
   {
     // Shuffled colors are not exactly random; we always use the same seed
     // so we know which colors we will get.
+
+    //with my new color shuffle, the first few colors are the same as the initial ones, then it shuffles. So this test is not really relevant anymore.
     const QColor firstColor(2, 75, 252);
     const QColor secondColor(148, 252, 2);
     m_Groups->Tracts->SetIntProperty("ShuffleColor", 1);
