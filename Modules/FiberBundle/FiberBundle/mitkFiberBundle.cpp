@@ -17,7 +17,7 @@
 #include <vtkParametricFunctionSource.h>
 #include <vtkParametricSpline.h>
 #include <vtkPolygon.h>
-#include <boost/progress.hpp>
+#include <boost/timer/progress_display.hpp>
 #include <vtkTransformPolyDataFilter.h>
 #include <mitkTransferFunction.h>
 #include <vtkLookupTable.h>
@@ -298,7 +298,7 @@ void mitk::FiberBundle::ColorFibersByCurvature(bool minMaxNorm)
   double min = 1;
   double max = 0;
   MITK_INFO << "Coloring fibers by curvature";
-  boost::progress_display disp(m_FiberPolyData->GetNumberOfCells());
+  boost::timer::progress_display disp(m_FiberPolyData->GetNumberOfCells());
   for (int i=0; i<m_FiberPolyData->GetNumberOfCells(); i++)
   {
     ++disp;
@@ -616,7 +616,7 @@ void mitk::FiberBundle::MirrorFibers(unsigned int axis)
     return;
 
   MITK_INFO << "Mirroring fibers";
-  boost::progress_display disp(m_NumFibers);
+  boost::timer::progress_display disp(m_NumFibers);
 
   vtkSmartPointer<vtkPoints> vtkNewPoints = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> vtkNewCells = vtkSmartPointer<vtkCellArray>::New();
@@ -663,7 +663,7 @@ void mitk::FiberBundle::ResampleSpline(float pointDistance, double tension, doub
   std::vector< vtkSmartPointer<vtkPolyLine> > resampled_streamlines;
   resampled_streamlines.resize(m_NumFibers);
 
-  boost::progress_display disp(m_NumFibers);
+  boost::timer::progress_display disp(m_NumFibers);
 #pragma omp parallel for
   for (int i = 0; i < m_NumFibers; i++)
   {
@@ -752,7 +752,7 @@ void mitk::FiberBundle::ResampleLinear(double pointDistance)
   vtkSmartPointer<vtkCellArray> vtkNewCells = vtkSmartPointer<vtkCellArray>::New();
 
   MITK_INFO << "Resampling fibers (linear)";
-  boost::progress_display disp(m_FiberPolyData->GetNumberOfCells());
+  boost::timer::progress_display disp(m_FiberPolyData->GetNumberOfCells());
   vtkSmartPointer<vtkFloatArray> newFiberWeights = vtkSmartPointer<vtkFloatArray>::New();
   newFiberWeights->SetName("FIBER_WEIGHTS");
   newFiberWeights->SetNumberOfValues(m_NumFibers);

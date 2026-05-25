@@ -210,7 +210,8 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
   m_HelpMenu = mainWindow->menuBar()->addMenu("&Help");
   const auto viewRegistry =
     berry::PlatformUI::GetWorkbench()->GetViewRegistry();
-  for (const auto viewDescriptor : viewRegistry->GetViews())
+  /*loop variable viewDescriptor is not modified, so we can afford to use a const reference to avoid unnecessary copies*/
+  for (const auto &viewDescriptor : viewRegistry->GetViews())
   {
     if (viewDescriptor->GetId() == "org.blueberry.views.helpindex")
     {

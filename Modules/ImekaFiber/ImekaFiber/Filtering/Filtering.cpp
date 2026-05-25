@@ -574,10 +574,13 @@ bool Filtering::FilterDataset(
 // We set the current `visibleTractGroupIndexes` as the new indices, which
 // don't seem to make much sense, but 1) it may have been updated before 2)
 // the streamlines may have been shuffled, or mirrored, etc.
+// This is never referenced in the code.
 void Filtering::ForceFilterDataset(
   const mitk::DataNode* datasetNode,
   mitk::FilteredFiberBundle* fibers)
 {
+  Q_UNUSED(fibers);
+
   auto& fiberMapperData = m_NodeDataMap[datasetNode].fiberMapperData;
   auto& datasetInfo = m_DatasetInfo.at(datasetNode);
   const auto& generalVisibility = datasetInfo.data.visibleTractGroupIndexes;

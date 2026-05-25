@@ -8,7 +8,7 @@
 
 // misc
 #include <cmath>
-#include <boost/progress.hpp>
+#include <boost/timer/progress_display.hpp>
 
 namespace itk{
 
@@ -132,7 +132,7 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
   MITK_INFO << "Number of fibers to process: " << numFibers;
   MITK_INFO << "Output image size: " << w << " x " << h << " x " << d;
 
-  boost::progress_display disp(numFibers);
+  boost::timer::progress_display disp(numFibers);
   for( int i=0; i<numFibers; i++ )
   {
     ++disp;
@@ -150,8 +150,12 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
       itk::Point<float, 3> vertex = GetItkPoint(points->GetPoint(j));
       itk::Index<3> index;
       itk::ContinuousIndex<float, 3> contIndex;
-      outImage->TransformPhysicalPointToIndex(vertex, index);
-      outImage->TransformPhysicalPointToContinuousIndex(vertex, contIndex);
+      if(!outImage->TransformPhysicalPointToIndex(vertex, index)){
+        MITK_WARN << "Warning: fiber point outside of output image, skipping point";
+        continue;
+      }
+      // previous line already checks if point is inside image, so the return value of this function is not needed. We still need to call it to get the continuous index, though.
+      (void) outImage->TransformPhysicalPointToContinuousIndex(vertex, contIndex);
 
       if (firstPoint)
       {

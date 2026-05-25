@@ -15,7 +15,7 @@
 #include <vtkPolyLine.h>
 #include <vtkCellArrayIterator.h>
 
-#include <boost/progress.hpp>
+#include <boost/timer/progress_display.hpp>
 
 #include <numeric> // Fill vector with std::itoa
 #include <random>
@@ -264,7 +264,7 @@ void FilteredFiberBundle::MirrorFibers(
   if (axis > 2) { return; }
 
   MITK_INFO << "Mirroring fibers";
-  boost::progress_display disp(m_NumFibers);
+  boost::timer::progress_display disp(m_NumFibers);
 
   const float shift = 2.0 * anatGeo->GetCenter()[axis];
   vtkPoints* points = m_FiberPolyData->GetPoints();

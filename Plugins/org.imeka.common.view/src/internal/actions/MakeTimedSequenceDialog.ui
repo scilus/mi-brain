@@ -48,7 +48,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>QimekaTimeSequenceDialog</receiver>
+   <receiver>MakeTimedSequenceDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -64,7 +64,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>QimekaTimeSequenceDialog</receiver>
+   <receiver>MakeTimedSequenceDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

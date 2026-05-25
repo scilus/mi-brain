@@ -468,7 +468,8 @@ bool FilteringUI::FinishedLoading()
   {
     AddActionsToROI(ROINode);
   }
-  for (const auto p : datasetsAndTG)
+  /*loop variable p is not modified, so we can afford to use a const reference to avoid unnecessary copies*/
+  for (const auto &p : datasetsAndTG)
   {
     for (auto TGNode : p.second)
     {
