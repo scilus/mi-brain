@@ -67,16 +67,19 @@ void FibersManager::RemoveFibersNode(mitk::DataNode* node)
 void FibersManager::GroupAdded(mitk::DataNode* node)
 {
   std::string categoryGroupName = "";
-  node->GetStringProperty(
-    Imeka::Fiber::GroupNodes::CategoryPropertyName, categoryGroupName);
-  if (categoryGroupName == "Anatomies")
-  {
+  node->GetStringProperty(Imeka::Fiber::GroupNodes::CategoryPropertyName, categoryGroupName);
 
+  m_Groups.AddVisibilityCallback(node);
+  
+  if (categoryGroupName == m_Groups.AnatomiesCategoryName)
+  {
+    // Nothing to do for anatomies for now
   }
-  else if (categoryGroupName == "Tracts")
+  else if (categoryGroupName == m_Groups.TractsCategoryName)
   {
     m_FibersColors.SetTractsCategoryActions(node);
     m_FilteringUI.AddActionsToTractsCategory(node);
+    
     m_Callback.Add("Save", "", node, [this](mitk::DataNode* node)
     {
       std::string saveTo = "";
@@ -86,28 +89,10 @@ void FibersManager::GroupAdded(mitk::DataNode* node)
       Imeka::Fiber::Saver::Instance().Save(saveTo == "dm", m_DM);
     });
   }
-  else if (categoryGroupName == "ROIs")
+  else if (categoryGroupName == m_Groups.ROIsCategoryName)
   {
-    m_Callback.Add("ShuffleColor", 0, node, [this](mitk::DataNode* node)
-    {
-      int shuffleColor = 0;
-      node->GetIntProperty("ShuffleColor", shuffleColor);
-      if (!shuffleColor) { return; }
-
-      Nodes nodes;
-      if (shuffleColor == 1)
-      {
-        // 1 is shuffle all
-        nodes = m_DM.DirectChildrenOf(node);
-      }
-      else
-      {
-        // 2 is shuffle masks
-        nodes = m_DM.GetAll(Imeka::Fiber::IsMaskPredicate(), node);
-      }
-      Imeka::Color::ShuffleColors(nodes);
-      node->SetIntProperty("ShuffleColor", 0);
-    });
+    m_FibersColors.SetROIsCategoryActions(node);
+    m_Groups.SetROIsCategoryActions(node);
   }
 }
 
@@ -136,8 +121,7 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
         node->SetBoolProperty("org.mitk.views.segmentation.ismask", true);
       }
 
-      std::cout <<
-        "Binary or labels image laoded; setting interpolation to NN.\n";
+      MITK_INFO << "Binary or labels image loaded; setting interpolation to NN.\n";
       auto interpolation =
         dynamic_cast<mitk::VtkResliceInterpolationProperty*>(
           node->GetProperty("reslice interpolation"));
@@ -145,12 +129,20 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     }
     if (Imeka::Fiber::GetROIPredicate()->CheckNode(node))
     {
-      if (!m_DM.GetDataStorage()->Exists(m_Groups.ROIs)) { m_DM.AddNode(m_Groups.ROIs); }
+      if (!m_DM.GetDataStorage()->Exists(m_Groups.ROIs)) { 
+        MITK_INFO << "ROIs group missing, adding it back.\n";
+        m_DM.AddNode(m_Groups.ROIs);
+        GroupAdded(m_Groups.ROIs);
+      }
       ROIAdded(node);
     }
     else
     {
-      if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)) { m_DM.AddNode(m_Groups.Anatomies); }
+      if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)) { 
+        MITK_INFO << "Anatomies group missing, adding it back.\n";
+        m_DM.AddNode(m_Groups.Anatomies);
+        GroupAdded(m_Groups.Anatomies);
+      }
       m_DM.ChangeParent(node, m_Groups.Anatomies);
     }
   }
@@ -161,11 +153,12 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     node->GetBoolProperty("helper object", helperObject);
     if (!helperObject) // Not RTT
     {
-      std::cout << "FibersManager: Adding fibers node " << node->GetName() << "\n";
+      MITK_INFO << "FibersManager: Adding fibers node " << node->GetName() << "\n";
       if (!m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
       {
-        std::cout << "FibersManager: Tracts group missing, adding it back.\n";
+        MITK_INFO << "FibersManager: Tracts group missing, adding it back.\n";
         m_DM.AddNode(m_Groups.Tracts);
+        GroupAdded(m_Groups.Tracts);
       }
       m_DM.ChangeParent(node, m_Groups.Tracts);
       FibersAdded(node, fiber);
@@ -291,7 +284,7 @@ void FibersManager::FibersAdded(
   fiber->CalculateStatsUsingVisibility();
   emit DisplayStats();
 
-  m_Callback.SetVisibilityCallback(
+  m_Callback.AddVisibilityCallback(
     node,
     [](){},
     [](){},

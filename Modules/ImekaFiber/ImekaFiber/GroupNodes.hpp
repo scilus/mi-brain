@@ -31,9 +31,11 @@ public:
   GroupNodes(ROIAction , Imeka::Callback&, Imeka::DataManager&);
   bool UpdateGroupIfRequired(mitk::DataNode*);
 
+  void SetROIsCategoryActions(mitk::DataNode* node);
+  void AddVisibilityCallback(mitk::DataNode*) const;
+
 private:
   mitk::DataNode::Pointer NewCategoryNode(const char*) const;
-  void AddVisibilityCallback(mitk::DataNode*) const;
 
   // Run this function each time the ROI category is modified
   const ROIAction m_ROIAction;

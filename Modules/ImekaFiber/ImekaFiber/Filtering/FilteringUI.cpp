@@ -85,7 +85,7 @@ void FilteringUI::AddActionsToTractsCategory(mitk::DataNode* TC)
   // This has been added because we want to recalculate the filtering when the
   // user makes the TractsCategory visible again. There's no need to computer
   // anything when it's invisible because it's invisible.
-  m_Callback.SetVisibilityCallback(
+  m_Callback.AddVisibilityCallback(
     TC,
     // OnVisible
     [this, TC]() {
@@ -115,7 +115,7 @@ void FilteringUI::AddActionsToDataset(mitk::DataNode* datasetNode)
   // This has been added because we want to recalculate the filtering when the
   // user makes a dataset visible again. There's no need to computer anything
   // when it's invisible because it's invisible.
-  m_Callback.SetVisibilityCallback(
+  m_Callback.AddVisibilityCallback(
     datasetNode,
     // OnVisible
     [this, datasetNode]() {
@@ -172,7 +172,7 @@ void FilteringUI::AddActionsToTractGroup(
 {
   if (addVisibilityActions)
   {
-    m_Callback.SetVisibilityCallback(
+    m_Callback.AddVisibilityCallback(
       TGNode,
       // OnVisible
       [this, datasetNode, TGNode](){
@@ -246,7 +246,7 @@ void FilteringUI::AddActionsToActiveROI(
   mitk::DataNode* TGNode,
   mitk::DataNode* activeROI)
 {
-  m_Callback.SetVisibilityCallback(
+  m_Callback.AddVisibilityCallback(
     activeROI,
     // OnVisible
     [this, datasetNode, TGNode, activeROI]()
