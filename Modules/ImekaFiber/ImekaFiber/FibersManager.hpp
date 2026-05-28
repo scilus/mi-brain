@@ -5,6 +5,7 @@
 #include "Filtering/FilteringUI.hpp"
 #include "FiberNodeData.hpp"
 #include "GroupNodes.hpp"
+#include "GroupNodeManager.hpp"
 
 #include "ImekaFiberExports.h"
 
@@ -22,13 +23,15 @@ signals:
   void DisplayStats();
 
 public:
-  FibersManager(Imeka::DataManager&, Imeka::Callback&, GroupNodes&);
+  FibersManager(Imeka::DataManager&, Imeka::Callback&, GroupNodes&, Callback::CallbackFunction);
   ~FibersManager() {}
 
   void SetAnat(mitk::DataNode*, mitk::Image*);
   void GroupAdded(mitk::DataNode*);
   void NodeAdded(mitk::DataNode*);
   void NodeRemoved(mitk::DataNode*);
+
+  bool UpdateGroupIfRequired(mitk::DataNode*);
 
   // For Testing only. Don't make it CONST. We should make it const but it
   // doesn't work and I don't know why.
@@ -105,6 +108,7 @@ private:
 
   Filtering m_Filtering;
   FilteringUI m_FilteringUI;
+  GroupNodeManager m_GroupNodeManager;
 };
 
 } // namespace Fiber

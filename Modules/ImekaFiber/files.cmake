@@ -19,6 +19,7 @@ set(CPP_FILES
   ImekaFiber/Mapper/vtkFiberMapper.cpp
   ImekaFiber/FibersManager.cpp
   ImekaFiber/FiberNodeData.cpp
+  ImekaFiber/GroupNodeManager.cpp
   ImekaFiber/GroupNodes.cpp
   ImekaFiber/MaximaData.cpp
   ImekaFiber/RTT.cpp

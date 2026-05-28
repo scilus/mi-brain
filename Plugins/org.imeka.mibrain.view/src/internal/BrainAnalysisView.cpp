@@ -13,8 +13,8 @@ const std::string BrainAnalysisView::VIEW_ID =
 
 BrainAnalysisView::BrainAnalysisView()
   : m_Callback()
-  , m_Groups(GetCreateROICallback(), m_Callback, m_DM)
-  , m_FibersManager(m_DM, m_Callback, m_Groups)
+  , m_Groups(m_Callback, m_DM)
+  , m_FibersManager(m_DM, m_Callback, m_Groups, GetCreateROICallback())
   , m_MaximaData(Imeka::Fiber::MaximaData::Instance())
   , m_RenderingManagerObserverTag(0)
 {}
@@ -26,7 +26,7 @@ BrainAnalysisView::~BrainAnalysisView()
     ->RemoveObserver(m_RenderingManagerObserverTag);
 }
 
-Imeka::Fiber::GroupNodes::ROIAction
+Imeka::Callback::CallbackFunction
 BrainAnalysisView::GetCreateROICallback() const
 {
   return [this](mitk::DataNode* node)
@@ -245,7 +245,7 @@ void BrainAnalysisView::NodeAdded(const mitk::DataNode* node)
 {
   auto nonConstNode = const_cast<mitk::DataNode*>(node);
 
-  if (m_Groups.UpdateGroupIfRequired(nonConstNode))
+  if (m_FibersManager.UpdateGroupIfRequired(nonConstNode))
   {
     m_Controls.regionOfInterestWidget->SetParentNode(m_Groups.ROIs);
     m_FibersManager.GroupAdded(nonConstNode);

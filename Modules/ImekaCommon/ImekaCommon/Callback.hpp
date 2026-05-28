@@ -27,8 +27,10 @@ namespace Imeka
 // so there can't be a callback triggering a callback triggering ...
 class ImekaCommon_EXPORT Callback
 {
-private:
+public:
   typedef std::function<void(mitk::DataNode*)> CallbackFunction;
+
+private:
 
   class Command
   {

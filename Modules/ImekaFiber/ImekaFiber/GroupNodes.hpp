@@ -17,8 +17,6 @@ namespace Fiber
 class ImekaFiber_EXPORT GroupNodes
 {
 public:
-  typedef std::function<void(mitk::DataNode* node)> ROIAction;
-
   static const char* CategoryPropertyName;
   static const char* AnatomiesCategoryName;
   static const char* ROIsCategoryName;
@@ -28,17 +26,13 @@ public:
   mitk::DataNode::Pointer Tracts;
   mitk::DataNode::Pointer ROIs;
 
-  GroupNodes(ROIAction , Imeka::Callback&, Imeka::DataManager&);
-  bool UpdateGroupIfRequired(mitk::DataNode*);
+  GroupNodes(Imeka::Callback&, Imeka::DataManager&);
 
-  void SetROIsCategoryActions(mitk::DataNode* node);
-  void AddVisibilityCallback(mitk::DataNode*) const;
+  // void SetROIsCategoryActions(mitk::DataNode* node);
+  // void AddVisibilityCallback(mitk::DataNode*) const;
 
 private:
   mitk::DataNode::Pointer NewCategoryNode(const char*) const;
-
-  // Run this function each time the ROI category is modified
-  const ROIAction m_ROIAction;
 
   Imeka::Callback& m_Callback;
   Imeka::DataManager& m_DM;

@@ -66,6 +66,8 @@ void Callback::AddVisibilityCallback(
   AddVisibilityCallback(node, [](){}, [](){}, [](){}, DM);
 }
 
+// This function exists because the logic for the visibility callback is complex
+// and reused in many places.
 void Callback::AddVisibilityCallback(
   mitk::DataNode* node,
   std::function<void()> onVisible,

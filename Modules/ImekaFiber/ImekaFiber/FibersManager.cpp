@@ -19,7 +19,8 @@ namespace Fiber
 FibersManager::FibersManager(
   Imeka::DataManager& DM,
   Imeka::Callback& callback,
-  GroupNodes& groups)
+  GroupNodes& groups,
+  Callback::CallbackFunction roiCreate)
   : m_DM(DM)
   , m_Callback(callback)
   , m_FibersColors(m_DM, m_Callback, m_FibersNodeData)
@@ -28,12 +29,12 @@ FibersManager::FibersManager(
   , m_AnatNode(nullptr)
   , m_Filtering(m_FibersNodeData)
   , m_FilteringUI(m_Callback, m_DM, m_FibersColors, m_Filtering)
+  , m_GroupNodeManager(m_Callback, m_DM, m_FibersColors, m_FilteringUI, m_Groups, roiCreate)
 {
   Saver::Instance().AddNodes(&m_FibersNodeData, false);
 
-  GroupAdded(m_Groups.Anatomies);
-  GroupAdded(m_Groups.ROIs);
-  GroupAdded(m_Groups.Tracts);
+  // m_GroupNodeManager(
+    // m_Callback, m_DM, m_FibersColors, m_FilteringUI, m_Groups, roiCreate);
 
   connect(&m_FilteringUI, &FilteringUI::RequestUpdateDataset,
     [this](mitk::DataNode* datasetNode)
@@ -64,36 +65,15 @@ void FibersManager::RemoveFibersNode(mitk::DataNode* node)
   }
 }
 
+// This function is essentially a wrapper around GroupNodeManager::InitializeGroupNode
 void FibersManager::GroupAdded(mitk::DataNode* node)
 {
-  std::string categoryGroupName = "";
-  node->GetStringProperty(Imeka::Fiber::GroupNodes::CategoryPropertyName, categoryGroupName);
+  m_GroupNodeManager.InitializeGroupNode(node);
+}
 
-  m_Groups.AddVisibilityCallback(node);
-  
-  if (categoryGroupName == m_Groups.AnatomiesCategoryName)
-  {
-    // Nothing to do for anatomies for now
-  }
-  else if (categoryGroupName == m_Groups.TractsCategoryName)
-  {
-    m_FibersColors.SetTractsCategoryActions(node);
-    m_FilteringUI.AddActionsToTractsCategory(node);
-    
-    m_Callback.Add("Save", "", node, [this](mitk::DataNode* node)
-    {
-      std::string saveTo = "";
-      if (!node->GetStringProperty("Save", saveTo) || saveTo.empty()) { return; }
-      node->SetStringProperty("Save", "");
-
-      Imeka::Fiber::Saver::Instance().Save(saveTo == "dm", m_DM);
-    });
-  }
-  else if (categoryGroupName == m_Groups.ROIsCategoryName)
-  {
-    m_FibersColors.SetROIsCategoryActions(node);
-    m_Groups.SetROIsCategoryActions(node);
-  }
+// This is also a wrapper, which came from GroupNodes to move the logic into GroupNodeManager.
+bool FibersManager::UpdateGroupIfRequired(mitk::DataNode* node){
+  return m_GroupNodeManager.SetupGroupIfRequired(node);
 }
 
 void FibersManager::NodeAdded(mitk::DataNode* node)
@@ -131,7 +111,6 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     {
       if (!m_DM.GetDataStorage()->Exists(m_Groups.ROIs)) { 
         MITK_INFO << "ROIs group missing, adding it back.\n";
-        m_DM.AddNode(m_Groups.ROIs);
         GroupAdded(m_Groups.ROIs);
       }
       ROIAdded(node);
@@ -140,7 +119,6 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     {
       if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)) { 
         MITK_INFO << "Anatomies group missing, adding it back.\n";
-        m_DM.AddNode(m_Groups.Anatomies);
         GroupAdded(m_Groups.Anatomies);
       }
       m_DM.ChangeParent(node, m_Groups.Anatomies);
@@ -157,7 +135,6 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
       if (!m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
       {
         MITK_INFO << "FibersManager: Tracts group missing, adding it back.\n";
-        m_DM.AddNode(m_Groups.Tracts);
         GroupAdded(m_Groups.Tracts);
       }
       m_DM.ChangeParent(node, m_Groups.Tracts);
