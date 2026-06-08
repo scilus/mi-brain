@@ -1,6 +1,5 @@
 set(SRC_CPP_FILES
   AboutDialog.cpp
-  AboutHandler.cpp
   CommonPerspective.cpp
   CommonWorkbenchWindowAdvisor.cpp
   PlitkActionBarAdvisor.cpp
@@ -18,7 +17,6 @@ set(UI_FILES
 
 set(MOC_H_FILES
   src/AboutDialog.hpp
-  src/AboutHandler.hpp
   src/CommonPerspective.hpp
   src/internal/PluginActivator.hpp
   src/internal/ViewPlacerAction.hpp
@@ -32,7 +30,7 @@ set(CACHED_RESOURCE_FILES
   resources/icon.xpm
   plugin.xml
   resources/images/logo_plitk.png
-  resources/images/logo_imeka.png
+  resources/images/logo_scil.png
 )
 
 # list of Qt .qrc files which contain additional resources

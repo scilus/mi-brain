@@ -22,6 +22,8 @@
 
 #include <vtkProperty.h>
 
+#include "AboutDialog.hpp"
+
 #include "internal/ViewPlacerAction.hpp"
 
 struct StdMultiWidgetPartListener : public berry::IPartListener
@@ -142,6 +144,55 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
   auto mainWindow =
     static_cast<QMainWindow*>(window->GetShell()->GetControl());
 
+  // The menu bar code is BELOW.
+
+  for(auto action : mainWindow->menuBar()->actions())
+  {
+    // MITK_INFO << "Menu: " << action->text().toStdString() << "\n"; // Uncomment to see the actions present in the menu bar.
+    
+    // if(action->text() == "&File")
+    // {
+    //   for(auto child : action->menu()->actions())
+    //   {
+    //     // MITK_INFO << "  Child: " << child->text().toStdString() << "\n";
+    //     // if(child->text() == "&Close Project...")
+    //     // {
+    //     //   action->menu()->removeAction(child);
+    //     //   break;
+    //     // }
+    //   }
+    // }
+
+    // remove the MITK Edit menu
+    if(action->text() == "&Edit")
+    {
+      action->menu()->clear();
+      mainWindow->menuBar()->removeAction(action);
+      continue;
+    }
+
+    if(action->text() == "Window")
+    {
+      for(auto child : action->menu()->actions())
+      {
+        // MITK_INFO << "  Child: " << child->text().toStdString() << "\n";
+        if(child->text() == "&Open Perspective" || child->text() == "&Preferences...")
+        {
+          action->menu()->removeAction(child);
+        }
+      }
+      continue;
+    }
+
+    // remove the MITK help menu
+    if(action->text() == "&Help")
+    {
+      action->menu()->clear();
+      mainWindow->menuBar()->removeAction(action);
+      continue;
+    }
+  }
+
   if (m_SetViewPlacerHotkeys)
   {
     QMenu* viewMenu = mainWindow->menuBar()->addMenu("&View");
@@ -153,6 +204,7 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     viewMenu->addAction(new ViewPlacerAction(ViewPlacerAction::POSTERIOR));
   }
 
+  // This is the code for the orientation marker in the 3D view.
   if (m_UseMarkerWidget)
   {
     m_AnnotatedCube = vtkSmartPointer<vtkAnnotatedCubeActor>::New();
@@ -208,44 +260,25 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
   // unmodifiable for some reason. We simply add our own version of it
   // with Help Index and About.
   m_HelpMenu = mainWindow->menuBar()->addMenu("&Help");
-  const auto viewRegistry =
-    berry::PlatformUI::GetWorkbench()->GetViewRegistry();
+  const auto viewRegistry = berry::PlatformUI::GetWorkbench()->GetViewRegistry();
   /*loop variable viewDescriptor is not modified, so we can afford to use a const reference to avoid unnecessary copies*/
   for (const auto &viewDescriptor : viewRegistry->GetViews())
   {
     if (viewDescriptor->GetId() == "org.blueberry.views.helpindex")
     {
-      // Add the damn Help Index!
       berry::IWorkbenchWindow::Pointer _window(window);
-      m_HelpMenu->addAction(
-        new berry::QtShowViewAction(_window, viewDescriptor));
-      m_HelpMenu->addSeparator();
+      m_HelpMenu->addAction(new berry::QtShowViewAction(_window, viewDescriptor));
       break;
     }
   }
 
-  /**
-  Add the &About action again.
-  THIS CODE IS BAD. The berry classes should NEVER be used outside of MITK's
-  code. THIS IS A HACK AND SHOULD BE REMOVED. However, it's here because
-  - we remove the standard Help menu because we want to add more menus before
-    the Help menu, which should be last
-  - "org.blueberry.ui.help.aboutAction" kind-of work but it takes their
-    extension point most of the time, so we disable theirs in
-    Plugins/org.mitk.gui.qt.ext/plugin.xml
-  */
-  berry::CommandContributionItemParameter::Pointer command(
-    new berry::CommandContributionItemParameter(
-      window.GetPointer(), QString(),
-      "org.blueberry.ui.help.aboutAction",
-      berry::CommandContributionItem::STYLE_PUSH));
-  command->icon = QIcon();
-  command->label = "&About";
-  command->tooltip = QString();
-  command->shortcut = QKeySequence();
-  berry::CommandContributionItem::Pointer item(
-    new berry::CommandContributionItem(command));
-  item->Fill(m_HelpMenu, nullptr);
+  QAction* aboutAction = m_HelpMenu->addAction("&About");
+  QWidget* parent = static_cast<QWidget*>(window->GetShell()->GetControl());
+  QObject::connect(aboutAction, &QAction::triggered, [parent]()
+  {
+    AboutDialog dlg(parent);
+    dlg.exec();
+  });
 }
 
 void CommonWorkbenchWindowAdvisor::Setup()

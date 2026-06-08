@@ -1,10 +1,13 @@
 #include "AboutDialog.hpp"
+#include "PlitkVersion.hpp"
 
 AboutDialog::AboutDialog(QWidget* parent)
 : QDialog(parent)
 {
   setupUi(this);
-  setWindowTitle("Imeka Solutions Inc.");
+  setWindowTitle("UdeS - SCIL");
+  Version(PLITK_VERSION);
+  MITKVersion(MITK_VERSION);
 
   // Remove the help button
   setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
