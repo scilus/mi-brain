@@ -309,6 +309,7 @@ void FibersManager::NodeRemoved(mitk::DataNode* node)
 
   const auto nodesToUpdate = m_FilteringUI.FilteringNodeRemoved(node);
 
+  m_DM.RemoveAllChildren(node);
   // Actually remove the node from MITK DM and memory. We do this because we
   // don't want ComputeFibersVisibility to count the node that we just deleted.
   m_DM.RemoveNode(node);

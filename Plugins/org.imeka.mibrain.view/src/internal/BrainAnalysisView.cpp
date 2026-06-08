@@ -363,13 +363,14 @@ void BrainAnalysisView::NodeRemoved(const mitk::DataNode* node)
     }
   }
 
-  std::cout << "Removing node: " << node->GetName() << "\n";
-  auto nonConstNode = const_cast<mitk::DataNode*>(node);
-  m_Callback.Remove(node);
-
   // The node can not-exist if the user selects all and delete. Some nodes
   // delete their children, so they would be deleted N times.
   if (!GetDataStorage()->Exists(node)) { return; }
+
+  std::cout << "Removing node: " << node->GetName() << "...\n";
+  auto nonConstNode = const_cast<mitk::DataNode*>(node);
+  m_Callback.Remove(node);
+
 
   if (Imeka::Fiber::GetMaximaPredicate()->CheckNode(node))
   {
