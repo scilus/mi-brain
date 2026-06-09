@@ -10,6 +10,9 @@
 #include <cmath>
 #include <boost/timer/progress_display.hpp>
 
+// progress bar
+#include <mitkProgressBar.h>
+
 namespace itk{
 
 template< class OutputImageType >
@@ -132,10 +135,24 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
   MITK_INFO << "Number of fibers to process: " << numFibers;
   MITK_INFO << "Output image size: " << w << " x " << h << " x " << d;
 
+  unsigned int fiberIdx = 0;
+  const unsigned int numSteps = numFibers / 100;
+  mitk::ProgressBar::GetInstance()->Reset();
+  mitk::ProgressBar::GetInstance()->AddStepsToDo(103); 
+  // we add +1 to the steps and this line so the bar appears from the start of the processing,
+  // and not only after the first 1% of fibers have been processed
+  mitk::ProgressBar::GetInstance()->Progress();
+
   boost::timer::progress_display disp(numFibers);
   for( int i=0; i<numFibers; i++ )
   {
     ++disp;
+    ++fiberIdx;
+    if (fiberIdx % numSteps == 0)
+    {
+      mitk::ProgressBar::GetInstance()->Progress();
+    }
+
     vtkCell* cell = fiberPolyData->GetCell(i);
     int numPoints = cell->GetNumberOfPoints();
     vtkPoints* points = cell->GetPoints();
@@ -253,6 +270,8 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
     }
   }
 
+  mitk::ProgressBar::GetInstance()->Progress();
+
   m_MaxDensity = 0;
   for (int i=0; i<w*h*d; i++)
     if (m_MaxDensity < outImageBufferPointer[i])
@@ -272,6 +291,10 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
     for (int i=0; i<w*h*d; i++)
       outImageBufferPointer[i] = 1-outImageBufferPointer[i];
   }
+
+  // 2 to avoid floating imprecision
+  mitk::ProgressBar::GetInstance()->Progress(2);
+
   MITK_INFO << "TractDensityImageFilter: finished processing";
   MITK_INFO << "TractDensityImageFilter: Max density = " << m_MaxDensity;
   MITK_INFO << "TractDensityImageFilter: Covered voxels = " << m_NumCoveredVoxels;
