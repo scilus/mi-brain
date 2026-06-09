@@ -33,9 +33,6 @@ FibersManager::FibersManager(
 {
   Saver::Instance().AddNodes(&m_FibersNodeData, false);
 
-  // m_GroupNodeManager(
-    // m_Callback, m_DM, m_FibersColors, m_FilteringUI, m_Groups, roiCreate);
-
   connect(&m_FilteringUI, &FilteringUI::RequestUpdateDataset,
     [this](mitk::DataNode* datasetNode)
   {
@@ -80,6 +77,14 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
 {
   m_DM.GiveUUID(node);
 
+  if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)||
+      !m_DM.GetDataStorage()->Exists(m_Groups.ROIs)||
+      !m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
+  {
+    MITK_INFO << "One of the groups is missing, adding them back.\n";
+    m_GroupNodeManager.EnsureAllGroupsExist();
+  }
+
   auto selectionObject = dynamic_cast<SelectionObject*>(node->GetData());
   if (selectionObject)
   {
@@ -109,18 +114,20 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     }
     if (Imeka::Fiber::GetROIPredicate()->CheckNode(node))
     {
-      if (!m_DM.GetDataStorage()->Exists(m_Groups.ROIs)) { 
-        MITK_INFO << "ROIs group missing, adding it back.\n";
-        GroupAdded(m_Groups.ROIs);
-      }
+      // We now check this at the start of the function.
+      // if (!m_DM.GetDataStorage()->Exists(m_Groups.ROIs)) { 
+      //   MITK_INFO << "ROIs group missing, adding it back.\n";
+      //   GroupAdded(m_Groups.ROIs);
+      // }
       ROIAdded(node);
     }
     else
     {
-      if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)) { 
-        MITK_INFO << "Anatomies group missing, adding it back.\n";
-        GroupAdded(m_Groups.Anatomies);
-      }
+      // We now check this at the start of the function.
+      // if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)) { 
+      //   MITK_INFO << "Anatomies group missing, adding it back.\n";
+      //   GroupAdded(m_Groups.Anatomies);
+      // }
       m_DM.ChangeParent(node, m_Groups.Anatomies);
     }
   }
@@ -132,11 +139,12 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     if (!helperObject) // Not RTT
     {
       MITK_INFO << "FibersManager: Adding fibers node " << node->GetName() << "\n";
-      if (!m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
-      {
-        MITK_INFO << "FibersManager: Tracts group missing, adding it back.\n";
-        GroupAdded(m_Groups.Tracts);
-      }
+      // We now check this at the start of the function.
+      // if (!m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
+      // {
+      //   MITK_INFO << "FibersManager: Tracts group missing, adding it back.\n";
+      //   GroupAdded(m_Groups.Tracts);
+      // }
       m_DM.ChangeParent(node, m_Groups.Tracts);
       FibersAdded(node, fiber);
 
@@ -309,7 +317,8 @@ void FibersManager::NodeRemoved(mitk::DataNode* node)
 
   const auto nodesToUpdate = m_FilteringUI.FilteringNodeRemoved(node);
 
-  m_DM.RemoveAllChildren(node);
+  // m_DM.RemoveAllChildren(node);
+  
   // Actually remove the node from MITK DM and memory. We do this because we
   // don't want ComputeFibersVisibility to count the node that we just deleted.
   m_DM.RemoveNode(node);

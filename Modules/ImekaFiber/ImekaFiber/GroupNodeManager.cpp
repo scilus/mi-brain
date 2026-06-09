@@ -22,27 +22,39 @@ namespace Fiber
         , m_FilteringUI(filteringUI)
         , m_Groups(groups)
         , m_ROICreate(roiCreate){
-            InitializeGroupNode(m_Groups.Anatomies);
-            InitializeGroupNode(m_Groups.ROIs);
-            InitializeGroupNode(m_Groups.Tracts);
+            // We no longer want the nodes to be present on startup.
+            // Instead, we add them when a file is loaded.
+            // That is done from the FibersManager class.
+            
+            // InitializeGroupNode(m_Groups.Anatomies);
+            // InitializeGroupNode(m_Groups.ROIs);
+            // InitializeGroupNode(m_Groups.Tracts);
         }
 
     void GroupNodeManager::InitializeGroupNode(mitk::DataNode* node) {
-        m_DM.AddNode(node);
-        std::string categoryGroupName = "";
-        node->GetStringProperty(GroupNodes::CategoryPropertyName, categoryGroupName);
-        if (categoryGroupName == GroupNodes::AnatomiesCategoryName)
-        {
-            SetupAnatomiesGroup(node);
+        if(!IsGroupNodePresent(node)){
+            m_DM.AddNode(node);
+            std::string categoryGroupName = "";
+            node->GetStringProperty(GroupNodes::CategoryPropertyName, categoryGroupName);
+            if (categoryGroupName == GroupNodes::AnatomiesCategoryName)
+            {
+                SetupAnatomiesGroup(node);
+            }
+            else if (categoryGroupName == GroupNodes::TractsCategoryName)
+            {
+                SetupTractsGroup(node);
+            }
+            else if (categoryGroupName == GroupNodes::ROIsCategoryName)
+            {
+                SetupROIsGroup(node);
+            }
         }
-        else if (categoryGroupName == GroupNodes::TractsCategoryName)
-        {
-            SetupTractsGroup(node);
-        }
-        else if (categoryGroupName == GroupNodes::ROIsCategoryName)
-        {
-            SetupROIsGroup(node);
-        }
+    }
+
+    void GroupNodeManager::EnsureAllGroupsExist(){
+        InitializeGroupNode(m_Groups.Anatomies);
+        InitializeGroupNode(m_Groups.ROIs);
+        InitializeGroupNode(m_Groups.Tracts);
     }
 
     bool GroupNodeManager::SetupGroupIfRequired(mitk::DataNode* node) { 
@@ -119,6 +131,11 @@ namespace Fiber
         m_Callback.AddVisibilityCallback(node, m_DM);
         m_FibersColors.SetROIsCategoryActions(node);
         m_Callback.Add("Create", "", node, m_ROICreate);
+    }
+
+    // Returns True if the node is already present in the DataManager
+    bool GroupNodeManager::IsGroupNodePresent(mitk::DataNode* node){
+        return m_DM.GetDataStorage()->Exists(node);
     }
 }
 }

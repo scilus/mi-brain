@@ -31,6 +31,8 @@ public:
   void InitializeGroupNode(mitk::DataNode* node);
   bool SetupGroupIfRequired(mitk::DataNode* node);
 
+  void EnsureAllGroupsExist();
+
 private:
   Imeka::Callback& m_Callback;
   Imeka::DataManager& m_DM;
@@ -42,6 +44,8 @@ private:
   void SetupAnatomiesGroup(mitk::DataNode* node);
   void SetupTractsGroup(mitk::DataNode* node);
   void SetupROIsGroup(mitk::DataNode* node);
+
+  bool IsGroupNodePresent(mitk::DataNode* node);
 };
 
 } // namespace Fiber
