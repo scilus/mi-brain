@@ -77,6 +77,7 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
 {
   m_DM.GiveUUID(node);
 
+  // always make sure all groups exist when adding a node of any type.
   if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)||
       !m_DM.GetDataStorage()->Exists(m_Groups.ROIs)||
       !m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
@@ -316,8 +317,6 @@ void FibersManager::NodeRemoved(mitk::DataNode* node)
   }
 
   const auto nodesToUpdate = m_FilteringUI.FilteringNodeRemoved(node);
-
-  // m_DM.RemoveAllChildren(node);
   
   // Actually remove the node from MITK DM and memory. We do this because we
   // don't want ComputeFibersVisibility to count the node that we just deleted.

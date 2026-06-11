@@ -363,14 +363,26 @@ void BrainAnalysisView::NodeRemoved(const mitk::DataNode* node)
     }
   }
 
-  // The node can not-exist if the user selects all and delete. Some nodes
+  // The node can "not-exist" if the user selects all and delete. Some nodes
   // delete their children, so they would be deleted N times.
   if (!GetDataStorage()->Exists(node)) { return; }
 
-  std::cout << "Removing node: " << node->GetName() << "...\n";
+  MITK_INFO << "Removing node: " << node->GetName() << "...\n";
   auto nonConstNode = const_cast<mitk::DataNode*>(node);
-  m_Callback.Remove(node);
 
+  Nodes children = m_DM.ChildrenOf(node);
+  if (!children.empty())
+  {
+    MITK_INFO << "Also removing " << children.size() << " children nodes.\n";
+  }
+  for (auto child : children){
+    // this line is a precaution, because some nodes have their chidren deleted in FibersManager::NodeRemoded, so they might not exist anymore. 
+    if (!GetDataStorage()->Exists(node)) { continue; }
+    m_Callback.Remove(child);
+    m_FibersManager.NodeRemoved(child);
+  }
+
+  m_Callback.Remove(node);
 
   if (Imeka::Fiber::GetMaximaPredicate()->CheckNode(node))
   {
