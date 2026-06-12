@@ -78,12 +78,14 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
   m_DM.GiveUUID(node);
 
   // always make sure all groups exist when adding a node of any type.
-  if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)||
-      !m_DM.GetDataStorage()->Exists(m_Groups.ROIs)||
-      !m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
-  {
-    MITK_INFO << "One of the groups is missing, adding them back.\n";
-    m_GroupNodeManager.EnsureAllGroupsExist();
+  if (!dynamic_cast<mitk::PlaneGeometryData*>(node->GetData())){
+    if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)||
+        !m_DM.GetDataStorage()->Exists(m_Groups.ROIs)||
+        !m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
+    {
+      MITK_INFO << "One of the groups is missing, adding them back.\n";
+      m_GroupNodeManager.EnsureAllGroupsExist();
+    }
   }
 
   auto selectionObject = dynamic_cast<SelectionObject*>(node->GetData());
