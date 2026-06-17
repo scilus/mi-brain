@@ -26,7 +26,7 @@ public:
     berry::QtWorkbenchAdvisor::Initialize(configurer);
 
     mitk::WorkbenchUtil::SetDepartmentLogoPreference(
-      ":/Images/logo_plitk.png", Activator::GetDefault()->GetPluginContext());
+      ":/Images/clear_alpha.png", Activator::GetDefault()->GetPluginContext());
 
     configurer->SetSaveAndRestore(true);
   }

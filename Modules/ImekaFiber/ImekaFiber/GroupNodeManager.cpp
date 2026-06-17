@@ -71,24 +71,26 @@ namespace Fiber
                 m_DM.RemoveNode(m_Groups.Anatomies);
                 // Replace the old pointer with the new one
                 m_Groups.Anatomies = node;
+                SetupAnatomiesGroup(node);
             }
             else if (categoryGroupName == GroupNodes::TractsCategoryName)
             {
                 m_Callback.Remove(m_Groups.Tracts);
                 m_DM.RemoveNode(m_Groups.Tracts);
                 m_Groups.Tracts = node;
+                SetupTractsGroup(node);
             }
             else if (categoryGroupName == GroupNodes::ROIsCategoryName)
             {
                 m_Callback.Remove(m_Groups.ROIs);
                 m_DM.RemoveNode(m_Groups.ROIs);
                 m_Groups.ROIs = node;
+                SetupROIsGroup(node);
             }
-            InitializeGroupNode(node);
             return true;
         }
         return false;
-     }
+    }
 
     void GroupNodeManager::SetupAnatomiesGroup(mitk::DataNode* node){
         m_Callback.AddVisibilityCallback(node, m_DM);
