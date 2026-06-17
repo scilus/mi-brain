@@ -370,16 +370,19 @@ void BrainAnalysisView::NodeRemoved(const mitk::DataNode* node)
   MITK_INFO << "Removing node: " << node->GetName() << "...\n";
   auto nonConstNode = const_cast<mitk::DataNode*>(node);
 
-  Nodes children = m_DM.ChildrenOf(node);
-  if (!children.empty())
+  if (!Imeka::Fiber::IsTractGroup(node))
   {
-    MITK_INFO << "Also removing " << children.size() << " children nodes.\n";
-  }
-  for (auto child : children){
-    // this line is a precaution, because some nodes have their chidren deleted in FibersManager::NodeRemoded, so they might not exist anymore. 
-    if (!GetDataStorage()->Exists(node)) { continue; }
-    m_Callback.Remove(child);
-    m_FibersManager.NodeRemoved(child);
+    Nodes children = m_DM.ChildrenOf(node);
+    if (!children.empty())
+    {
+      MITK_INFO << "Also removing " << children.size() << " children nodes.\n";
+    }
+    for (auto child : children){
+      // this line is a precaution, because some nodes have their chidren deleted in FibersManager::NodeRemoded, so they might not exist anymore. 
+      if (!GetDataStorage()->Exists(node)) { continue; }
+      m_Callback.Remove(child);
+      m_FibersManager.NodeRemoved(child);
+    }
   }
 
   m_Callback.Remove(node);
