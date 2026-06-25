@@ -9,6 +9,9 @@
 
 #include "ImekaCommonExports.h"
 
+#include "itkImage.h"
+#include "itkRGBPixel.h"
+
 namespace Imeka
 {
 
@@ -20,17 +23,17 @@ class ImekaCommon_EXPORT ImekaRGBMapper : public mitk::ImageVtkMapper2D
 {
 public:
   mitkClassMacro(ImekaRGBMapper, ImageVtkMapper2D)
-  itkNewMacro(Self);
+  itkFactorylessNewMacro(Self);
 
-  void SetDataNode(mitk::DataNode*) override;
-  virtual const mitk::Image* GetInput();
+  void GenerateDataForRenderer(mitk::BaseRenderer* renderer) override;
 
 protected:
   ImekaRGBMapper();
-  ~ImekaRGBMapper() {}
+  ~ImekaRGBMapper() override = default;
 
 private:
   mitk::Image::Pointer m_RGBImage;
+  mitk::Image::Pointer m_SourceImage;
 };
 
 template<typename TPixel, unsigned int VImageDimension>

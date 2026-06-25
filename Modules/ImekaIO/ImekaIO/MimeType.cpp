@@ -144,6 +144,34 @@ QString ImekaIO_EXPORT GetVFFImageFilter()
   );
 }
 
+std::string ImekaIO_EXPORT GetRGBNiftiImageName()
+{
+  return mitk::IOMimeTypes::DEFAULT_BASE_NAME() + ".image.nifti.rgb";
+}
+
+std::string ImekaIO_EXPORT GetRGBNiftiImageDescription()
+{
+  return "RGB NIfTI Reader";
+}
+
+mitk::CustomMimeType ImekaIO_EXPORT GetRGBNiftiImageMimeType()
+{
+  mitk::CustomMimeType mimeType(GetRGBNiftiImageName());
+  mimeType.AddExtension("nii");
+  mimeType.AddExtension("nii.gz");
+  mimeType.SetCategory(mitk::IOMimeTypes::CATEGORY_IMAGES());
+  mimeType.SetComment("RGB NIfTI Image");
+  return mimeType;
+}
+
+QString ImekaIO_EXPORT GetRGBNiftiImageFilter()
+{
+  const auto mime = GetRGBNiftiImageMimeType();
+  return QString::fromStdString(
+    mime.GetComment() + " (*." + mime.GetExtensions()[0] + ")"
+  );
+}
+
 } // namespace IO
 
 } // namespace Imeka

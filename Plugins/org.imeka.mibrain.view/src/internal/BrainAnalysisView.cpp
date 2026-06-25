@@ -264,11 +264,12 @@ void BrainAnalysisView::NodeAdded(const mitk::DataNode* node)
   {
     SelectionObjectAdded(nonConstNode, selectionObject);
   }
-  else if (auto image = dynamic_cast<mitk::Image*>(node->GetData()))
+  else if (mitk::Image* image = dynamic_cast<mitk::Image*>(node->GetData()))
   {
     if (Imeka::Fiber::GetRGBPredicate()->CheckNode(node))
     {
-      nonConstNode->SetMapper(1, Imeka::Mapper::ImekaRGBMapper::New());
+      // nonConstNode->SetMapper(1, Imeka::Mapper::ImekaRGBMapper::New());
+      MITK_WARN << "Tried to use mapper\n";
     }
     else if (Imeka::Fiber::GetMaximaPredicate()->CheckNode(node))
     {
