@@ -13,3 +13,4 @@ cmake \
     ..
 
 cmake --build . --parallel
+# cmake --build . -j 4

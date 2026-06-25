@@ -148,21 +148,6 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
 
   for(auto action : mainWindow->menuBar()->actions())
   {
-    // MITK_INFO << "Menu: " << action->text().toStdString() << "\n"; // Uncomment to see the actions present in the menu bar.
-    
-    // if(action->text() == "&File")
-    // {
-    //   for(auto child : action->menu()->actions())
-    //   {
-    //     // MITK_INFO << "  Child: " << child->text().toStdString() << "\n";
-    //     // if(child->text() == "&Close Project...")
-    //     // {
-    //     //   action->menu()->removeAction(child);
-    //     //   break;
-    //     // }
-    //   }
-    // }
-
     // remove the MITK Edit menu
     if(action->text() == "&Edit")
     {
@@ -175,8 +160,7 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     {
       for(auto child : action->menu()->actions())
       {
-        // MITK_INFO << "  Child: " << child->text().toStdString() << "\n";
-        if(child->text() == "&Open Perspective" || child->text() == "&Preferences...")
+        if(child->text() == "&Open Perspective")
         {
           action->menu()->removeAction(child);
         }
