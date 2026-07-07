@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set the path to the MITK plugins directory
-MITK_PLUGINS_DIR="$HOME/Libraries/build/mitk-2025.12-build/MITK-build/lib/plugins"
-MITK_BIN_DIR="$HOME/Libraries/build/mitk-2025.12-build/MITK-build/bin"
+MITK_PLUGINS_DIR="$HOME/Libraries/build/mitk-v2025.12/MITK-build/lib/plugins"
+MITK_BIN_DIR="$HOME/Libraries/build/mitk-v2025.12/MITK-build/bin"
 
 # Set the path to the MI-Brain executable directory
 MI_BRAIN_BIN_DIR="$HOME/mi-brain/mi-brain/build-2025/bin"
