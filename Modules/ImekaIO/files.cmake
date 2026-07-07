@@ -10,6 +10,7 @@ set(CPP_FILES
   ImekaIO/DataNodeGroup/DataNodeGroupReader.cpp
   ImekaIO/FDFLoader/FDFReader.cpp
   ImekaIO/VFFLoader/VFFReader.cpp
+  ImekaIO/RGBNiftiReader/RGBNiftiFileReader.cpp
 )
 
 set(MOC_H_FILES

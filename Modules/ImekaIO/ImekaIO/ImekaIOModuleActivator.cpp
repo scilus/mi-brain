@@ -10,6 +10,7 @@
 #include "Dicom/DicomWriter.hpp"
 #include "FDFLoader/FDFReader.hpp"
 #include "VFFLoader/VFFReader.hpp"
+#include "RGBNiftiReader/RGBNiftiFileReader.hpp"
 
 namespace Imeka
 {
@@ -30,6 +31,7 @@ public:
     context->RegisterService(GetDataNodeGroupMimeType().Clone(), props);
     context->RegisterService(GetFDFImageMimeType().Clone(), props);
     context->RegisterService(GetVFFImageMimeType().Clone(), props);
+    context->RegisterService(GetRGBNiftiImageMimeType().Clone(), props);
 
     m_BoundingObjectReader = new BoundingObjectReader();
     m_BoundingObjectWriter = new BoundingObjectWriter();
@@ -38,6 +40,7 @@ public:
     m_DicomWriter = new DicomWriter();
     m_FDFReader = new FDFReader();
     m_VFFReader = new VFFReader();
+    m_RGBReader = new RGBNiftiFileReader();
   }
 
   void Unload(us::ModuleContext*)
@@ -49,6 +52,7 @@ public:
     delete m_DicomWriter;
     delete m_FDFReader;
     delete m_VFFReader;
+    delete m_RGBReader;
   }
 
 private:
@@ -59,6 +63,7 @@ private:
   DicomWriter* m_DicomWriter;
   FDFReader* m_FDFReader;
   VFFReader* m_VFFReader;
+  RGBNiftiFileReader* m_RGBReader;
 };
 
 } // namespace IO
