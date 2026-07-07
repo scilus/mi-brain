@@ -9,32 +9,28 @@
 
 #include "ImekaCommonExports.h"
 
-#include "itkImage.h"
-#include "itkRGBPixel.h"
-
 namespace Imeka
 {
 
 namespace Mapper
 {
-  
+
 // Swaps the standard image for an RGB version just for display.
-[[deprecated("RGB NIfTI images are now supported by the RGBNiftiFileReader, which automatically converts them to RGB images for display. Use that instead of this mapper.")]]
 class ImekaCommon_EXPORT ImekaRGBMapper : public mitk::ImageVtkMapper2D
 {
 public:
   mitkClassMacro(ImekaRGBMapper, ImageVtkMapper2D)
-  itkFactorylessNewMacro(Self);
+  itkNewMacro(Self);
 
-  void GenerateDataForRenderer(mitk::BaseRenderer* renderer) override;
+  void SetDataNode(mitk::DataNode*) override;
+  virtual const mitk::Image* GetInput();
 
 protected:
   ImekaRGBMapper();
-  ~ImekaRGBMapper() override = default;
+  ~ImekaRGBMapper() {}
 
 private:
   mitk::Image::Pointer m_RGBImage;
-  mitk::Image::Pointer m_SourceImage;
 };
 
 template<typename TPixel, unsigned int VImageDimension>

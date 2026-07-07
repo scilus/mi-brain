@@ -2,6 +2,7 @@
 #include "RGBMapper.hpp"
 
 #include <mitkImageAccessByItk.h>
+#include <mitkSmartPointerProperty.h>
 
 namespace Imeka
 {
@@ -11,65 +12,32 @@ namespace Mapper
 
 ImekaRGBMapper::ImekaRGBMapper()
   : m_RGBImage(nullptr)
-  , m_SourceImage(nullptr)
+{}
+
+void ImekaRGBMapper::SetDataNode(mitk::DataNode* node)
 {
-  MITK_INFO << "Using ImekaRGBMapper";
+  mitk::ImageVtkMapper2D::SetDataNode(node);
+  m_RGBImage = nullptr;
 }
 
-void ImekaRGBMapper::GenerateDataForRenderer(mitk::BaseRenderer* renderer)
+const mitk::Image* ImekaRGBMapper::GetInput()
 {
-  auto* node = this->GetDataNode();
-  if (node == nullptr)
+  if (!m_RGBImage)
   {
-    return;
+    auto realImage = GetDataNode()->GetData();
+    AccessFixedDimensionByItk_1(
+      static_cast<const mitk::Image *>(realImage),
+      ToRGBImage, 4, m_RGBImage);
+
+    m_RGBImage->GetGeometry()->SetIndexToWorldTransform(
+      realImage->GetGeometry()->GetIndexToWorldTransform());
+
+    this->GetDataNode()->SetProperty(
+      "ScilPy RGB Image",
+      mitk::SmartPointerProperty::New(m_RGBImage));
   }
 
-  auto* sourceImage = dynamic_cast<mitk::Image*>(node->GetData());
-  if (sourceImage == nullptr)
-  {
-    return;
-  }
-
-  if (sourceImage != m_SourceImage.GetPointer())
-  {
-    m_SourceImage = sourceImage;
-    m_RGBImage = nullptr;
-  }
-
-  if (m_RGBImage.IsNull())
-  {
-    if (sourceImage->GetDimension() != 4 || sourceImage->GetDimension(3) != 3)
-    {
-      MITK_WARN << "ImekaRGBMapper: source image must be 4D with 3 channels in the last dimension";
-      return;
-    }
-
-    AccessFixedDimensionByItk_1(sourceImage, ToRGBImage, 4, m_RGBImage);
-    if (m_RGBImage.IsNull())
-    {
-      return;
-    }
-
-    if (sourceImage->GetGeometry() && m_RGBImage->GetGeometry())
-    {
-      m_RGBImage->GetGeometry()->SetIndexToWorldTransform(
-        sourceImage->GetGeometry()->GetIndexToWorldTransform());
-    }
-
-    if (sourceImage->GetTimeGeometry())
-    {
-      m_RGBImage->SetTimeGeometry(sourceImage->GetTimeGeometry()->Clone());
-    }
-  }
-
-  auto* originalData = node->GetData();
-  node->SetData(m_RGBImage.GetPointer());
-  mitk::ImageVtkMapper2D::GenerateDataForRenderer(renderer);
-  // node->SetData(originalData);
-  if (m_RGBImage.IsNotNull())
-  {
-    node->SetData(m_RGBImage);
-  }
+  return m_RGBImage;
 }
 
 } // namespace Mapper
