@@ -17,8 +17,9 @@ namespace Imeka
 
 namespace Mapper
 {
-
+  
 // Swaps the standard image for an RGB version just for display.
+[[deprecated("RGB NIfTI images are now supported by the RGBNiftiFileReader, which automatically converts them to RGB images for display. Use that instead of this mapper.")]]
 class ImekaCommon_EXPORT ImekaRGBMapper : public mitk::ImageVtkMapper2D
 {
 public:

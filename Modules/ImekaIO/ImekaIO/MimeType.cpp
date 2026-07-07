@@ -157,6 +157,7 @@ std::string ImekaIO_EXPORT GetRGBNiftiImageDescription()
 mitk::CustomMimeType ImekaIO_EXPORT GetRGBNiftiImageMimeType()
 {
   mitk::CustomMimeType mimeType(GetRGBNiftiImageName());
+  // add every extention that needs to be detected.
   mimeType.AddExtension("nii");
   mimeType.AddExtension("nii.gz");
   mimeType.SetCategory(mitk::IOMimeTypes::CATEGORY_IMAGES());

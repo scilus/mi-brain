@@ -28,7 +28,7 @@ RGBNiftiFileReader::RGBNiftiFileReader()
       GetRGBNiftiImageDescription())
 {
   this->SetDescription("4D NIfTI as RGB image");
-  this->SetRanking(1); // IMPORTANT: beat default reader
+  this->SetRanking(1000); // IMPORTANT: try to beat default reader
   this->SetDefault(true);
   m_ServiceReg = this->RegisterService();
 }
@@ -37,10 +37,11 @@ RGBNiftiFileReader::RGBNiftiFileReader(const RGBNiftiFileReader &other)
   : mitk::AbstractFileReader(other)
 {}
 
+// Verifies that the file is a 4D NIfTI, based on the verification that was done with GetRGBPredicate() for the old mapper.
+// This makes it so that the reader does not support regular NIfTI files.
 mitk::IFileIO::ConfidenceLevel
 RGBNiftiFileReader::GetConfidenceLevel() const{
   const auto filename = this->GetInputLocation();
-  MITK_INFO << "in GetConfidenceLevel\n";
 
   if(filename.empty())
     return Unsupported;
@@ -108,6 +109,7 @@ std::vector<mitk::BaseData::Pointer> RGBNiftiFileReader::DoRead()
 
   if (t < 3)
   {
+    // just a precaution, this should not happen because the reader should only be called if the file is a 4D NIfTI with 3 channels in the last dimension.
     MITK_INFO << "t smaller than 3.\n";
     mitkThrow() << "Not an RGB NIfTI";
   }
@@ -125,7 +127,6 @@ std::vector<mitk::BaseData::Pointer> RGBNiftiFileReader::DoRead()
   region3d.SetSize(size3);
 
   rgb->SetRegions(region3d);
-  // vec->SetNumberOfComponentsPerPixel(3);
   rgb->Allocate();
 
   itk::ImageRegionIterator<RGBImageType> outIt(rgb, region3d);
@@ -138,16 +139,12 @@ std::vector<mitk::BaseData::Pointer> RGBNiftiFileReader::DoRead()
     idx4[1] = idx3[1];
     idx4[2] = idx3[2];
 
-    // itk::VariableLengthVector<unsigned char> pixel(3);
     RGBPixelType pixel;
 
     idx4[3] = 0;
     pixel.SetRed(img4d->GetPixel(idx4));
-    // pixel[c] = img4d->GetPixel(idx4);
-
     idx4[3] = 1;
     pixel.SetGreen(img4d->GetPixel(idx4));
-
     idx4[3] = 2;
     pixel.SetBlue(img4d->GetPixel(idx4));
 
@@ -160,18 +157,20 @@ std::vector<mitk::BaseData::Pointer> RGBNiftiFileReader::DoRead()
   auto originalMitkImage = mitk::Image::New();
   mitk::CastToMitkImage(img4d, originalMitkImage);
 
+  // Copy the geometry from the original image to the new RGB image, so that it is displayed in the correct position and orientation.
   if(originalMitkImage->GetGeometry()){
     mitkImage->SetGeometry(
       originalMitkImage->GetGeometry()->Clone());
   }
 
+  // Copy the time geometry from the original image to the new RGB image, so that it is displayed in the time frames.
+  // Commented out because it seems to cause issues with the display of the RGB image in some cases. The RGB image is not a time series, so it should not have a time geometry.
   // if(originalMitkImage->GetTimeGeometry()){
   //   mitkImage->SetTimeGeometry(
   //     originalMitkImage->GetTimeGeometry()->Clone());
   // }
 
   mitkImage->SetProperty("binary", mitk::BoolProperty::New(false));
-
   result.push_back(mitkImage.GetPointer());
   return result;
 }

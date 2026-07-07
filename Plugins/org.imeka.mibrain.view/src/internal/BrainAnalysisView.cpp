@@ -269,7 +269,7 @@ void BrainAnalysisView::NodeAdded(const mitk::DataNode* node)
     if (Imeka::Fiber::GetRGBPredicate()->CheckNode(node))
     {
       // nonConstNode->SetMapper(1, Imeka::Mapper::ImekaRGBMapper::New());
-      MITK_WARN << "Tried to use mapper\n";
+      // MITK_WARN << "Tried to use mapper\n";
     }
     else if (Imeka::Fiber::GetMaximaPredicate()->CheckNode(node))
     {
