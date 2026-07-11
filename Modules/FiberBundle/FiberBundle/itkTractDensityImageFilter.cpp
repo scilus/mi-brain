@@ -127,7 +127,6 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
   }
 
   MITK_INFO << "TractDensityImageFilter: starting image generation";
-  bool firstPoint = true;
 
   vtkSmartPointer<vtkPolyData> fiberPolyData = m_FiberBundle->GetFiberPolyData();
 
@@ -136,9 +135,9 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
   MITK_INFO << "Output image size: " << w << " x " << h << " x " << d;
 
   unsigned int fiberIdx = 0;
-  const unsigned int numSteps = numFibers / 100;
+  const unsigned int numSteps = std::ceil((float)numFibers / 100.0f);
   mitk::ProgressBar::GetInstance()->Reset();
-  mitk::ProgressBar::GetInstance()->AddStepsToDo(103); 
+  mitk::ProgressBar::GetInstance()->AddStepsToDo( std::ceil((float)numFibers / (float)numSteps) + 3); 
   // we add +1 to the steps and this line so the bar appears from the start of the processing,
   // and not only after the first 1% of fibers have been processed
   mitk::ProgressBar::GetInstance()->Progress();
@@ -157,9 +156,10 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
     int numPoints = cell->GetNumberOfPoints();
     vtkPoints* points = cell->GetPoints();
 
-    if (i == 0) { MITK_INFO << "Fiber 0 points count: " << numPoints; }
+    if (i <= 16) { MITK_INFO << "Fiber " << i << " points count: " << numPoints; }
 
     float weight = 1.0;
+    bool firstPoint = true;
 
     // fill output image
     for( int j=0; j<numPoints; j++)
