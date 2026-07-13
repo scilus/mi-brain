@@ -142,10 +142,11 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
   // and not only after the first 1% of fibers have been processed
   mitk::ProgressBar::GetInstance()->Progress();
 
-  boost::timer::progress_display disp(numFibers);
+  // boost::timer::progress_display disp(numFibers);
+  // TODO : this could probably be parallelized
   for( int i=0; i<numFibers; i++ )
   {
-    ++disp;
+    // ++disp;
     ++fiberIdx;
     if (fiberIdx % numSteps == 0)
     {
@@ -156,10 +157,10 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
     int numPoints = cell->GetNumberOfPoints();
     vtkPoints* points = cell->GetPoints();
 
-    if (i <= 16) { MITK_INFO << "Fiber " << i << " points count: " << numPoints; }
+    // if (i <= 16) { MITK_INFO << "Fiber " << i << " points count: " << numPoints; }
 
     float weight = 1.0;
-    bool firstPoint = true;
+    // bool firstPoint = true;
 
     // fill output image
     for( int j=0; j<numPoints; j++)
@@ -174,11 +175,11 @@ void TractDensityImageFilter< OutputImageType >::GenerateData()
       // previous line already checks if point is inside image, so the return value of this function is not needed. We still need to call it to get the continuous index, though.
       (void) outImage->TransformPhysicalPointToContinuousIndex(vertex, contIndex);
 
-      if (firstPoint)
-      {
-        MITK_INFO << "First fiber point: " << vertex[0] << ", " << vertex[1] << ", " << vertex[2] << " -> Index: " << index[0] << ", " << index[1] << ", " << index[2];
-        firstPoint = false;
-      }
+      // if (firstPoint)
+      // {
+      //   MITK_INFO << "First fiber point: " << vertex[0] << ", " << vertex[1] << ", " << vertex[2] << " -> Index: " << index[0] << ", " << index[1] << ", " << index[2];
+      //   firstPoint = false;
+      // }
 
       if (!m_UseTrilinearInterpolation)
       {
