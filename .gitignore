@@ -3,3 +3,4 @@ build
 testing_data
 .vscode
 .cache
+.gdbinit
