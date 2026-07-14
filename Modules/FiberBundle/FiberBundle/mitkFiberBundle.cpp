@@ -841,7 +841,7 @@ void mitk::FiberBundle::ResampleLinear(double pointDistance)
       result.Points.push_back(lastV);
 
       // skip the first point (j=1)
-      for (int j = 1; j < vertices.size(); ++j)
+      for (unsigned int j = 1; j < vertices.size(); ++j)
       {
         vnl_vector_fixed<double, 3> vec = vertices[j] - lastV;
         double new_dist = vec.magnitude();

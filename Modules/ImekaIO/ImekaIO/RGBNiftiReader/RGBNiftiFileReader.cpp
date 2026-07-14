@@ -62,7 +62,7 @@ RGBNiftiFileReader::GetConfidenceLevel() const{
 
     return Supported;
   }
-  catch (mitk::Exception) {
+  catch (...) {
     return Unsupported;
   }
 }
