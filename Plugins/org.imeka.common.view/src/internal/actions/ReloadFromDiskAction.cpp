@@ -29,7 +29,7 @@ void ReloadFromDiskAction::Run(
           "Can't reload from disk because the file has moved or you can't "
           "reach it with your current setup. Original path was \"%1\"."
         ).arg(qPath);
-        QMessageBox::information(QApplication::activeWindow(), "Imeka", msg);
+        QMessageBox::information(QApplication::activeWindow(), "MI-Brain", msg);
       }
     }
   }

@@ -15,7 +15,7 @@ AboutDialog::AboutDialog(QWidget* parent)
 
 void AboutDialog::Version(const char* version)
 {
-  imekaVersionLabel->setText(version);
+  mibrainVersionLabel->setText(version);
 }
 
 void AboutDialog::MITKVersion(const char* version)

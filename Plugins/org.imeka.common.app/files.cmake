@@ -29,7 +29,6 @@ set(MOC_H_FILES
 set(CACHED_RESOURCE_FILES
   resources/icon.xpm
   plugin.xml
-  resources/images/logo_plitk.png
   resources/images/logo_scil.png
 )
 

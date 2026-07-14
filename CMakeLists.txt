@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Change project and application name to your own
-set(MY_PROJECT_NAME Imeka)
+set(MY_PROJECT_NAME SCIL)
 set(MY_APP_NAME MI-Brain)
 
 #-----------------------------------------------------------------------------
@@ -156,9 +156,9 @@ include(mitkFunctionGetVersion)
 # Set project specific options and variables (NOT available during superbuild)
 #-----------------------------------------------------------------------------
 
-set(${PROJECT_NAME}_VERSION_MAJOR "2020")
-set(${PROJECT_NAME}_VERSION_MINOR "04")
-set(${PROJECT_NAME}_VERSION_PATCH "09")
+set(${PROJECT_NAME}_VERSION_MAJOR "2026")
+set(${PROJECT_NAME}_VERSION_MINOR "07")
+set(${PROJECT_NAME}_VERSION_PATCH "01")
 set(${PROJECT_NAME}_VERSION_STRING "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 set(${PROJECT_NAME}_REVISION "")
 

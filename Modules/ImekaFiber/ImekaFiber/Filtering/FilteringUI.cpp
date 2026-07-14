@@ -143,7 +143,7 @@ void FilteringUI::AddActionsToDataset(mitk::DataNode* datasetNode)
     const unsigned int nbROIs = GetAllROIs().size();
     if (nbROIs == 0)
     {
-      QMessageBox::information(QApplication::activeWindow(), "Imeka",
+      QMessageBox::information(QApplication::activeWindow(), "MI-Brain",
         "Can't create a tractGroup because there's no ROI.");
       return;
     }
@@ -151,7 +151,7 @@ void FilteringUI::AddActionsToDataset(mitk::DataNode* datasetNode)
     // If there are only Surfaces and no anat
     if (nbROIs > 0 && nbROIs == GetAllSurfaces().size() && !m_DM.GetAnat())
     {
-      QMessageBox::information(QApplication::activeWindow(), "Imeka",
+      QMessageBox::information(QApplication::activeWindow(), "MI-Brain",
         "Can't create a tractGroup because the only available ROIs are "
         "Surfaces and you must load a reference anatomy to filter with a "
         "surface.");

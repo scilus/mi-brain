@@ -28,8 +28,8 @@ RGBNiftiFileReader::RGBNiftiFileReader()
       GetRGBNiftiImageDescription())
 {
   this->SetDescription("4D NIfTI as RGB image");
-  this->SetRanking(1000); // IMPORTANT: try to beat default reader
-  this->SetDefault(true);
+  this->SetRanking(1000);
+  // this->SetDefault(true);
   m_ServiceReg = this->RegisterService();
 }
 

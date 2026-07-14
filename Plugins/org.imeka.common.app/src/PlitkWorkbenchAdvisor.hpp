@@ -38,7 +38,7 @@ public:
     auto windowAdvisor = new WorkbenchWindowAdvisor(this, configurer);
     windowAdvisor->Setup();
     windowAdvisor->SetProductName(m_AppTitle);
-    windowAdvisor->SetWindowIcon(":/Images/logo_imeka.png");
+    windowAdvisor->SetWindowIcon(":/Images/logo_scil.png");
     return windowAdvisor;
   }
 

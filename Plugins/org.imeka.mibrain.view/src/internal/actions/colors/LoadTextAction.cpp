@@ -54,7 +54,7 @@ void LoadTextAction::Run(
       .arg(loadedValues.size())
       .arg(QString::fromStdString(node->GetName()))
       .arg(nbFibers);
-    QMessageBox::warning(QApplication::activeWindow(), "Imeka", msg);
+    QMessageBox::warning(QApplication::activeWindow(), "MI-Brain", msg);
     return;
   }
 
