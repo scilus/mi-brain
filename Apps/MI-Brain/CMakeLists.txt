@@ -51,3 +51,66 @@ set_target_properties(MI-Brain PROPERTIES MACOSX_BUNDLE_ICON_FILE "icon.icns")
 if(APPLE)
   install(FILES "icons/icon.icns" DESTINATION "MI-Brain.app/Contents/Resources")
 endif(APPLE)
+
+# QtWebEngine runtime plugins
+get_filename_component(QT_LIB_DIR "${Qt6_DIR}/../.." ABSOLUTE)
+get_filename_component(QT_PLUGIN_DIR "${Qt6_DIR}/../../../plugins" ABSOLUTE)
+
+install(
+  PROGRAMS
+    "${QT_LIB_DIR}/../libexec/QtWebEngineProcess"
+  DESTINATION bin
+)
+
+install(
+  DIRECTORY
+    "${QT_LIB_DIR}/../resources"
+  DESTINATION bin
+)
+
+install(
+  DIRECTORY
+    "${QT_LIB_DIR}/../translations"
+  DESTINATION bin
+)
+
+# Qt runtime plugins
+install(
+  FILES
+  "${QT_PLUGIN_DIR}/platforms/libqxcb.so"
+  DESTINATION bin/plugins/platforms
+)
+
+install(
+  DIRECTORY
+  "${QT_PLUGIN_DIR}/imageformats"
+  DESTINATION bin/plugins
+)
+
+install(
+  DIRECTORY
+  "${QT_PLUGIN_DIR}/iconengines"
+  DESTINATION bin/plugins
+)
+
+install(
+  FILES
+  "${QT_PLUGIN_DIR}/sqldrivers/libqsqlite.so"
+  DESTINATION bin/plugins/sqldrivers
+)
+
+install(
+  DIRECTORY
+  "${QT_PLUGIN_DIR}/xcbglintegrations"
+  DESTINATION bin/plugins
+)
+
+file(GLOB QT_XCB_QPA_LIBS
+  "${QT_LIB_DIR}/libQt6XcbQpa.so*"
+)
+
+install(
+  FILES
+  ${QT_XCB_QPA_LIBS}
+  DESTINATION bin
+)

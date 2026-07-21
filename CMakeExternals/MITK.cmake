@@ -20,7 +20,7 @@ if(NOT MITK_DIR)
   option(MITK_USE_ACVD "Use Approximated Centroidal Voronoi Diagrams" OFF)
   option(MITK_USE_CTK "Use CTK in MITK" ${MITK_USE_BLUEBERRY})
   option(MITK_USE_DCMTK "Use DCMTK in MITK" ON)
-  option(MITK_USE_Qt5 "Use Qt 5 library in MITK" ON)
+  option(MITK_USE_Qt6 "Use Qt 6 library in MITK" ON)
   option(MITK_USE_DCMQI "Use dcmqi in MITK" OFF)
   option(MITK_USE_OpenCV "Use Intel's OpenCV library" OFF)
   option(MITK_USE_Python "Enable Python wrapping in MITK" OFF)
@@ -30,9 +30,9 @@ if(NOT MITK_DIR)
     set(MITK_USE_CTK ON CACHE BOOL "Use CTK in MITK" FORCE)
   endif()
 
-  if(MITK_USE_CTK AND NOT MITK_USE_Qt5)
-    message("Forcing MITK_USE_Qt5 to ON because of MITK_USE_CTK")
-    set(MITK_USE_Qt5 ON CACHE BOOL "Use Qt 5 library in MITK" FORCE)
+  if(MITK_USE_CTK AND NOT MITK_USE_Qt6)
+    message("Forcing MITK_USE_Qt6 to ON because of MITK_USE_CTK")
+    set(MITK_USE_Qt6 ON CACHE BOOL "Use Qt 6 library in MITK" FORCE)
   endif()
 
   set(MITK_USE_CableSwig ${MITK_USE_Python})
@@ -53,15 +53,15 @@ if(NOT MITK_DIR)
     MITK_USE_ACVD
     MITK_USE_CTK
     MITK_USE_DCMTK
-    MITK_USE_Qt5
+    MITK_USE_Qt6
     MITK_USE_DCMQI
     MITK_USE_OpenCV
     MITK_USE_Python
    )
 
-  if(MITK_USE_Qt5)
+  if(MITK_USE_Qt6)
     # Look for Qt at the superbuild level, to catch missing Qt libs early
-    find_package(Qt5Widgets REQUIRED)
+    find_package(Qt6Widgets REQUIRED)
   endif()
 
   set(additional_mitk_cmakevars )
@@ -109,9 +109,9 @@ if(NOT MITK_DIR)
     list(APPEND additional_mitk_cmakevars "-DBOOST_ROOT:PATH=${MITK_BOOST_ROOT}")
   endif()
 
-  set(MITK_SOURCE_DIR "" CACHE PATH "MITK source code location. If empty, MITK will be cloned from MITK_GIT_REPOSITORY")
-  set(MITK_GIT_REPOSITORY "https://phabricator.mitk.org/diffusion/MITK/mitk.git" CACHE STRING "The git repository for cloning MITK")
-  set(MITK_GIT_TAG "origin/release/2016-11" CACHE STRING "The git tag/hash to be used when cloning from MITK_GIT_REPOSITORY")
+  set(MITK_SOURCE_DIR "${HOME}/Libraries/src/mitk/" CACHE PATH "MITK source code location. If empty, MITK will be cloned from MITK_GIT_REPOSITORY")
+  set(MITK_GIT_REPOSITORY "https://github.com/MITK/MITK.git" CACHE STRING "The git repository for cloning MITK")
+  set(MITK_GIT_TAG "origin/release/v2025.12.2" CACHE STRING "The git tag/hash to be used when cloning from MITK_GIT_REPOSITORY")
   mark_as_advanced(MITK_SOURCE_DIR MITK_GIT_REPOSITORY MITK_GIT_TAG)
 
   #-----------------------------------------------------------------------------

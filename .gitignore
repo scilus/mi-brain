@@ -4,3 +4,5 @@ testing_data
 .vscode
 .cache
 .gdbinit
+dist
+MI-Brain-rel

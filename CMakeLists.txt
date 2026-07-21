@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.28 FATAL_ERROR)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Change project and application name to your own
@@ -9,7 +9,7 @@ set(MY_APP_NAME MI-Brain)
 # Set the language standard (MITK requires C++14)
 #-----------------------------------------------------------------------------
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED 1)
 set(CMAKE_CXX_EXTENSIONS 0)
 
@@ -134,7 +134,7 @@ find_package(MITK 2025.12 REQUIRED)
 if(COMMAND mitkFunctionCheckMitkCompatibility)
   mitkFunctionCheckMitkCompatibility(VERSIONS MITK_VERSION_PLUGIN_SYSTEM 1 REQUIRED)
 else()
-  message(SEND_ERROR "Your MITK version is too old. Please use Git hash b86bf28 or newer")
+  message(SEND_ERROR "Your MITK version is too old. Please use Git hash 7bc86e9 or newer")
 endif()
 
 link_directories(${MITK_LINK_DIRECTORIES})
@@ -339,8 +339,8 @@ endif()
 
 set(PLITK_VERSION ${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}${PACKAGE_VERSION_PATCH})
 set(PLITK_VERSION_NOHASH "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
-set(MIBRAIN_VERSION_CHECK "https://www.imeka.ca/version/VERSION")
-set(MIBRAIN_VERSION_UPDATE "https://www.imeka.ca/mi-brain")
+# set(MIBRAIN_VERSION_CHECK "https://www.imeka.ca/version/VERSION")
+# set(MIBRAIN_VERSION_UPDATE "https://www.imeka.ca/mi-brain")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/PlitkVersion.hpp.in
   ${CMAKE_BINARY_DIR}/PlitkVersion.hpp @ONLY)
@@ -357,8 +357,10 @@ add_subdirectory(Apps/${MY_APP_NAME})
 # Set MITK cpack variables, customize CPack variables for this project
 include(mitkSetupCPack)
 include(CPackSetup)
-MITK_INSTALL(FILES
-  "${PROJECT_SOURCE_DIR}/MI-Brain.bmp")
+if(EXISTS "${PROJECT_SOURCE_DIR}/MI-Brain.bmp")
+  MITK_INSTALL(FILES
+    "${PROJECT_SOURCE_DIR}/MI-Brain.bmp")
+endif()
 
 list(APPEND CPACK_CREATE_DESKTOP_LINKS "${MY_APP_NAME}")
 
