@@ -41,7 +41,7 @@ void BinaryImageAction::Run(
   auto node = mitk::DataNode::New();
   node->SetData(img);
   node->SetBoolProperty("binary", true);
-  node->SetBoolProperty("outline binary", true);
+  node->SetBoolProperty("outline binary", false);
   node->SetName("Binary Map");
 
   mitk::LevelWindow lw;

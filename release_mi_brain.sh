@@ -2,8 +2,8 @@
 
 set -e
 
-mkdir -p ~/mi-brain/mi-brain/build
-cd ~/mi-brain/mi-brain/build
+mkdir -p $PWD/build
+cd $PWD/build
 
 rm -rf *
 

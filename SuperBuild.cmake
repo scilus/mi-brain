@@ -187,6 +187,8 @@ ExternalProject_Add(${proj}
     -DMITK_DIR:PATH=${MITK_DIR}
     -DITK_DIR:PATH=${ITK_DIR}
     -DVTK_DIR:PATH=${VTK_DIR}
+    # --- added this line because sometimes the superbuildcannot find Qt6_DIR
+    -DQt6_DIR:PATH=${Qt6_DIR}
 
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
   BINARY_DIR ${CMAKE_BINARY_DIR}/${MY_PROJECT_NAME}-build

@@ -5,7 +5,7 @@ export MITK_PLUGINS_DIR="$HOME/Libraries/build/mitk-v2025.12.2/MITK-build/lib/pl
 export MITK_BIN_DIR="$HOME/Libraries/build/mitk-v2025.12.2/MITK-build/bin"
 
 # Set the path to the MI-Brain executable directory
-export MI_BRAIN_BIN_DIR="$HOME/mi-brain/mi-brain/build-2025/bin"
+export MI_BRAIN_BIN_DIR="$PWD/build-2025/bin"
 
 export QT_DIR="$HOME/Libraries/install/qt-6.8.3"
 
