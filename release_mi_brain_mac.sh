@@ -28,7 +28,6 @@ cmake --install "$PWD/build/SCIL-build" --prefix "$PWD/MI-Brain-rel"
 
 APP="$PWD/MI-Brain-rel/MI-Brain.app"
 QT_BIN="$HOME/Qt/6.9.2/macos/bin"
-SIGN_IDENTITY="Developer ID Application: USHERBROOKE"
 
 find "$APP/Contents/PlugIns" -type f -name "*.dylib" | while read plugin
 do
@@ -44,12 +43,20 @@ do
 done
         
 echo "Signing app..."
+#SIGN_IDENTITY="Developer ID Application: <name>"
+#codesign \
+#    --force \
+#    --deep \
+#    --options runtime \
+#    --timestamp \
+#    --sign "$SIGN_IDENTITY" \
+#    "$APP"
+
 codesign \
     --force \
     --deep \
-    --options runtime \
     --timestamp \
-    --sign "$SIGN_IDENTITY" \
+    --sign - \
     "$APP"
 
 echo "Checking signature..."
