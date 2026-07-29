@@ -6,3 +6,5 @@ testing_data
 .gdbinit
 dist
 MI-Brain-rel
+MI-Brain.dmg
+.DS_Store

@@ -376,6 +376,15 @@ configure_file(${PROJECT_SOURCE_DIR}/CPackOptions.cmake.in
                ${PROJECT_BINARY_DIR}/${PROJECT_NAME}CPackOptions.cmake @ONLY)
 set(CPACK_PROJECT_CONFIG_FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}CPackOptions.cmake")
 
+set(CMAKE_INSTALL_RPATH
+    "@loader_path/../Frameworks"
+    "@executable_path/../Frameworks"
+)
+
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+set(CMAKE_MACOSX_RPATH TRUE)
+
 # include CPack model once all variables are set
 include(CPack)
 
