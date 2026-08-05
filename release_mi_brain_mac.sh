@@ -56,7 +56,7 @@ cmake --install "$PWD/build/SCIL-build" --prefix "$PWD/MI-Brain-$ARCH"
 
 # Mac specific qt deployment
 
-APP="$PWD/MI-Brain-$ARCH/MI-Brain.app"
+APP="$PWD/MI-Brain-mac-$ARCH/MI-Brain.app"
 QT_BIN="$HOME/Qt/6.9.2/macos/bin"
 
 find "$APP/Contents/PlugIns" -type f -name "*.dylib" | while read plugin
@@ -98,4 +98,4 @@ hdiutil create \
     -srcfolder "$APP" \
     -ov \
     -format UDZO \
-    MI-Brain-$ARCH.dmg
+    MI-Brain-mac-$ARCH.dmg
