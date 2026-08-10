@@ -10,7 +10,8 @@
     <product name="MI-Brain" application="org.imeka.mibrain.app" />
   </extension>
   <extension point="org.blueberry.ui.perspectives">
-    <perspective id="org.imeka.plitk.mibrainperspective" name="Imeka" class="MIBrainPerspective" icon="">
+    // name="SCIL" is the name of the perspective that will be displayed in the title bar of the application window
+    <perspective id="org.imeka.plitk.mibrainperspective" name="SCIL" class="MIBrainPerspective" icon="">
       <description>The user won't see this</description>
     </perspective>
   </extension>

@@ -37,7 +37,7 @@ mitk::FiberBundleTrackVisReader * mitk::FiberBundleTrackVisReader::Clone() const
   return new FiberBundleTrackVisReader(*this);
 }
 
-std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleTrackVisReader::Read()
+std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleTrackVisReader::DoRead()
 {
 
   std::vector<itk::SmartPointer<mitk::BaseData> > result;
@@ -92,12 +92,18 @@ std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleTrackVisReader:
           "Error reading properties. Trk file is corrupted.";
         throw std::length_error(noReadPropertiesWarning);
       }
+
+      /*if (auto refGeometry = fiber->GetReferenceGeometry())
+      {
+        fiber->SetGeometry(refGeometry->Clone());
+      }*/
+
       result.push_back(fiber.GetPointer());
-      return result;
     }
 
     setlocale(LC_ALL, currLocale.c_str());
     MITK_INFO << "Fiber bundle read";
+    return result;
   }
   catch(...)
   {

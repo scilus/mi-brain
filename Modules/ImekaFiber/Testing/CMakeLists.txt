@@ -2,6 +2,7 @@ MITK_CREATE_MODULE_TESTS(LABELS
   ColoringTest
   CutTest
   DuplicateTGTest
+  ImekaIOTest
   MinMaxFilteringTest
   MirrorTest
   SaveLoadScenesTest

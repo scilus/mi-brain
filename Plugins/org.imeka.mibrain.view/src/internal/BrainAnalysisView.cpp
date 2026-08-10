@@ -9,12 +9,12 @@
 #include "FiberBundle/DataStorageUtils.hpp"
 
 const std::string BrainAnalysisView::VIEW_ID =
-  "org.mitk.views.brainanalysisview";
+  "org.imeka.views.brainanalysisview";
 
 BrainAnalysisView::BrainAnalysisView()
   : m_Callback()
-  , m_Groups(GetCreateROICallback(), m_Callback, m_DM)
-  , m_FibersManager(m_DM, m_Callback, m_Groups)
+  , m_Groups(m_Callback, m_DM)
+  , m_FibersManager(m_DM, m_Callback, m_Groups, GetCreateROICallback())
   , m_MaximaData(Imeka::Fiber::MaximaData::Instance())
   , m_RenderingManagerObserverTag(0)
 {}
@@ -26,7 +26,7 @@ BrainAnalysisView::~BrainAnalysisView()
     ->RemoveObserver(m_RenderingManagerObserverTag);
 }
 
-Imeka::Fiber::GroupNodes::ROIAction
+Imeka::Callback::CallbackFunction
 BrainAnalysisView::GetCreateROICallback() const
 {
   return [this](mitk::DataNode* node)
@@ -111,7 +111,7 @@ void BrainAnalysisView::CreateQtPartControl(QWidget *parent)
     m_FibersManager.SelectionObjectMoved(so, true);
   });
 
-  connect(m_Controls.chkShowAll, &QCheckBox::stateChanged, [this](){
+  connect(m_Controls.chkShowAll, &QCheckBox::checkStateChanged, [this](){
     TractGroupVisibilityChanged(false);
   });
   connect(this, &BrainAnalysisView::RequestUpdateUI,
@@ -245,7 +245,7 @@ void BrainAnalysisView::NodeAdded(const mitk::DataNode* node)
 {
   auto nonConstNode = const_cast<mitk::DataNode*>(node);
 
-  if (m_Groups.UpdateGroupIfRequired(nonConstNode))
+  if (m_FibersManager.UpdateGroupIfRequired(nonConstNode))
   {
     m_Controls.regionOfInterestWidget->SetParentNode(m_Groups.ROIs);
     m_FibersManager.GroupAdded(nonConstNode);
@@ -264,11 +264,12 @@ void BrainAnalysisView::NodeAdded(const mitk::DataNode* node)
   {
     SelectionObjectAdded(nonConstNode, selectionObject);
   }
-  else if (auto image = dynamic_cast<mitk::Image*>(node->GetData()))
+  else if (mitk::Image* image = dynamic_cast<mitk::Image*>(node->GetData()))
   {
     if (Imeka::Fiber::GetRGBPredicate()->CheckNode(node))
     {
-      nonConstNode->SetMapper(1, Imeka::Mapper::ImekaRGBMapper::New());
+      // nonConstNode->SetMapper(1, Imeka::Mapper::ImekaRGBMapper::New());
+      // MITK_WARN << "Tried to use mapper\n";
     }
     else if (Imeka::Fiber::GetMaximaPredicate()->CheckNode(node))
     {
@@ -320,8 +321,7 @@ void BrainAnalysisView::PeaksImageAdded(
         const bool visible = node->IsVisible(nullptr);
         if (!visible) { return; }
 
-        const auto anatNode = m_Controls.cboAnatImage->GetSelectedNode();
-        if (!IsReinited(anatNode) && !IsReinited(node)) { Reinit(anatNode); }
+        mitk::RenderingManager::GetInstance()->RequestUpdateAll();
       });
 
       m_MaximaData.Add(node);
@@ -364,13 +364,29 @@ void BrainAnalysisView::NodeRemoved(const mitk::DataNode* node)
     }
   }
 
-  std::cout << "Removing node: " << node->GetName() << "\n";
-  auto nonConstNode = const_cast<mitk::DataNode*>(node);
-  m_Callback.Remove(node);
-
-  // The node can not-exist if the user selects all and delete. Some nodes
+  // The node can "not-exist" if the user selects all and delete. Some nodes
   // delete their children, so they would be deleted N times.
   if (!GetDataStorage()->Exists(node)) { return; }
+
+  MITK_INFO << "Removing node: " << node->GetName() << "...\n";
+  auto nonConstNode = const_cast<mitk::DataNode*>(node);
+
+  if (!Imeka::Fiber::IsTractGroup(node))
+  {
+    Nodes children = m_DM.ChildrenOf(node);
+    if (!children.empty())
+    {
+      MITK_INFO << "Also removing " << children.size() << " children nodes.\n";
+    }
+    for (auto child : children){
+      // this line is a precaution, because some nodes have their chidren deleted in FibersManager::NodeRemoded, so they might not exist anymore. 
+      if (!GetDataStorage()->Exists(node)) { continue; }
+      m_Callback.Remove(child);
+      m_FibersManager.NodeRemoved(child);
+    }
+  }
+
+  m_Callback.Remove(node);
 
   if (Imeka::Fiber::GetMaximaPredicate()->CheckNode(node))
   {

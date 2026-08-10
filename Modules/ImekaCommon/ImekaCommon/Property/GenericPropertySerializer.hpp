@@ -4,6 +4,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <tinyxml2.h>
 #include <mitkBasePropertySerializer.h>
 #include <mitkGenericProperty.h>
 
@@ -26,27 +27,27 @@ public:
   mitkClassMacro(GenericPropertySerializer, BasePropertySerializer);
   itkNewMacro(Self);
 
-  virtual TiXmlElement* Serialize() override
+  virtual tinyxml2::XMLElement* Serialize(tinyxml2::XMLDocument& doc) override
   {
     const GenericProperty<T>* property =
       dynamic_cast<const GenericProperty<T>*>(m_Property.GetPointer());
     if (property)
     {
-      TiXmlElement* element = new TiXmlElement("Generic");
-      element->SetAttribute("value", property->GetValueAsString());
+      tinyxml2::XMLElement* element = doc.NewElement("Generic");
+      element->SetAttribute("value", property->GetValueAsString().c_str());
       return element;
     }
     return nullptr;
   }
 
-  virtual BaseProperty::Pointer Deserialize(TiXmlElement* element) override
+  virtual BaseProperty::Pointer Deserialize(const tinyxml2::XMLElement* element) override
   {
     if (!element) { return nullptr; }
 
-    std::string strVal;
-    if (element->QueryStringAttribute("value", &strVal) == TIXML_SUCCESS)
+    const char* strVal = element->Attribute("value");
+    if (strVal)
     {
-      const T val = boost::lexical_cast<T>(strVal);
+      const T val = boost::lexical_cast<T>(std::string(strVal));
       return Property::New(val).GetPointer();
     }
     return nullptr;

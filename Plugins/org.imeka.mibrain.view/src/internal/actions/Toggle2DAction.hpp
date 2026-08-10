@@ -15,7 +15,7 @@ public:
   Toggle2DAction() {}
 
   void Run(const QList<mitk::DataNode::Pointer> &selectedNodes) override;
-  void SetDataStorage(mitk::DataStorage* ds) override { }
+  void SetDataStorage(mitk::DataStorage* ds) override { Q_UNUSED(ds);}
   void SetSmoothed(bool) override {}
   void SetDecimated(bool) override {}
   void SetFunctionality(berry::QtViewPart*) override {}

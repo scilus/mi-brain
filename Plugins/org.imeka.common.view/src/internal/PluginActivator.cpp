@@ -1,6 +1,9 @@
 
 #include "PluginActivator.hpp"
 
+#include <usModuleInitialization.h>
+US_INITIALIZE_MODULE
+
 #include "actions/LocateSurfaceAction.hpp"
 #include "actions/LocateSelectionObjectAction.hpp"
 #include "actions/MakeTimedSequenceAction.hpp"

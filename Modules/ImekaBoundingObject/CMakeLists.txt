@@ -1,5 +1,5 @@
 MITK_CREATE_MODULE( ImekaBoundingObject
-  PACKAGE_DEPENDS Qt5|Core+Widgets
+  PACKAGE_DEPENDS Qt6|Core+Widgets
   DEPENDS MitkDataTypesExt MitkQtWidgets ImekaCommon
   WARNINGS_NO_ERRORS
 )

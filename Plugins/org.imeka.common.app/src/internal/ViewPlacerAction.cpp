@@ -3,6 +3,7 @@
 
 #include <mitkBaseRenderer.h>
 #include <mitkCameraController.h>
+#include <QWidget>
 
 #include "ImekaGeometry/ViewUtils.hpp"
 

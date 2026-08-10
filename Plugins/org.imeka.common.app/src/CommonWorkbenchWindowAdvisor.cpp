@@ -4,8 +4,8 @@
 #include <berryCommandContributionItem.h>
 #include <berryCommandContributionItemParameter.h>
 #include <berryFileEditorInput.h>
-#include <berryIPreferences.h>
-#include <berryIPreferencesService.h>
+#include <mitkIPreferences.h>
+#include <mitkIPreferencesService.h>
 #include <berryIQtStyleManager.h>
 #include <berryMenuManager.h>
 #include <berryPlatformUI.h>
@@ -22,6 +22,8 @@
 
 #include <vtkProperty.h>
 
+#include "AboutDialog.hpp"
+
 #include "internal/ViewPlacerAction.hpp"
 
 struct StdMultiWidgetPartListener : public berry::IPartListener
@@ -31,8 +33,11 @@ struct StdMultiWidgetPartListener : public berry::IPartListener
     , m_WasDisplayed(false)
   {
     auto _3dView =
-      mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4");
-    m_MarkerWidget->SetInteractor(_3dView->GetInteractor());
+      mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget3");
+    if (_3dView)
+    {
+      m_MarkerWidget->SetInteractor(_3dView->GetInteractor());
+    }
   }
 
   Events::Types GetPartEventTypes() const override
@@ -50,7 +55,11 @@ struct StdMultiWidgetPartListener : public berry::IPartListener
     if (shouldDisplay ^ m_WasDisplayed)
     {
       m_MarkerWidget->SetEnabled(shouldDisplay);
-      mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4")->Render();
+      auto _3dView = mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget3");
+      if (_3dView)
+      {
+        _3dView->Render();
+      }
 
       m_WasDisplayed = shouldDisplay;
     }
@@ -106,7 +115,7 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
   // that's why it's currently separated in 2 groups.
   auto prefService = berry::WorkbenchPlugin::GetDefault()->GetPreferencesService();
 
-  {
+  /*{
     auto prefs = prefService->GetSystemPreferences()
       ->Node(berry::QtPreferences::QT_STYLES_NODE);
     const bool showCategoryNames = prefs->GetBool(
@@ -115,15 +124,15 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     {
       prefs->PutBool(berry::QtPreferences::QT_SHOW_TOOLBAR_CATEGORY_NAMES, false);
     }
-  }
+  }*/
 
   {
     auto prefs = prefService->GetSystemPreferences()->Node("/org.mitk.views.datamanager");
     const QString pref = "Call global reinit if node is deleted";
-    const bool reinitOnDelete = prefs->GetBool(pref, false);
+    const bool reinitOnDelete = prefs->GetBool(pref.toStdString(), false);
     if (reinitOnDelete)
     {
-      prefs->PutBool(pref, true);
+      prefs->PutBool(pref.toStdString(), true);
     }
   }
 
@@ -134,6 +143,39 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     this->GetWindowConfigurer()->GetWindow();
   auto mainWindow =
     static_cast<QMainWindow*>(window->GetShell()->GetControl());
+
+  // The menu bar code is BELOW.
+
+  for(auto action : mainWindow->menuBar()->actions())
+  {
+    // remove the MITK Edit menu
+    if(action->text() == "&Edit")
+    {
+      action->menu()->clear();
+      mainWindow->menuBar()->removeAction(action);
+      continue;
+    }
+
+    if(action->text() == "Window")
+    {
+      for(auto child : action->menu()->actions())
+      {
+        if(child->text() == "&Open Perspective")
+        {
+          action->menu()->removeAction(child);
+        }
+      }
+      continue;
+    }
+
+    // remove the MITK help menu
+    if(action->text() == "&Help")
+    {
+      action->menu()->clear();
+      mainWindow->menuBar()->removeAction(action);
+      continue;
+    }
+  }
 
   if (m_SetViewPlacerHotkeys)
   {
@@ -146,6 +188,7 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     viewMenu->addAction(new ViewPlacerAction(ViewPlacerAction::POSTERIOR));
   }
 
+  // This is the code for the orientation marker in the 3D view.
   if (m_UseMarkerWidget)
   {
     m_AnnotatedCube = vtkSmartPointer<vtkAnnotatedCubeActor>::New();
@@ -187,58 +230,39 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
     m_MarkerWidget = vtkSmartPointer<vtkOrientationMarkerWidget>::New();
     m_MarkerWidget->SetOrientationMarker(m_AnnotatedCube);
     m_MarkerWidget->SetOutlineColor(0.9300, 0.5700, 0.1300);
-    m_MarkerWidget->SetInteractor(
-      mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget4")
-      ->GetInteractor());
+    auto renderWindow = mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget3");
+    if (renderWindow)
+    {
+      m_MarkerWidget->SetInteractor(renderWindow->GetInteractor());
+      m_MarkerWidget->SetEnabled(1);
+    }
 
     m_Listener.reset(new StdMultiWidgetPartListener(m_MarkerWidget));
-    GetWindowConfigurer()->GetWindow()->GetActivePage()->AddPartListener(
-      m_Listener.data());
-
-    m_MarkerWidget->SetEnabled(1);
   }
 
   // We modified MITK's code to NOT add the Help menu because it's
   // unmodifiable for some reason. We simply add our own version of it
   // with Help Index and About.
   m_HelpMenu = mainWindow->menuBar()->addMenu("&Help");
-  const auto viewRegistry =
-    berry::PlatformUI::GetWorkbench()->GetViewRegistry();
-  for (const auto viewDescriptor : viewRegistry->GetViews())
+  const auto viewRegistry = berry::PlatformUI::GetWorkbench()->GetViewRegistry();
+  /*loop variable viewDescriptor is not modified, so we can afford to use a const reference to avoid unnecessary copies*/
+  for (const auto &viewDescriptor : viewRegistry->GetViews())
   {
     if (viewDescriptor->GetId() == "org.blueberry.views.helpindex")
     {
-      // Add the damn Help Index!
       berry::IWorkbenchWindow::Pointer _window(window);
-      m_HelpMenu->addAction(
-        new berry::QtShowViewAction(_window, viewDescriptor));
-      m_HelpMenu->addSeparator();
+      m_HelpMenu->addAction(new berry::QtShowViewAction(_window, viewDescriptor));
       break;
     }
   }
 
-  /**
-  Add the &About action again.
-  THIS CODE IS BAD. The berry classes should NEVER be used outside of MITK's
-  code. THIS IS A HACK AND SHOULD BE REMOVED. However, it's here because
-  - we remove the standard Help menu because we want to add more menus before
-    the Help menu, which should be last
-  - "org.blueberry.ui.help.aboutAction" kind-of work but it takes their
-    extension point most of the time, so we disable theirs in
-    Plugins/org.mitk.gui.qt.ext/plugin.xml
-  */
-  berry::CommandContributionItemParameter::Pointer command(
-    new berry::CommandContributionItemParameter(
-      window.GetPointer(), QString(),
-      "org.blueberry.ui.help.aboutAction",
-      berry::CommandContributionItem::STYLE_PUSH));
-  command->icon = QIcon();
-  command->label = "&About";
-  command->tooltip = QString();
-  command->shortcut = QKeySequence();
-  berry::CommandContributionItem::Pointer item(
-    new berry::CommandContributionItem(command));
-  item->Fill(m_HelpMenu, nullptr);
+  QAction* aboutAction = m_HelpMenu->addAction("&About");
+  QWidget* parent = static_cast<QWidget*>(window->GetShell()->GetControl());
+  QObject::connect(aboutAction, &QAction::triggered, [parent]()
+  {
+    AboutDialog dlg(parent);
+    dlg.exec();
+  });
 }
 
 void CommonWorkbenchWindowAdvisor::Setup()

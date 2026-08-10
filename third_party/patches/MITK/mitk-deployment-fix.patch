@@ -1,0 +1,16 @@
+diff --git a/CMake/mitkMacroInstall.cmake b/CMake/mitkMacroInstall.cmake
+index 91987663b0..8dc36c2e3e 100644
+--- a/CMake/mitkMacroInstall.cmake
++++ b/CMake/mitkMacroInstall.cmake
+@@ -209,6 +209,11 @@ macro(_fixup_target)
+     if(_additional_search_paths)
+       set(DIRS \"\${DIRS};\${_additional_search_paths}\")
+     endif()
++    # MapleGlazedCrow PATCH
++    get_filename_component(_qt_lib_dir \"${Qt6_DIR}/../..\" ABSOLUTE)
++    if(_qt_lib_dir)
++      set(DIRS \"\${DIRS};\${_qt_lib_dir}\")
++    endif()
+     foreach(_plugin \${PLUGINS})
+       get_filename_component(_pluginpath \${_plugin} PATH)
+       list(APPEND DIRS \"\${_pluginpath}\")

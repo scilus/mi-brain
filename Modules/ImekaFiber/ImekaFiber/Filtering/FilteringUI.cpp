@@ -85,7 +85,7 @@ void FilteringUI::AddActionsToTractsCategory(mitk::DataNode* TC)
   // This has been added because we want to recalculate the filtering when the
   // user makes the TractsCategory visible again. There's no need to computer
   // anything when it's invisible because it's invisible.
-  m_Callback.SetVisibilityCallback(
+  m_Callback.AddVisibilityCallback(
     TC,
     // OnVisible
     [this, TC]() {
@@ -115,7 +115,7 @@ void FilteringUI::AddActionsToDataset(mitk::DataNode* datasetNode)
   // This has been added because we want to recalculate the filtering when the
   // user makes a dataset visible again. There's no need to computer anything
   // when it's invisible because it's invisible.
-  m_Callback.SetVisibilityCallback(
+  m_Callback.AddVisibilityCallback(
     datasetNode,
     // OnVisible
     [this, datasetNode]() {
@@ -143,7 +143,7 @@ void FilteringUI::AddActionsToDataset(mitk::DataNode* datasetNode)
     const unsigned int nbROIs = GetAllROIs().size();
     if (nbROIs == 0)
     {
-      QMessageBox::information(QApplication::activeWindow(), "Imeka",
+      QMessageBox::information(QApplication::activeWindow(), "MI-Brain",
         "Can't create a tractGroup because there's no ROI.");
       return;
     }
@@ -151,7 +151,7 @@ void FilteringUI::AddActionsToDataset(mitk::DataNode* datasetNode)
     // If there are only Surfaces and no anat
     if (nbROIs > 0 && nbROIs == GetAllSurfaces().size() && !m_DM.GetAnat())
     {
-      QMessageBox::information(QApplication::activeWindow(), "Imeka",
+      QMessageBox::information(QApplication::activeWindow(), "MI-Brain",
         "Can't create a tractGroup because the only available ROIs are "
         "Surfaces and you must load a reference anatomy to filter with a "
         "surface.");
@@ -172,7 +172,7 @@ void FilteringUI::AddActionsToTractGroup(
 {
   if (addVisibilityActions)
   {
-    m_Callback.SetVisibilityCallback(
+    m_Callback.AddVisibilityCallback(
       TGNode,
       // OnVisible
       [this, datasetNode, TGNode](){
@@ -246,7 +246,7 @@ void FilteringUI::AddActionsToActiveROI(
   mitk::DataNode* TGNode,
   mitk::DataNode* activeROI)
 {
-  m_Callback.SetVisibilityCallback(
+  m_Callback.AddVisibilityCallback(
     activeROI,
     // OnVisible
     [this, datasetNode, TGNode, activeROI]()
@@ -468,7 +468,8 @@ bool FilteringUI::FinishedLoading()
   {
     AddActionsToROI(ROINode);
   }
-  for (const auto p : datasetsAndTG)
+  /*loop variable p is not modified, so we can afford to use a const reference to avoid unnecessary copies*/
+  for (const auto &p : datasetsAndTG)
   {
     for (auto TGNode : p.second)
     {

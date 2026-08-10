@@ -26,7 +26,7 @@ public:
     berry::QtWorkbenchAdvisor::Initialize(configurer);
 
     mitk::WorkbenchUtil::SetDepartmentLogoPreference(
-      ":/Images/logo_plitk.png", Activator::GetDefault()->GetPluginContext());
+      ":/Images/clear_alpha.png", Activator::GetDefault()->GetPluginContext());
 
     configurer->SetSaveAndRestore(true);
   }
@@ -38,7 +38,7 @@ public:
     auto windowAdvisor = new WorkbenchWindowAdvisor(this, configurer);
     windowAdvisor->Setup();
     windowAdvisor->SetProductName(m_AppTitle);
-    windowAdvisor->SetWindowIcon(":/Images/logo_imeka.png");
+    windowAdvisor->SetWindowIcon(":/Images/logo_scil.png");
     return windowAdvisor;
   }
 

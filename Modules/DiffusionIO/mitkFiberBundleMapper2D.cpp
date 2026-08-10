@@ -24,6 +24,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <vtkPlane.h>
 #include <vtkPolyData.h>
 #include <vtkPointData.h>
+#include <vtkShaderProperty.h>
 #include <vtkProperty.h>
 #include <vtkLookupTable.h>
 #include <vtkPoints.h>
@@ -113,13 +114,19 @@ mitk::FiberBundle* mitk::FiberBundleMapper2D::GetInput()
   return dynamic_cast< mitk::FiberBundle * > ( GetDataNode()->GetData() );
 }
 
-
+void mitk::FiberBundleMapper2D::UpdateVtkTransform(mitk::BaseRenderer *)
+{
+  // don't apply transform since the fiber polydata is already in world coordinates.
+  return;
+}
 
 void mitk::FiberBundleMapper2D::Update(mitk::BaseRenderer * renderer)
 {
-  bool visible = true;
-  GetDataNode()->GetVisibility(visible, renderer, "visible");
-  if ( !visible )
+  FBXLocalStorage *localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
+  bool visible = GetDataNode()->IsVisible(nullptr) && GetDataNode()->IsVisible(renderer);
+
+  localStorage->m_Actor->SetVisibility(visible);
+  if (!visible)
     return;
 
   // Calculate time step of the input data for the specified renderer (integer value)
@@ -127,8 +134,6 @@ void mitk::FiberBundleMapper2D::Update(mitk::BaseRenderer * renderer)
   this->CalculateTimeStep( renderer );
 
   //check if updates occured in the node or on the display
-  FBXLocalStorage *localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
-
   //set renderer independent shader properties
   const DataNode::Pointer node = this->GetDataNode();
   float thickness = 2.0;
@@ -186,11 +191,12 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
   localStorage->m_Mapper->ScalarVisibilityOn();
   localStorage->m_Mapper->SetScalarModeToUsePointFieldData();
   localStorage->m_Mapper->SetLookupTable(m_lut);  //apply the properties after the slice was set
-  localStorage->m_Actor->GetProperty()->SetOpacity(0.999);
+  localStorage->m_Actor->GetProperty()->SetOpacity(1.0);
+  localStorage->m_Actor->SetPosition(0, 0, 0.01);
   localStorage->m_Mapper->SelectColorArray("FIBER_COLORS");
   localStorage->m_Mapper->SetInputData(fiberPolyData);
 
-  localStorage->m_Mapper->SetVertexShaderCode(
+  localStorage->m_Actor->GetShaderProperty()->SetVertexShaderCode(
         "//VTK::System::Dec\n"
         "attribute vec4 vertexMC;\n"
 
@@ -210,7 +216,7 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
         "}\n"
         );
 
-  localStorage->m_Mapper->SetFragmentShaderCode(
+  localStorage->m_Actor->GetShaderProperty()->SetFragmentShaderCode(
         "//VTK::System::Dec\n"  // always start with this line
         "//VTK::Output::Dec\n"  // always have this line in your FS
         "uniform vec4 slicingPlane;\n"
@@ -229,11 +235,10 @@ void mitk::FiberBundleMapper2D::GenerateDataForRenderer(mitk::BaseRenderer *rend
         "  if (abs(r1) >= fiberThickness)\n"
         "    discard;\n"
 
-        "  if (fiberFadingON != 0)\n"
+        "  if (fiberFadingON != 0 && fiberThickness > 0.0)\n"
         "  {\n"
-        "    float x = (r1 + fiberThickness) / (fiberThickness*2.0);\n"
-        "    x = 1.0 - x;\n"
-        "    out_Color = vec4(colorVertex.xyz*x, fiberOpacity);\n"
+        "    float x = 1.0 - (abs(r1) / fiberThickness);\n"
+        "    out_Color = vec4(colorVertex.xyz * x, fiberOpacity);\n"
         "  }\n"
         "  else{\n"
         "    out_Color = vec4(colorVertex.xyz, fiberOpacity);\n"

@@ -18,10 +18,9 @@ public:
   DataNodeGroupReader();
   virtual ~DataNodeGroupReader(){}
   DataNodeGroupReader(const DataNodeGroupReader& other);
-  virtual DataNodeGroupReader* Clone() const;
+  virtual DataNodeGroupReader* Clone() const override;
 
-  using mitk::AbstractFileReader::Read;
-  virtual std::vector<itk::SmartPointer<mitk::BaseData>> Read();
+  virtual std::vector<itk::SmartPointer<mitk::BaseData>> DoRead() override;
 
 private:
   us::ServiceRegistration<mitk::IFileReader> m_ServiceReg;

@@ -84,10 +84,8 @@ public:
   FDFReader();
   virtual ~FDFReader(){}
   FDFReader(const FDFReader& other);
-  virtual FDFReader* Clone() const;
-
-  using mitk::AbstractFileReader::Read;
-  virtual std::vector<itk::SmartPointer<mitk::BaseData>> Read();
+  virtual FDFReader* Clone() const override;
+  virtual std::vector<itk::SmartPointer<mitk::BaseData>> DoRead() override;
 
 private:
   template<typename OutputContainer>

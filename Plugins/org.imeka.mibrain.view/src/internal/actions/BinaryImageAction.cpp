@@ -1,7 +1,8 @@
 
 #include "BinaryImageAction.hpp"
 
-#include <mitkImage.h>
+#include <mitkImageCast.h>
+#include <mitkLevelWindowProperty.h>
 
 #include "ImekaFiber/GroupNodes.hpp"
 #include "ImekaFiber/utils.hpp"
@@ -27,16 +28,25 @@ void BinaryImageAction::Run(
     allStreamlines = Imeka::Fiber::Union(selectedNodes);
   }
 
+  if (!allStreamlines) { return; }
+
   auto itkImage = Imeka::Fiber::GetTractDensityImage<unsigned char>(
     allStreamlines, anatNode, true);
 
+  if (itkImage.IsNull()) { return; }
+
   auto img = mitk::Image::New();
-  img->InitializeByItk(itkImage.GetPointer());
-  img->SetVolume(itkImage->GetBufferPointer());
+  mitk::CastToMitkImage(itkImage, img);
 
   auto node = mitk::DataNode::New();
   node->SetData(img);
-
+  node->SetBoolProperty("binary", true);
+  node->SetBoolProperty("outline binary", false);
   node->SetName("Binary Map");
+
+  mitk::LevelWindow lw;
+  lw.SetWindowBounds(0, 1);
+  node->SetProperty("levelwindow", mitk::LevelWindowProperty::New(lw));
+
   DM.AddNode(node);
 }

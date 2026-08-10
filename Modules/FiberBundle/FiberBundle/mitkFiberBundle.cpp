@@ -17,13 +17,16 @@
 #include <vtkParametricFunctionSource.h>
 #include <vtkParametricSpline.h>
 #include <vtkPolygon.h>
-#include <boost/progress.hpp>
+#include <boost/timer/progress_display.hpp>
 #include <vtkTransformPolyDataFilter.h>
 #include <mitkTransferFunction.h>
 #include <vtkLookupTable.h>
 #include <mitkLookupTable.h>
 #include <vtkCardinalSpline.h>
 #include <vtkAppendPolyData.h>
+
+// progress bar
+#include <mitkProgressBar.h>
 
 const char* mitk::FiberBundle::FIBER_ID_ARRAY = "Fiber_IDs";
 
@@ -51,7 +54,9 @@ mitk::FiberBundle::~FiberBundle()
 
 mitk::FiberBundle::Pointer mitk::FiberBundle::GetDeepCopy()
 {
-  mitk::FiberBundle::Pointer newFib = mitk::FiberBundle::New(m_FiberPolyData);
+  auto polyData = vtkSmartPointer<vtkPolyData>::New();
+  polyData->DeepCopy(m_FiberPolyData);
+  mitk::FiberBundle::Pointer newFib = mitk::FiberBundle::New(polyData);
   newFib->SetFiberColors(this->m_FiberColors);
   return newFib;
 }
@@ -76,9 +81,13 @@ itk::Point<float, 3> mitk::FiberBundle::GetItkPoint(double point[3])
 void mitk::FiberBundle::SetFiberPolyData(vtkSmartPointer<vtkPolyData> fiberPD, bool updateGeometry)
 {
   if (fiberPD == nullptr)
+  {
     this->m_FiberPolyData = vtkSmartPointer<vtkPolyData>::New();
-  else
+  }
+  else if (m_FiberPolyData != fiberPD)
+  {
     m_FiberPolyData->DeepCopy(fiberPD);
+  }
 
   m_NumFibers = m_FiberPolyData->GetNumberOfLines();
 
@@ -191,7 +200,7 @@ void mitk::FiberBundle::ColorFibersByOrientation()
   fiberList->InitTraversal();
   for (int fi=0; fi<numOfFibers; ++fi) {
 
-    vtkIdType* idList; // contains the point id's of the line
+    const vtkIdType* idList; // contains the point id's of the line
     vtkIdType pointsPerFiber; // number of points for current line
     fiberList->GetNextCell(pointsPerFiber, idList);
 
@@ -292,7 +301,7 @@ void mitk::FiberBundle::ColorFibersByCurvature(bool minMaxNorm)
   double min = 1;
   double max = 0;
   MITK_INFO << "Coloring fibers by curvature";
-  boost::progress_display disp(m_FiberPolyData->GetNumberOfCells());
+  boost::timer::progress_display disp(m_FiberPolyData->GetNumberOfCells());
   for (int i=0; i<m_FiberPolyData->GetNumberOfCells(); i++)
   {
     ++disp;
@@ -534,6 +543,7 @@ void mitk::FiberBundle::UpdateFiberGeometry()
   m_FiberPolyData->GetBounds(b);
 
   // calculate statistics
+  // TODO : this could probably be parallelized
   for (int i=0; i<m_FiberPolyData->GetNumberOfCells(); i++)
   {
     vtkCell* cell = m_FiberPolyData->GetCell(i);
@@ -610,7 +620,7 @@ void mitk::FiberBundle::MirrorFibers(unsigned int axis)
     return;
 
   MITK_INFO << "Mirroring fibers";
-  boost::progress_display disp(m_NumFibers);
+  boost::timer::progress_display disp(m_NumFibers);
 
   vtkSmartPointer<vtkPoints> vtkNewPoints = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> vtkNewCells = vtkSmartPointer<vtkCellArray>::New();
@@ -639,89 +649,118 @@ void mitk::FiberBundle::MirrorFibers(unsigned int axis)
   this->SetFiberPolyData(m_FiberPolyData, true);
 }
 
+template<typename T>
+struct FiberResult{
+  std::vector<T> Points;
+};
+
 void mitk::FiberBundle::ResampleSpline(float pointDistance, double tension, double continuity, double bias)
 {
   if (pointDistance <= 0)
     return;
 
-  vtkSmartPointer<vtkPoints> vtkSmoothPoints = vtkSmartPointer<vtkPoints>::New(); //in smoothpoints the interpolated points representing a fiber are stored.
+  const int chunkSize = 20000;
 
+  //in smoothpoints the interpolated points representing a fiber are stored.
+  vtkSmartPointer<vtkPoints> vtkSmoothPoints =
+    vtkSmartPointer<vtkPoints>::New();
   //in vtkcells all polylines are stored, actually all id's of them are stored
-  vtkSmartPointer<vtkCellArray> vtkSmoothCells = vtkSmartPointer<vtkCellArray>::New(); //cellcontainer for smoothed lines
+  vtkSmartPointer<vtkCellArray> vtkSmoothCells =
+    vtkSmartPointer<vtkCellArray>::New();
 
   MITK_INFO << "Smoothing fibers";
-  vtkSmartPointer<vtkFloatArray> newFiberWeights = vtkSmartPointer<vtkFloatArray>::New();
-  newFiberWeights->SetName("FIBER_WEIGHTS");
-  newFiberWeights->SetNumberOfValues(m_NumFibers);
 
-  std::vector< vtkSmartPointer<vtkPolyLine> > resampled_streamlines;
-  resampled_streamlines.resize(m_NumFibers);
+  // code to init the progress bar
+  mitk::ProgressBar::GetInstance()->Reset();
+  mitk::ProgressBar::GetInstance()->AddStepsToDo(std::ceil(static_cast<double>(m_NumFibers) / (chunkSize / 2)) + 3); 
+  mitk::ProgressBar::GetInstance()->Progress();
 
-  boost::progress_display disp(m_NumFibers);
+  boost::timer::progress_display disp(m_NumFibers);
+
+  for (int chunkStart = 0; chunkStart < m_NumFibers; chunkStart += chunkSize)
+  {
+    const int chunkEnd = std::min(chunkStart + chunkSize, m_NumFibers);
+    std::vector<FiberResult<std::array<double, 3>>> results(chunkEnd - chunkStart);
+
 #pragma omp parallel for
-  for (int i = 0; i < m_NumFibers; i++)
-  {
-    vtkSmartPointer<vtkPoints> newPoints = vtkSmartPointer<vtkPoints>::New();
-    float length = 0;
-#pragma omp critical
+    for (int i = chunkStart; i < chunkEnd; ++i)
     {
-      length = m_FiberLengths.at(i);
-      ++disp;
-      vtkCell* cell = m_FiberPolyData->GetCell(i);
-      int numPoints = cell->GetNumberOfPoints();
-      vtkPoints* points = cell->GetPoints();
-      for (int j = 0; j < numPoints; j++)
-        newPoints->InsertNextPoint(points->GetPoint(j));
-    }
-
-    int sampling = std::ceil(length / pointDistance);
-
-    vtkSmartPointer<vtkKochanekSpline> xSpline = vtkSmartPointer<vtkKochanekSpline>::New();
-    vtkSmartPointer<vtkKochanekSpline> ySpline = vtkSmartPointer<vtkKochanekSpline>::New();
-    vtkSmartPointer<vtkKochanekSpline> zSpline = vtkSmartPointer<vtkKochanekSpline>::New();
-    xSpline->SetDefaultBias(bias); xSpline->SetDefaultTension(tension); xSpline->SetDefaultContinuity(continuity);
-    ySpline->SetDefaultBias(bias); ySpline->SetDefaultTension(tension); ySpline->SetDefaultContinuity(continuity);
-    zSpline->SetDefaultBias(bias); zSpline->SetDefaultTension(tension); zSpline->SetDefaultContinuity(continuity);
-
-    vtkSmartPointer<vtkParametricSpline> spline = vtkSmartPointer<vtkParametricSpline>::New();
-    spline->SetXSpline(xSpline);
-    spline->SetYSpline(ySpline);
-    spline->SetZSpline(zSpline);
-    spline->SetPoints(newPoints);
-
-    vtkSmartPointer<vtkParametricFunctionSource> functionSource = vtkSmartPointer<vtkParametricFunctionSource>::New();
-    functionSource->SetParametricFunction(spline);
-    functionSource->SetUResolution(sampling);
-    functionSource->SetVResolution(sampling);
-    functionSource->SetWResolution(sampling);
-    functionSource->Update();
-
-    vtkPolyData* outputFunction = functionSource->GetOutput();
-    vtkPoints* tmpSmoothPnts = outputFunction->GetPoints(); //smoothPoints of current fiber
-
-    vtkSmartPointer<vtkPolyLine> smoothLine = vtkSmartPointer<vtkPolyLine>::New();
-
-#pragma omp critical
-    {
-      for (int j = 0; j < tmpSmoothPnts->GetNumberOfPoints(); j++)
+      FiberResult<std::array<double, 3>>& result = results[i - chunkStart];
+      
+      vtkSmartPointer<vtkPoints> newPoints =
+        vtkSmartPointer<vtkPoints>::New();
+      
+      #pragma omp critical(ReadFiber)
       {
-        vtkIdType id = vtkSmoothPoints->InsertNextPoint(tmpSmoothPnts->GetPoint(j));
-        smoothLine->GetPointIds()->InsertNextId(id);
+        ++disp;
+        // copy of the original fiber
+        vtkCell* cell = m_FiberPolyData->GetCell(i);
+        vtkPoints* points = cell->GetPoints();
+
+        for (int j = 0; j < points->GetNumberOfPoints(); ++j)
+          newPoints->InsertNextPoint(points->GetPoint(j));
+      } 
+
+      int sampling = std::ceil(m_FiberLengths.at(i) / pointDistance);
+      // Clamp to something reasonable
+      // sampling = std::min(sampling, 10000);
+
+      vtkNew<vtkKochanekSpline> xSpline;
+      vtkNew<vtkKochanekSpline> ySpline;
+      vtkNew<vtkKochanekSpline> zSpline;
+      xSpline->SetDefaultBias(bias); xSpline->SetDefaultTension(tension); xSpline->SetDefaultContinuity(continuity);
+      ySpline->SetDefaultBias(bias); ySpline->SetDefaultTension(tension); ySpline->SetDefaultContinuity(continuity);
+      zSpline->SetDefaultBias(bias); zSpline->SetDefaultTension(tension); zSpline->SetDefaultContinuity(continuity);
+
+      vtkNew<vtkParametricSpline> spline;
+      spline->SetXSpline(xSpline);
+      spline->SetYSpline(ySpline);
+      spline->SetZSpline(zSpline);
+      spline->SetPoints(newPoints);
+
+      vtkNew<vtkParametricFunctionSource> functionSource;
+      functionSource->SetParametricFunction(spline);
+      functionSource->SetUResolution(sampling);
+      functionSource->SetVResolution(sampling);
+      functionSource->SetWResolution(sampling);
+      functionSource->Update();
+
+      vtkPoints* out = functionSource->GetOutput()->GetPoints(); //smoothPoints of current fiber
+
+      result.Points.reserve(out->GetNumberOfPoints());
+
+      for (int j = 0; j < out->GetNumberOfPoints(); ++j)
+      {
+        double p[3];
+        out->GetPoint(j, p);
+
+        result.Points.push_back({p[0], p[1], p[2]});
       }
-
-      resampled_streamlines[i] = smoothLine;
     }
+
+    mitk::ProgressBar::GetInstance()->Progress();
+    
+    for (const auto& fiber : results)
+    {
+      vtkNew<vtkPolyLine> line;
+      for (const auto& point : fiber.Points)
+      {
+        vtkIdType id = vtkSmoothPoints->InsertNextPoint(point.data());
+
+        line->GetPointIds()->InsertNextId(id);
+      }
+      vtkSmoothCells->InsertNextCell(line);
+    }
+    mitk::ProgressBar::GetInstance()->Progress();
   }
 
-  for (auto container : resampled_streamlines)
-  {
-    vtkSmoothCells->InsertNextCell(container);
-  }
+  mitk::ProgressBar::GetInstance()->Progress(2);
 
   m_FiberPolyData = vtkSmartPointer<vtkPolyData>::New();
   m_FiberPolyData->SetPoints(vtkSmoothPoints);
   m_FiberPolyData->SetLines(vtkSmoothCells);
   this->SetFiberPolyData(m_FiberPolyData, true);
+  mitk::ProgressBar::GetInstance()->Progress(2);
 }
 
 void mitk::FiberBundle::ResampleSpline(float pointDistance)
@@ -742,111 +781,155 @@ unsigned long mitk::FiberBundle::GetNumberOfPoints() const
 
 void mitk::FiberBundle::ResampleLinear(double pointDistance)
 {
-  vtkSmartPointer<vtkPoints> vtkNewPoints = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> vtkNewCells = vtkSmartPointer<vtkCellArray>::New();
+  if (pointDistance <= 0)
+    return;
+
+  const int chunkSize = 20000;
+  const int numThreads = std::max(1, omp_get_max_threads() - 2);
+
+  vtkSmartPointer<vtkPoints> vtkNewPoints =
+    vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> vtkNewCells =
+    vtkSmartPointer<vtkCellArray>::New();
 
   MITK_INFO << "Resampling fibers (linear)";
-  boost::progress_display disp(m_FiberPolyData->GetNumberOfCells());
-  vtkSmartPointer<vtkFloatArray> newFiberWeights = vtkSmartPointer<vtkFloatArray>::New();
-  newFiberWeights->SetName("FIBER_WEIGHTS");
-  newFiberWeights->SetNumberOfValues(m_NumFibers);
+  const int numCells = m_FiberPolyData->GetNumberOfCells();
 
-  std::vector< vtkSmartPointer<vtkPolyLine> > resampled_streamlines;
-  resampled_streamlines.resize(m_FiberPolyData->GetNumberOfCells());
+  // code to init the progress bar
+  mitk::ProgressBar::GetInstance()->Reset();
+  mitk::ProgressBar::GetInstance()->AddStepsToDo(std::ceil(static_cast<double>(numCells) / (chunkSize / 2)) + 3);
+  mitk::ProgressBar::GetInstance()->Progress();
 
-#pragma omp parallel for
-  for (int i = 0; i < m_FiberPolyData->GetNumberOfCells(); i++)
+  // Build cells for sanity
+  m_FiberPolyData->BuildCells();
+
+  for (int chunkStart = 0; chunkStart < numCells; chunkStart += chunkSize)
   {
+    const int chunkEnd = std::min(chunkStart + chunkSize, numCells);
+    std::vector<FiberResult<vnl_vector_fixed<double, 3>>> results(chunkEnd - chunkStart);
 
-    std::vector< vnl_vector_fixed< double, 3 > > vertices;
-
-#pragma omp critical
+    #pragma omp parallel for num_threads(numThreads)
+    for (int i = chunkStart; i < chunkEnd; ++i)
     {
-      ++disp;
-      vtkCell* cell = m_FiberPolyData->GetCell(i);
-      int numPoints = cell->GetNumberOfPoints();
-      vtkPoints* points = cell->GetPoints();
+      FiberResult<vnl_vector_fixed<double, 3>>& result = results[i - chunkStart];
+      std::vector< vnl_vector_fixed< double, 3 > > vertices;
 
-      for (int j = 0; j < numPoints; j++)
+      // vtkCell* cell = m_FiberPolyData->GetCell(i);
+      // vtkPoints* points = cell->GetPoints();
+
+      // vtkCell* cell = nullptr;
+      // vtkPoints* points = nullptr;
+
+      #pragma omp critical(ReadFiber)
       {
-        double cand[3];
-        points->GetPoint(j, cand);
-        vnl_vector_fixed< double, 3 > candV;
-        candV[0] = cand[0]; candV[1] = cand[1]; candV[2] = cand[2];
-        vertices.push_back(candV);
-      }
-    }
+        vtkCell* cell = m_FiberPolyData->GetCell(i);
+        vtkPoints* points = cell->GetPoints();
 
-    vtkSmartPointer<vtkPolyLine> container = vtkSmartPointer<vtkPolyLine>::New();
-    vnl_vector_fixed< double, 3 > lastV = vertices.at(0);
+        int numPoints = cell->GetNumberOfPoints();
 
-#pragma omp critical
-    {
-      vtkIdType id = vtkNewPoints->InsertNextPoint(lastV.data_block());
-      container->GetPointIds()->InsertNextId(id);
-    }
-    for (unsigned int j = 1; j < vertices.size(); j++)
-    {
-      vnl_vector_fixed< double, 3 > vec = vertices.at(j) - lastV;
-      double new_dist = vec.magnitude();
-
-      if (new_dist >= pointDistance)
-      {
-        vnl_vector_fixed< double, 3 > newV = lastV;
-        if (new_dist - pointDistance <= mitk::eps)
+        for (int j = 0; j < numPoints; j++)
         {
-          vec.normalize();
-          newV += vec * pointDistance;
+          double cand[3];
+          points->GetPoint(j, cand);
+          vnl_vector_fixed<double, 3> candV;
+          candV[0] = cand[0]; candV[1] = cand[1]; candV[2] = cand[2];
+          vertices.push_back(candV);
         }
-        else
+      }
+
+      vnl_vector_fixed<double, 3> lastV = vertices[0];
+      result.Points.push_back(lastV);
+
+      // skip the first point (j=1)
+      for (unsigned int j = 1; j < vertices.size(); ++j)
+      {
+        vnl_vector_fixed<double, 3> vec = vertices[j] - lastV;
+        double new_dist = vec.magnitude();
+
+        if (new_dist >= pointDistance)
         {
-          // intersection between sphere (radius 'pointDistance', center 'lastV') and line (direction 'd' and point 'p')
-          vnl_vector_fixed< double, 3 > p = vertices.at(j - 1);
-          vnl_vector_fixed< double, 3 > d = vertices.at(j) - p;
+          vnl_vector_fixed<double, 3> newV = lastV;
 
-          double a = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
-          double b = 2 * (d[0] * (p[0] - lastV[0]) + d[1] * (p[1] - lastV[1]) + d[2] * (p[2] - lastV[2]));
-          double c = (p[0] - lastV[0])*(p[0] - lastV[0]) + (p[1] - lastV[1])*(p[1] - lastV[1]) + (p[2] - lastV[2])*(p[2] - lastV[2]) - pointDistance * pointDistance;
-
-          double v1 = (-b + std::sqrt(b*b - 4 * a*c)) / (2 * a);
-          double v2 = (-b - std::sqrt(b*b - 4 * a*c)) / (2 * a);
-
-          if (v1 > 0)
-            newV = p + d * v1;
-          else if (v2 > 0)
-            newV = p + d * v2;
+          if (new_dist - pointDistance <= mitk::eps)
+          {
+            vec.normalize();
+            newV += vec * pointDistance;
+          }
           else
-            MITK_INFO << "ERROR1 - linear resampling";
+          {
+            // intersection between sphere (radius 'pointDistance', center 'lastV') and line (direction 'd' and point 'p')
+            vnl_vector_fixed< double, 3 > p = vertices[j - 1];
 
-          j--;
-        }
+            vnl_vector_fixed< double, 3 > d = vertices[j] - p;
 
-#pragma omp critical
-        {
-          vtkIdType id = vtkNewPoints->InsertNextPoint(newV.data_block());
-          container->GetPointIds()->InsertNextId(id);
+            double a =
+              d[0] * d[0] +
+              d[1] * d[1] +
+              d[2] * d[2];
+
+            double b =
+              2.0 *
+              (d[0] * (p[0] - lastV[0]) +
+               d[1] * (p[1] - lastV[1]) +
+               d[2] * (p[2] - lastV[2]));
+
+            double c =
+              (p[0] - lastV[0])*(p[0] - lastV[0]) +
+              (p[1] - lastV[1])*(p[1] - lastV[1]) +
+              (p[2] - lastV[2])*(p[2] - lastV[2]) -
+              pointDistance * pointDistance;
+
+            double discriminant = b*b - 4 * a*c;
+            bool inserted = false;
+            if (discriminant >= 0 && a != 0){
+              double sqrtDisc = std::sqrt(discriminant);
+              double v1 = (-b + sqrtDisc) / (2*a);
+              double v2 = (-b - sqrtDisc) / (2*a);
+              
+              if (v1 > 0){
+                newV = p + d * v1;
+                inserted = true;
+              }
+              else if (v2 > 0){
+                newV = p + d * v2;
+                inserted = true;
+              }
+              else{
+                MITK_INFO << "ERROR1 - linear resampling";
+              }
+            }
+            else { 
+              MITK_WARN << "ERROR2 - linear resampling";
+            }
+  
+            if (inserted) {
+              --j;
+            }
+          }
+          result.Points.push_back(newV);
+          lastV = newV;
         }
-        lastV = newV;
-      }
-      else if (j == vertices.size() - 1 && new_dist > 0.0001)
-      {
-#pragma omp critical
+        else if (j == vertices.size() - 1 && new_dist > 1e-4)
         {
-          vtkIdType id = vtkNewPoints->InsertNextPoint(vertices.at(j).data_block());
-          container->GetPointIds()->InsertNextId(id);
+          result.Points.push_back(vertices[j]);
         }
       }
     }
+    mitk::ProgressBar::GetInstance()->Progress();
 
-#pragma omp critical
+    // merge chunk
+    for (const auto& fiber : results)
     {
-      resampled_streamlines[i] = container;
+      vtkNew<vtkPolyLine> line;
+      for (const auto& point : fiber.Points)
+      {
+        vtkIdType id = vtkNewPoints->InsertNextPoint(point.data_block());
+        line->GetPointIds()->InsertNextId(id);
+      }
+      vtkNewCells->InsertNextCell(line);
     }
-  }
 
-  for (auto container : resampled_streamlines)
-  {
-    vtkNewCells->InsertNextCell(container);
+    mitk::ProgressBar::GetInstance()->Progress();
   }
 
   if (vtkNewCells->GetNumberOfCells() > 0)
@@ -856,6 +939,7 @@ void mitk::FiberBundle::ResampleLinear(double pointDistance)
     m_FiberPolyData->SetLines(vtkNewCells);
     this->SetFiberPolyData(m_FiberPolyData, true);
   }
+  mitk::ProgressBar::GetInstance()->Progress(2);
 }
 
 // reapply selected colorcoding in case PolyData structure has changed

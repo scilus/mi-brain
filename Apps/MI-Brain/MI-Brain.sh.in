@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+binpath=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+appname=$(basename "$0" .sh)
+
+export LD_LIBRARY_PATH="${binpath}/bin${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+export QT_PLUGIN_PATH="${binpath}/bin/plugins${QT_PLUGIN_PATH:+:${QT_PLUGIN_PATH}}"
+export QT_QPA_PLATFORM_PLUGIN_PATH="${binpath}/bin/plugins/platforms${QT_QPA_PLATFORM_PLUGIN_PATH:+:${QT_QPA_PLATFORM_PLUGIN_PATH}}"
+export QT_QPA_PLATFORM=xcb
+
+exec "${binpath}/bin/${appname}" "$@"

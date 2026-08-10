@@ -30,6 +30,8 @@ public:
   void SetTractsCategoryActions(mitk::DataNode* node);
   void SetFibersActions(mitk::DataNode* node);
 
+  void SetROIsCategoryActions(mitk::DataNode* node);
+
   void SetColorsAfterCut(
     const mitk::DataNode* datasetNode,
     const mitk::FilteredFiberBundle* fibers,

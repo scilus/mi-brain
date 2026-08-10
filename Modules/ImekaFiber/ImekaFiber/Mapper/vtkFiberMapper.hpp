@@ -10,7 +10,7 @@ class ImekaFiber_EXPORT vtkFiberMapper : public vtkOpenGLPolyDataMapper
 {
 public:
   static vtkFiberMapper* New();
-  vtkTypeMacro(vtkFiberMapper, vtkPolyDataMapper)
+  vtkTypeMacro(vtkFiberMapper, vtkOpenGLPolyDataMapper)
 
   void SetFiberMapperData(const Imeka::Fiber::FiberMapperData* data);
   void UpdateIBO();

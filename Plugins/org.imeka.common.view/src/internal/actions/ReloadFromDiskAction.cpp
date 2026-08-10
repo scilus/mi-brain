@@ -11,7 +11,7 @@ void ReloadFromDiskAction::Run(
   const QList<mitk::DataNode::Pointer> &selectedNodes)
 {
   std::vector<std::string> paths;
-  for (const auto node: selectedNodes)
+  for (const auto& node: selectedNodes)
   {
     std::string path;
     if (node->GetStringProperty("full_path", path))
@@ -29,7 +29,7 @@ void ReloadFromDiskAction::Run(
           "Can't reload from disk because the file has moved or you can't "
           "reach it with your current setup. Original path was \"%1\"."
         ).arg(qPath);
-        QMessageBox::information(QApplication::activeWindow(), "Imeka", msg);
+        QMessageBox::information(QApplication::activeWindow(), "MI-Brain", msg);
       }
     }
   }

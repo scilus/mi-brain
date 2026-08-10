@@ -44,7 +44,7 @@ protected:
 
 private:
   void SetMaxFibersLength(const float, const bool);
-  Imeka::Fiber::GroupNodes::ROIAction GetCreateROICallback() const;
+  Imeka::Callback::CallbackFunction GetCreateROICallback() const;
   void RenderingManagerReinitialized();
   void SelectionObjectAdded(mitk::DataNode*, SelectionObject*);
   void PeaksImageAdded(mitk::DataNode*, mitk::Image*);

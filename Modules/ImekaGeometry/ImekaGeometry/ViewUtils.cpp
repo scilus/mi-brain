@@ -18,7 +18,7 @@ mitk::BaseRenderer* GetRenderer(const ViewDirection viewDir)
   {
   case ViewDirection::Axial: return GetAxialRenderer();
   case ViewDirection::Sagittal: return GetSagittalRenderer();
-  case ViewDirection::Frontal: return GetCoronalRenderer();
+  case ViewDirection::Coronal: return GetCoronalRenderer();
   case ViewDirection::Original: return Get3DRenderer();
   }
   return nullptr;
@@ -33,22 +33,22 @@ mitk::BaseRenderer* GetRenderer(const std::string& viewName)
 
 mitk::BaseRenderer* GetAxialRenderer()
 {
-  return GetRenderer("stdmulti.widget1");
+  return GetRenderer("stdmulti.widget0");
 }
 
 mitk::BaseRenderer* GetSagittalRenderer()
 {
-  return GetRenderer("stdmulti.widget2");
+  return GetRenderer("stdmulti.widget1");
 }
 
 mitk::BaseRenderer* GetCoronalRenderer()
 {
-  return GetRenderer("stdmulti.widget3");
+  return GetRenderer("stdmulti.widget2");
 }
 
 mitk::BaseRenderer* Get3DRenderer()
 {
-  return GetRenderer("stdmulti.widget4");
+  return GetRenderer("stdmulti.widget3");
 }
 
 std::vector<mitk::BaseRenderer*> Get2DRenderers()

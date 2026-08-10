@@ -13,6 +13,8 @@ LoadTextActionDialog::LoadTextActionDialog(
   , m_ArrMinMax(std::make_pair(m_Values[0], m_Values[m_Values.size() - 1]))
   , m_IQRMinMax(IQR(m_Values))
 {
+  Q_UNUSED(parent);
+
   setupUi(this);
 
   this->lblNbLoaded->setText(

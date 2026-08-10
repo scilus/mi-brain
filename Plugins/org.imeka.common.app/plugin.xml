@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
-  <extension point="org.blueberry.ui.handlers">
-    <handler
-      commandId="org.blueberry.ui.help.aboutAction"
-      class="AboutHandler"/>
-  </extension>
-  <extension point="org.blueberry.ui.perspectives">
+  <!-- <extension point="org.blueberry.ui.perspectives">
     <perspective
-      id="org.imeka.plitk.defaultperspective" name="Imeka" class="CommonPerspective">
+      id="org.imeka.plitk.defaultperspective" name="Imeka1" class="CommonPerspective">
     </perspective>
-  </extension>
+  </extension> -->
 </plugin>

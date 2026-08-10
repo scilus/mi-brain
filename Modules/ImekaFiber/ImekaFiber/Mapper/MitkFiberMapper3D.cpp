@@ -33,13 +33,13 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <mitkClippingProperty.h>
 
 mitk::MitkFiberMapper3D::MitkFiberMapper3D()
-  : m_UpdateIndices(false)
-  , m_TubeRadius(0.0)
+  : m_TubeRadius(0.0)
   , m_TubeSides(15)
   , m_LineWidth(1)
 {
   m_lut = vtkSmartPointer<vtkLookupTable>::New();
   m_lut->Build();
+  m_IBOTime.Modified();
 }
 
 mitk::MitkFiberMapper3D::~MitkFiberMapper3D()
@@ -50,9 +50,20 @@ void mitk::MitkFiberMapper3D::SetFiberMapperData(Imeka::Fiber::FiberMapperData* 
   m_FiberMapperData = data;
 }
 
+void mitk::MitkFiberMapper3D::UpdateIndices()
+{
+  m_IBOTime.Modified();
+}
+
 const mitk::FiberBundle* mitk::MitkFiberMapper3D::GetInput()
 {
   return static_cast<const mitk::FiberBundle * > (GetDataNode()->GetData());
+}
+
+void mitk::MitkFiberMapper3D::UpdateVtkTransform(mitk::BaseRenderer *)
+{
+  // don't apply transform since the fiber polydata is already in world coordinates.
+  return;
 }
 
 /*
@@ -137,13 +148,14 @@ void mitk::MitkFiberMapper3D::InternalGenerateData(mitk::BaseRenderer *renderer)
 
 void mitk::MitkFiberMapper3D::GenerateDataForRenderer(mitk::BaseRenderer *renderer)
 {
-  bool visible = true;
-  GetDataNode()->GetVisibility(visible, renderer, "visible");
+  LocalStorage3D* localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
+  bool visible = GetDataNode()->IsVisible(nullptr) && GetDataNode()->IsVisible(renderer);
+
+  localStorage->m_FiberAssembly->SetVisibility(visible);
   if (!visible)
     return;
 
   const DataNode* node = this->GetDataNode();
-  LocalStorage3D* localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
 
   m_FiberBundle = dynamic_cast<mitk::FiberBundle*>(node->GetData());
   m_FiberPolyData = m_FiberBundle->GetFiberPolyData();
@@ -202,13 +214,13 @@ void mitk::MitkFiberMapper3D::GenerateDataForRenderer(mitk::BaseRenderer *render
   property->SetOpacity(opacity);
 
   localStorage->m_FiberMapper->SetFiberMapperData(m_FiberMapperData);
-  if (m_UpdateIndices)
+  if (localStorage->m_LastIBOTime < m_IBOTime)
   {
     localStorage->m_FiberMapper->UpdateIBO();
-    m_UpdateIndices = false;
+    localStorage->m_LastIBOTime.Modified();
   }
 
-  if (localStorage->m_LastUpdateTime >= m_FiberBundle->GetUpdateTime3D())
+  if (localStorage->m_LastUpdateTime >= m_FiberBundle->GetUpdateTime3D() && localStorage->m_FiberMapper->GetInput() != nullptr)
     return;
 
   // Calculate time step of the input data for the specified renderer (integer value)

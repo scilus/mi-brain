@@ -5,7 +5,7 @@ static const char* const PLITK_VERSION = "@PLITK_VERSION@";
 static const char* const PLITK_VERSION_NOHASH = "@PLITK_VERSION_NOHASH@";
 static const char* const MITK_VERSION = "@MITK_VERSION_STRING@";
 
-static const char* const MIBRAIN_VERSION_CHECK = "@MIBRAIN_VERSION_CHECK@";
-static const char* const MIBRAIN_VERSION_UPDATE = "@MIBRAIN_VERSION_UPDATE@";
+static const char* const MIBRAIN_VERSION_CHECK = "";
+static const char* const MIBRAIN_VERSION_UPDATE = "";
 
 #endif // PLITK_VERSION_HPP_INCLUDED

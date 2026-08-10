@@ -1,0 +1,198 @@
+diff --git a/CMake/mitkMacroInstall.cmake b/CMake/mitkMacroInstall.cmake
+index 91987663b0..8dc36c2e3e 100644
+--- a/CMake/mitkMacroInstall.cmake
++++ b/CMake/mitkMacroInstall.cmake
+@@ -209,6 +209,11 @@ macro(_fixup_target)
+     if(_additional_search_paths)
+       set(DIRS \"\${DIRS};\${_additional_search_paths}\")
+     endif()
++    # MapleGlazedCrow PATCH
++    get_filename_component(_qt_lib_dir \"${Qt6_DIR}/../..\" ABSOLUTE)
++    if(_qt_lib_dir)
++      set(DIRS \"\${DIRS};\${_qt_lib_dir}\")
++    endif()
+     foreach(_plugin \${PLUGINS})
+       get_filename_component(_pluginpath \${_plugin} PATH)
+       list(APPEND DIRS \"\${_pluginpath}\")
+diff --git a/CMakeExternals/ACVD.cmake b/CMakeExternals/ACVD.cmake
+index b85a7a66a9..5585c94712 100644
+--- a/CMakeExternals/ACVD.cmake
++++ b/CMakeExternals/ACVD.cmake
+@@ -24,7 +24,7 @@ if(MITK_USE_ACVD)
+     ExternalProject_Add(${proj}
+       LIST_SEPARATOR ${sep}
+       GIT_REPOSITORY https://github.com/valette/ACVD.git
+-      GIT_TAG 83a0bd0b5edd510f897c9e59e951412698ed3fb9
++      GIT_TAG 0f934e11a001b2c84e11454263e05e54ba128222
+       CMAKE_GENERATOR ${gen}
+       CMAKE_GENERATOR_PLATFORM ${gen_platform}
+       CMAKE_ARGS
+diff --git a/CMakeExternals/VTK.cmake b/CMakeExternals/VTK.cmake
+index 35726e7fa4..13c11d8923 100644
+--- a/CMakeExternals/VTK.cmake
++++ b/CMakeExternals/VTK.cmake
+@@ -57,7 +57,7 @@ if(NOT DEFINED VTK_DIR)
+   ExternalProject_Add(${proj}
+     LIST_SEPARATOR ${sep}
+     GIT_REPOSITORY https://github.com/Kitware/VTK.git
+-    GIT_TAG 40ef44cb1bda31f1dca400452125fcf43f9b0626 # 2025-04-09
++    GIT_TAG 9bd2ddd86ca49ca379e294cdceef8a16bbb64ea5 # Aug 25, 2025
+     GIT_SUBMODULES ""
+     CMAKE_GENERATOR ${gen}
+     CMAKE_GENERATOR_PLATFORM ${gen_platform}
+diff --git a/Modules/Chart/include/QmitkChartWidget.h b/Modules/Chart/include/QmitkChartWidget.h
+index 308098167b..a6af0b7793 100644
+--- a/Modules/Chart/include/QmitkChartWidget.h
++++ b/Modules/Chart/include/QmitkChartWidget.h
+@@ -160,7 +160,7 @@ public:
+                               const std::string& type,
+                               const std::string& color,
+                               const std::string& lineStyle,
+-                              const std::string& pieLabelsData = 0);
++                              const std::string& pieLabelsData = {});
+ 
+   /*!
+   * \brief Adds 2D data to the widget. Call repeatedly for displaying multiple charts.
+@@ -182,7 +182,7 @@ public:
+                            const std::string& type,
+                            const std::string& color,
+                            const std::string& style,
+-                           const std::string& pieLabelsData = 0);
++                           const std::string& pieLabelsData = {});
+ 
+   /*!
+   * \brief Removes data from the widget, works for 1D and 2D Data
+diff --git a/Modules/Chart/src/QmitkChartWidget.cpp b/Modules/Chart/src/QmitkChartWidget.cpp
+index 8110163093..2b8e86f026 100644
+--- a/Modules/Chart/src/QmitkChartWidget.cpp
++++ b/Modules/Chart/src/QmitkChartWidget.cpp
+@@ -54,7 +54,7 @@ public:
+                            const std::string& type,
+                            const std::string& color,
+                            const std::string& style,
+-                           const std::string& pieLabelsData = 0);
++                           const std::string& pieLabelsData = {});
+ 
+   void UpdateData1D(const std::vector<double> &data1D, const std::string &label);
+   void UpdateData2D(const std::vector< std::pair<double, double> > &data2D, const std::string &label);
+@@ -63,7 +63,7 @@ public:
+                               const std::string& type,
+                               const std::string& color,
+                               const std::string& lineStyle,
+-                              const std::string& pieLabelsData = 0);
++                              const std::string& pieLabelsData = {});
+ 
+   void RemoveData(const std::string &label);
+ 
+diff --git a/Modules/Classification/CLUtilities/include/itkEnhancedScalarImageToNeighbourhoodGreyLevelDifferenceMatrixFilter.hxx b/Modules/Classification/CLUtilities/include/itkEnhancedScalarImageToNeighbourhoodGreyLevelDifferenceMatrixFilter.hxx
+index a744a463a1..4326e4ffbe 100644
+--- a/Modules/Classification/CLUtilities/include/itkEnhancedScalarImageToNeighbourhoodGreyLevelDifferenceMatrixFilter.hxx
++++ b/Modules/Classification/CLUtilities/include/itkEnhancedScalarImageToNeighbourhoodGreyLevelDifferenceMatrixFilter.hxx
+@@ -298,7 +298,7 @@ EnhancedScalarImageToNeighbourhoodGreyLevelDifferenceMatrixFilter<TImageType, TH
+ 
+     PixelType mean = sum / px;
+ 
+-    double si = std::abs<double>(mean-centerPixelIntensity);
++    double si = std::abs(static_cast<double>(mean-centerPixelIntensity));
+ 
+     run[0] = centerPixelIntensity;
+ 
+diff --git a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFCooccurenceMatrix2.cpp b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFCooccurenceMatrix2.cpp
+index b2fe3c7d3b..308a7b84cd 100644
+--- a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFCooccurenceMatrix2.cpp
++++ b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFCooccurenceMatrix2.cpp
+@@ -338,9 +338,9 @@ void CalculateFeatures(
+       }
+       results.AngularSecondMoment += pij*pij;
+       results.Contrast += (iInt - jInt)* (iInt - jInt) * pij;
+-      results.Dissimilarity += std::abs<double>(iInt - jInt) * pij;
+-      results.InverseDifference += pij / (1 + (std::abs<double>(iInt - jInt)));
+-      results.InverseDifferenceNormalised += pij / (1 + (std::abs<double>(iInt - jInt) / Ng));
++      results.Dissimilarity += std::abs(iInt - jInt) * pij;
++      results.InverseDifference += pij / (1 + (std::abs(iInt - jInt)));
++      results.InverseDifferenceNormalised += pij / (1 + (std::abs(iInt - jInt) / Ng));
+       results.InverseDifferenceMoment += pij / (1 + (iInt - jInt)*(iInt - jInt));
+       results.InverseDifferenceMomentNormalised += pij / (1 + (iInt - jInt)*(iInt - jInt)/Ng/Ng);
+       results.Autocorrelation += iInt*jInt * pij;
+diff --git a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFFirstOrderHistogramStatistics.cpp b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFFirstOrderHistogramStatistics.cpp
+index 8913274d43..d526ba420e 100644
+--- a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFFirstOrderHistogramStatistics.cpp
++++ b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFFirstOrderHistogramStatistics.cpp
+@@ -184,8 +184,8 @@ CalculateFirstOrderHistogramStatistics(const itk::Image<TPixel, VImageDimension>
+     meanAbsoluteDeviationIndex += probability * std::abs(deltaIndex);
+     if ((i >= p10Index) && (i <= p90Index))
+     {
+-      robustMeanAbsoluteDeviationValue += frequence * std::abs<double>(voxelValue - robustMeanValue);
+-      robustMeanAbsoluteDeivationIndex += frequence * std::abs<double>(i*1.0 - robustMeanIndex*1.0);
++      robustMeanAbsoluteDeviationValue += frequence * std::abs(voxelValue - robustMeanValue);
++      robustMeanAbsoluteDeivationIndex += frequence * std::abs(i*1.0 - robustMeanIndex*1.0);
+     }
+     medianAbsoluteDeviationValue += probability * std::abs(voxelValue - medianValue);
+     medianAbsoluteDeviationIndex += probability * std::abs(i*1.0 - medianIndex);
+diff --git a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFFirstOrderNumericStatistics.cpp b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFFirstOrderNumericStatistics.cpp
+index 5f9f1d43a8..25e68d1ec9 100644
+--- a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFFirstOrderNumericStatistics.cpp
++++ b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFFirstOrderNumericStatistics.cpp
+@@ -190,8 +190,8 @@ CalculateFirstOrderStatistics(const itk::Image<TPixel, VImageDimension>* itkImag
+       double value = imageIter.Get();
+       double valueMinusMean = value - mean;
+ 
+-      sumAbsoluteDistanceToMean += std::abs<double>(valueMinusMean);
+-      sumAbsoluteDistanceToMedian += std::abs<double>(value - median);
++      sumAbsoluteDistanceToMean += std::abs(valueMinusMean);
++      sumAbsoluteDistanceToMedian += std::abs(value - median);
+       sumValueMinusMeanThree += valueMinusMean * valueMinusMean * valueMinusMean;
+       sumValueMinusMeanFour += valueMinusMean * valueMinusMean * valueMinusMean * valueMinusMean;
+ 
+diff --git a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFIntensityVolumeHistogramFeatures.cpp b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFIntensityVolumeHistogramFeatures.cpp
+index 4cc6c40fa4..7048d84df4 100644
+--- a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFIntensityVolumeHistogramFeatures.cpp
++++ b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFIntensityVolumeHistogramFeatures.cpp
+@@ -106,8 +106,8 @@ namespace
+     featureList.push_back(std::make_pair(mitk::CreateFeatureID(params.id, "Volume fraction at 0.90 intensity"), hist[index090]));
+     featureList.push_back(std::make_pair(mitk::CreateFeatureID(params.id, "Intensity at 0.10 volume"), intensity010));
+     featureList.push_back(std::make_pair(mitk::CreateFeatureID(params.id, "Intensity at 0.90 volume"), intensity090));
+-    featureList.push_back(std::make_pair(mitk::CreateFeatureID(params.id, "Difference volume fraction at 0.10 and 0.90 intensity"), std::abs<double>(hist[index010] - hist[index090])));
+-    featureList.push_back(std::make_pair(mitk::CreateFeatureID(params.id, "Difference intensity at 0.10 and 0.90 volume"), std::abs<double>(intensity090 - intensity010)));
++    featureList.push_back(std::make_pair(mitk::CreateFeatureID(params.id, "Difference volume fraction at 0.10 and 0.90 intensity"), std::abs(hist[index010] - hist[index090])));
++    featureList.push_back(std::make_pair(mitk::CreateFeatureID(params.id, "Difference intensity at 0.10 and 0.90 volume"), std::abs(intensity090 - intensity010)));
+     featureList.push_back(std::make_pair(mitk::CreateFeatureID(params.id, "Area under IVH curve"), auc));
+     //featureList.push_back(std::make_pair("Local Intensity Global Intensity Peak", globalPeakValue));
+   }
+diff --git a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFNeighbourhoodGreyToneDifferenceFeatures.cpp b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFNeighbourhoodGreyToneDifferenceFeatures.cpp
+index dcb5481593..3e8e8aa6d5 100644
+--- a/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFNeighbourhoodGreyToneDifferenceFeatures.cpp
++++ b/Modules/Classification/CLUtilities/src/GlobalImageFeatures/mitkGIFNeighbourhoodGreyToneDifferenceFeatures.cpp
+@@ -75,7 +75,7 @@ CalculateIntensityPeak(const itk::Image<TPixel, VImageDimension>* itkImage, cons
+       {
+         localMean /= localCount;
+       }
+-        localMean = std::abs<double>(localIndex + 1 - localMean);
++        localMean = std::abs(localIndex + 1 - localMean);
+ 
+         pVector[localIndex] += 1;
+         sVector[localIndex] += localMean;
+@@ -114,8 +114,8 @@ CalculateIntensityPeak(const itk::Image<TPixel, VImageDimension>* itkImage, cons
+       contrastA += pVector[i] * pVector[j] * iMinusj*iMinusj;
+       if ((pVector[i] > 0) && (pVector[j] > 0))
+       {
+-        busynessA += std::abs<double>((i + 1.0)*pVector[i] - (j + 1.0)*pVector[j]);
+-        complexity += std::abs<double>(iMinusj)*(pVector[i] * sVector[i] + pVector[j] * sVector[j]) / (pVector[i] + pVector[j]);
++        busynessA += std::abs((i + 1.0)*pVector[i] - (j + 1.0)*pVector[j]);
++        complexity += std::abs(iMinusj)*(pVector[i] * sVector[i] + pVector[j] * sVector[j]) / (pVector[i] + pVector[j]);
+         strengthA += (pVector[i] + pVector[j])*iMinusj*iMinusj;
+       }
+     }
+diff --git a/Modules/SegmentationUI/Qmitk/QmitkToolSelectionBox.h b/Modules/SegmentationUI/Qmitk/QmitkToolSelectionBox.h
+index f9e7e14569..1aa206d410 100755
+--- a/Modules/SegmentationUI/Qmitk/QmitkToolSelectionBox.h
++++ b/Modules/SegmentationUI/Qmitk/QmitkToolSelectionBox.h
+@@ -68,7 +68,7 @@ public:
+ 
+     @param toolGroups
+   */
+-  void SetDisplayedToolGroups(const std::string &toolGroups = nullptr);
++  void SetDisplayedToolGroups(const std::string &toolGroups = {});
+ 
+   void OnToolManagerToolModified();
+   void OnToolManagerReferenceDataModified();

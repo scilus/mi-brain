@@ -39,6 +39,11 @@ std::string ImekaIO_EXPORT GetVFFImageDescription();
 mitk::CustomMimeType ImekaIO_EXPORT GetVFFImageMimeType();
 QString ImekaIO_EXPORT GetVFFImageFilter();
 
+std::string ImekaIO_EXPORT GetRGBNiftiImageName();
+std::string ImekaIO_EXPORT GetRGBNiftiImageDescription();
+mitk::CustomMimeType ImekaIO_EXPORT GetRGBNiftiImageMimeType();
+QString ImekaIO_EXPORT GetRGBNiftiImageFilter();
+
 } // namespace IO
 
 } // namespace Imeka

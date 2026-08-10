@@ -22,9 +22,14 @@ const char* ActiveROIName = "ActiveROI";
 
 mitk::NodePredicateAnd::Pointer GetAnatPredicate()
 {
-  return mitk::NodePredicateAnd::New(
-    mitk::NodePredicateDataType::New("Image"),
-    Imeka::Predicate::NotHelperObject());
+  auto isAnat = mitk::NodePredicateAnd::New();
+  isAnat->AddPredicate(mitk::NodePredicateDataType::New("Image"));
+  isAnat->AddPredicate(Imeka::Predicate::NotHelperObject());
+  isAnat->AddPredicate(Imeka::Predicate::NotProperty("binary", true));
+  isAnat->AddPredicate(Imeka::Predicate::NotProperty("segmentation", true));
+  isAnat->AddPredicate(Imeka::Predicate::NotProperty("org.mitk.views.segmentation.ismask", true));
+
+  return isAnat;
 }
 
 mitk::NodePredicateImageInfo::Pointer GetRGBPredicate()
@@ -155,6 +160,7 @@ void SetupNodeDataAndMappers(
 {
   node->SetBoolProperty("pickable", false);
   node->SetBoolProperty("Fiber2DfadeEFX", false);
+  node->SetVisibility(true); // Global visibility master switch
 
   Mappers2DSettingsWidget::SetVisibility(node);
   Mappers2DSettingsWidget::SetFiberThickness(node);
@@ -202,6 +208,7 @@ mitk::FilteredFiberBundle::Pointer Union(const ConstNodes& nodes)
     colors = mitk::FilteredFiberBundle::GetNewColorArray(nbPoints);
   }
 
+  std::cout << "Fibers::Union: Merging " << fiberBundles.size() << " fiber bundles, total points: " << nbPoints << "\n";
   auto lines = vtkSmartPointer<vtkCellArray>::New();
   auto points = vtkSmartPointer<vtkPoints>::New();
 
@@ -214,6 +221,7 @@ mitk::FilteredFiberBundle::Pointer Union(const ConstNodes& nodes)
   if (points->GetNumberOfPoints() > 0)
   {
     newFibers = mitk::FilteredFiberBundle::New(lines, points, colors);
+    std::cout << "Fibers::Union: Resulting bundle has " << newFibers->GetNumFibers() << " fibers\n";
   }
 
   if (!newFibers || newFibers->GetNumberOfPoints() == 0)

@@ -30,9 +30,8 @@ void FibersManagerTester::setUp()
 {
   m_DS = mitk::StandaloneDataStorage::New();
   m_DM = new Imeka::DataManager(m_DS);
-  m_Groups = new Imeka::Fiber::GroupNodes(
-    [](mitk::DataNode*){}, m_Callback, *m_DM);
-  m_FM = new Imeka::Fiber::FibersManager(*m_DM, m_Callback, *m_Groups);
+  m_Groups = new Imeka::Fiber::GroupNodes(m_Callback, *m_DM);
+  m_FM = new Imeka::Fiber::FibersManager(*m_DM, m_Callback, *m_Groups, [](mitk::DataNode*){});
 
   /* We must add a NodeAdded listener because we are not connected to the
   normal MITK view system, so BrainAnalysisView::NodeAdded will never be
@@ -335,7 +334,7 @@ void FibersManagerTester::NodeAddedProxy(const mitk::DataNode* node)
     m_BlockNodeAdded = true;
 
     auto nonConstNode = const_cast<mitk::DataNode*>(node);
-    if (m_Groups->UpdateGroupIfRequired(nonConstNode))
+    if (m_FM->UpdateGroupIfRequired(nonConstNode))
     {
       m_BlockNodeAdded = false;
       return;

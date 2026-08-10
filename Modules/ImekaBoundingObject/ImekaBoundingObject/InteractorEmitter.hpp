@@ -42,18 +42,30 @@ protected:
     mitk::StateMachineAction*, mitk::InteractionEvent*) override;
   virtual void DeselectObject(
     mitk::StateMachineAction*, mitk::InteractionEvent*) override;
-  virtual void InitAction(mitk::StateMachineAction*, mitk::InteractionEvent*) override;
+  virtual void InitTranslate(mitk::StateMachineAction*, mitk::InteractionEvent*) override;
+  virtual void InitRotate(mitk::StateMachineAction*, mitk::InteractionEvent*) override;
+  virtual void InitDeformation(mitk::StateMachineAction*, mitk::InteractionEvent*) override;
   virtual void TranslateObject(
     mitk::StateMachineAction*, mitk::InteractionEvent*) override;
   virtual void RotateObject(
     mitk::StateMachineAction*, mitk::InteractionEvent*) override;
   virtual void DeformObject(
     mitk::StateMachineAction*, mitk::InteractionEvent*) override;
+  virtual void ScaleRadius(
+    mitk::StateMachineAction *, mitk::InteractionEvent *) override;
 
 private:
   mitk::BoundingObject* m_BoundingObject;
   bool m_NodeIsSelected;
   bool m_NodeIsInited;
+
+  mitk::DataNode::Pointer m_SelectedNode;
+
+  mitk::Point3D m_InitialOrigin;
+  mitk::Point3D m_InitialPlaneIntersection;
+
+  mitk::Vector3D m_InteractionPlaneNormal;
+  mitk::Point3D m_InteractionPlanePoint;
 };
 
 } // namespace BoundingObject

@@ -8,7 +8,7 @@ int main(int argc, char** argv)
   // Create a QApplication instance first
   mitk::BaseApplication app(argc, argv);
   app.setApplicationName("MI-Brain");
-  app.setOrganizationName("Imeka");
+  app.setOrganizationName("SCIL");
 
   // Preload the org.mitk.gui.qt.ext plug-in (and hence also QmitkExt) to speed
   // up a clean-cache start. This also works around bugs in older gcc and glibc implementations,

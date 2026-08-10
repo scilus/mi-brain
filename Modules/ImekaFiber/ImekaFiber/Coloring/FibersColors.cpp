@@ -3,6 +3,7 @@
 
 #include <mitkLevelWindowProperty.h>
 #include <mitkRenderingManager.h>
+#include "ImekaFiber/utils.hpp"
 
 #include "ImekaCommon/Colors.hpp"
 
@@ -58,6 +59,8 @@ void FibersColors::DeleteLevelWindowCallbacks(
   }
 }
 
+// this function is dangerous because it relies on the promise that only a TractGroup will be passed as a parameter.
+// But it's already here for some reason, so I don't want to disturb it too much.
 void FibersColors::SetTractsCategoryActions(mitk::DataNode* node)
 {
   m_Callback.Add("ShuffleColor", 0, node, [this](mitk::DataNode* node)
@@ -118,6 +121,30 @@ void FibersColors::SetTractsCategoryActions(mitk::DataNode* node)
     node->SetIntProperty("ShuffleColor", 0);
     node->SetColor(-1.0, -1.0, -1.0);
     node->SetIntProperty("ColorType", -1);
+  });
+}
+
+void FibersColors::SetROIsCategoryActions(mitk::DataNode* node)
+{
+  m_Callback.Add("ShuffleColor", 0, node, [this](mitk::DataNode* node)
+  {
+    int shuffleColor = 0;
+    node->GetIntProperty("ShuffleColor", shuffleColor);
+    if (!shuffleColor) { return; }
+
+    Nodes nodes;
+    if (shuffleColor == 1)
+    {
+      // 1 is shuffle all
+      nodes = m_DM.DirectChildrenOf(node);
+    }
+    else
+    {
+      // 2 is shuffle masks
+      nodes = m_DM.GetAll(Imeka::Fiber::IsMaskPredicate(), node);
+    }
+    Imeka::Color::ShuffleColors(nodes);
+    node->SetIntProperty("ShuffleColor", 0);
   });
 }
 

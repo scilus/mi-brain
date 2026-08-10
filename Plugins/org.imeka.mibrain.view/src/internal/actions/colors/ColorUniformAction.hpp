@@ -27,6 +27,7 @@ public:
       const auto tractsCategoryNode = selectedNodes[0];
       const auto nodes =
         Imeka::DataManager(m_DS).DirectChildrenOf(tractsCategoryNode);
+      //Nodes is a vector, so this is fine. It's not really an int.
       if (nodes.size() == 0) { return; }
 
       const QColor color = QColorDialog::getColor(
@@ -52,7 +53,7 @@ public:
         Imeka::Fiber::GetSingleInitialColor(selectedNodes));
       if (!color.isValid()) { return; }
 
-      for (const auto node : selectedNodes)
+      for (const auto &node : selectedNodes)
       {
         Imeka::Color::Apply(node, color);
       }

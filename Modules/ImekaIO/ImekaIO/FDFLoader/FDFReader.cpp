@@ -40,7 +40,8 @@ FDFReader* FDFReader::Clone() const
   return new FDFReader(*this);
 }
 
-std::vector<itk::SmartPointer<mitk::BaseData>> FDFReader::Read()
+std::vector<itk::SmartPointer<mitk::BaseData>>
+FDFReader::DoRead()
 {
   std::vector<itk::SmartPointer<mitk::BaseData>> result;
   const std::string& locale = "C";

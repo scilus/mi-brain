@@ -59,14 +59,16 @@ void Callback::Remove(
   }
 }
 
-void Callback::SetVisibilityCallback(
+void Callback::AddVisibilityCallback(
   mitk::DataNode* node,
   Imeka::DataManager& DM)
 {
-  SetVisibilityCallback(node, [](){}, [](){}, [](){}, DM);
+  AddVisibilityCallback(node, [](){}, [](){}, [](){}, DM);
 }
 
-void Callback::SetVisibilityCallback(
+// This function exists because the logic for the visibility callback is complex
+// and reused in many places.
+void Callback::AddVisibilityCallback(
   mitk::DataNode* node,
   std::function<void()> onVisible,
   std::function<void()> onHide,

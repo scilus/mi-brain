@@ -12,6 +12,8 @@ set(INTERNAL_CPP_FILES
   actions/CreateSphereSOAction.cpp
   actions/CreateTractGroupAction.cpp
   actions/CutFibersAbstractAction.cpp
+  actions/ConvertToBinaryROIAction.cpp
+  actions/ConvertToMultiLabelAction.cpp
   actions/DensityImageAction.cpp
   actions/DuplicateTractGroupAction.cpp
   actions/EditActiveROIsAction.cpp
@@ -46,6 +48,8 @@ set(MOC_H_FILES
   src/internal/actions/CreateTractGroupAction.hpp
   src/internal/actions/CutFibersInsideAction.hpp
   src/internal/actions/CutFibersOutsideAction.hpp
+  src/internal/actions/ConvertToBinaryROIAction.hpp
+  src/internal/actions/ConvertToMultiLabelAction.hpp
   src/internal/actions/DensityImageAction.hpp
   src/internal/actions/DuplicateTractGroupAction.hpp
   src/internal/actions/EditActiveROIsAction.hpp

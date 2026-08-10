@@ -1,6 +1,9 @@
 
 #include "PluginActivator.hpp"
 
+#include <usModuleInitialization.h>
+US_INITIALIZE_MODULE
+
 #include "BrainAnalysisView.h"
 #include "actions/colors/ColorEndPointsAction.hpp"
 #include "actions/colors/ColorFromAnatomyAction.hpp"
@@ -10,6 +13,8 @@
 #include "actions/colors/ColorUniformAction.hpp"
 #include "actions/colors/LoadTextAction.hpp"
 #include "actions/BinaryImageAction.hpp"
+#include "actions/ConvertToBinaryROIAction.hpp"
+#include "actions/ConvertToMultiLabelAction.hpp"
 #include "actions/CreateCubeSOAction.hpp"
 #include "actions/CreateSphereSOAction.hpp"
 #include "actions/CreateTractGroupAction.hpp"
@@ -32,6 +37,8 @@ void PluginActivator::start(ctkPluginContext* context)
 {
   BERRY_REGISTER_EXTENSION_CLASS(BrainAnalysisView, context)
   BERRY_REGISTER_EXTENSION_CLASS(BinaryImageAction, context)
+  BERRY_REGISTER_EXTENSION_CLASS(ConvertToBinaryROIAction, context)
+  BERRY_REGISTER_EXTENSION_CLASS(ConvertToMultiLabelAction, context)
   BERRY_REGISTER_EXTENSION_CLASS(ColorEndPointsAction, context)
   BERRY_REGISTER_EXTENSION_CLASS(ColorFromAnatomyAction, context)
   BERRY_REGISTER_EXTENSION_CLASS(ColorLocalAction, context)

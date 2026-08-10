@@ -75,7 +75,8 @@ unsigned char* StreamlinesCutter::GetStreamlineColors(
 {
   auto colors = static_cast<unsigned char*>(
     m_OriginalFibers->GetFiberColors()->GetVoidPointer(0));
-  vtkIdType nPts, *pts;
+  vtkIdType nPts;
+  const vtkIdType *pts;
   m_OriginalPolyData->GetCellPoints(streamlineIdx, nPts, pts);
   return colors + 4 * *pts;
 }
@@ -205,7 +206,7 @@ StreamlinesCutter::GetLineState(
     return Intersect;
   }
 
-  //  p0 -- ¼ -- ½ -- ¾ -- p1
+  //  p0 -- ï¿½ -- ï¿½ -- ï¿½ -- p1
   mitk::Point3D quarterPoint, middlePoint, threeQuarterPoint;
   middlePoint.SetToMidPoint(p0, p1);
   quarterPoint.SetToMidPoint(p0, middlePoint);

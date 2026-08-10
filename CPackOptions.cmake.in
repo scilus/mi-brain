@@ -4,8 +4,8 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   set(CPACK_PACKAGE_ICON "C:\\Imeka\\MI-Brain\\MI-Brain.bmp")
   # set the install/unistall icon used for the installer itself
   # There is a bug in NSIS that does not handle full unix paths properly. 
-  set(CPACK_NSIS_MUI_ICON "@PROJECT_SOURCE_DIR@\\Apps\\MI-Brain\\icons\\logo_imeka.ico")
-  set(CPACK_NSIS_MUI_UNIICON "@PROJECT_SOURCE_DIR@\\Apps\\MI-Brain\\icons\\logo_imeka.ico")
+  set(CPACK_NSIS_MUI_ICON "@PROJECT_SOURCE_DIR@\\Apps\\MI-Brain\\icons\\logo_scil.ico")
+  set(CPACK_NSIS_MUI_UNIICON "@PROJECT_SOURCE_DIR@\\Apps\\MI-Brain\\icons\\logo_scil.ico")
 
   set(CPACK_NSIS_DISPLAY_NAME "MI-Brain - Medical Imaging and Interaction Toolkit")
   

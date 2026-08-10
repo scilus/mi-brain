@@ -1,6 +1,9 @@
 
 #include "PluginActivator.hpp"
 
+#include <usModuleInitialization.h>
+US_INITIALIZE_MODULE
+
 #include <mitkNodePredicateDataType.h>
 #include <mitkNodePredicateProperty.h>
 #include <QmitkNodeDescriptorManager.h>
@@ -48,6 +51,9 @@ void PluginActivator::start(ctkPluginContext* context)
   manager->AddDescriptor(
     new QmitkNodeDescriptor("SelectionROI",
     "", Imeka::Fiber::GetROIPredicate(), manager));
+  manager->AddDescriptor(
+    new QmitkNodeDescriptor("MultiLabelSegmentation",
+    "", mitk::NodePredicateDataType::New("MultiLabelSegmentation"), manager));
 
   // 1 and 2 because I want to group and order some actions.
   manager->AddDescriptor(

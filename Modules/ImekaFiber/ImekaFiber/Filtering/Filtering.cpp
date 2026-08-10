@@ -13,7 +13,7 @@ namespace Fiber
 // Called in another thread to get a QFuture. This way, the user doesn't have
 // to wait for this results. It's useless for him anyway.
 vtkSmartPointer<vtkOctreePointLocator> GetReadyOctree(
-  const mitk::FilteredFiberBundle* fiber)
+  mitk::FilteredFiberBundle::ConstPointer fiber)
 {
   auto octree = vtkSmartPointer<vtkOctreePointLocator>::New();
   octree->SetDataSet(fiber->GetFiberPolyData());
@@ -80,7 +80,7 @@ TractGroup& Filtering::DuplicateDataset(
 
 void Filtering::FillDatasetInfo(
   const mitk::DataNode* datasetNode,
-  const mitk::FilteredFiberBundle* fiber)
+  mitk::FilteredFiberBundle* fiber)
 {
   const bool alreadyIn = m_DatasetInfo.count(datasetNode) > 0;
   auto& datasetInfo = m_DatasetInfo[datasetNode];
@@ -96,7 +96,7 @@ void Filtering::FillDatasetInfo(
   datasetInfo.fiber = fiber;
   datasetInfo.data = {
     SubsetOf(fiber),
-    QtConcurrent::run(GetReadyOctree, fiber),
+    QtConcurrent::run(GetReadyOctree, mitk::FilteredFiberBundle::ConstPointer(fiber)),
     additionalBoundingMargin
   };
 }
@@ -574,10 +574,13 @@ bool Filtering::FilterDataset(
 // We set the current `visibleTractGroupIndexes` as the new indices, which
 // don't seem to make much sense, but 1) it may have been updated before 2)
 // the streamlines may have been shuffled, or mirrored, etc.
+// This is never referenced in the code.
 void Filtering::ForceFilterDataset(
   const mitk::DataNode* datasetNode,
   mitk::FilteredFiberBundle* fibers)
 {
+  Q_UNUSED(fibers);
+
   auto& fiberMapperData = m_NodeDataMap[datasetNode].fiberMapperData;
   auto& datasetInfo = m_DatasetInfo.at(datasetNode);
   const auto& generalVisibility = datasetInfo.data.visibleTractGroupIndexes;

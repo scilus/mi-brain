@@ -63,7 +63,7 @@ void DicomWriter::Write()
   origin4D[3] = 0; // There is no support for a 4D origin. However, we should have an valid value here
 
   itk::ImageIOBase::Pointer imageIO =
-    itk::ImageIOFactory::CreateImageIO(GetOutputLocation().c_str(), itk::ImageIOFactory::WriteMode);
+    itk::ImageIOFactory::CreateImageIO(GetOutputLocation().c_str(), itk::IOFileModeEnum::WriteMode);
 
   if(imageIO.IsNull())
   {
@@ -74,9 +74,9 @@ void DicomWriter::Write()
   imageIO->SetNumberOfDimensions(dimension);
   imageIO->SetPixelType( pixelType.GetPixelType() );
   imageIO->SetComponentType(
-    pixelType.GetComponentType() < mitk::PixelComponentUserType ?
-      static_cast<itk::ImageIOBase::IOComponentType>(pixelType.GetComponentType()) :
-      itk::ImageIOBase::UNKNOWNCOMPONENTTYPE);
+    (static_cast<int>(pixelType.GetComponentType()) < mitk::PixelComponentUserType) ?
+      pixelType.GetComponentType() :
+      itk::IOComponentEnum::UNKNOWNCOMPONENTTYPE);
   imageIO->SetNumberOfComponents( pixelType.GetNumberOfComponents() );
 
   itk::ImageIORegion ioRegion( dimension );
@@ -88,7 +88,8 @@ void DicomWriter::Write()
     imageIO->SetOrigin(i,origin4D[i]);
 
     mitk::Vector3D mitkDirection;
-    mitkDirection.SetVnlVector(image->GetGeometry()->GetIndexToWorldTransform()->GetMatrix().GetVnlMatrix().get_column(i));
+    vnl_vector<double> column(image->GetGeometry()->GetIndexToWorldTransform()->GetMatrix().GetVnlMatrix().get_column(i));
+    mitkDirection.SetVnlVector(column);
     itk::Vector<double, 4u> direction4D;
     direction4D[0] = mitkDirection[0];
     direction4D[1] = mitkDirection[1];

@@ -20,10 +20,13 @@ UpdaterMenu::UpdaterMenu(QWidget* parent)
   this->setTitle("Update available!");
 
   const QUrl checkURL(MIBRAIN_VERSION_CHECK);
+  if (checkURL.isEmpty())
+  {
+    return;
+  }
 
   auto manager = new QNetworkAccessManager(this);
   QNetworkRequest request(checkURL);
-  request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
   connect(manager, &QNetworkAccessManager::finished,
     this, &UpdaterMenu::replyFinished);
 
@@ -34,9 +37,7 @@ UpdaterMenu::UpdaterMenu(QWidget* parent)
                   "with your Internet connetion.\n";
     return;
   }
-  const auto errorMethod =
-    QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error);
-  connect(m_Reply, errorMethod, this, &UpdaterMenu::replyError);
+  connect(m_Reply, &QNetworkReply::errorOccurred, this, &UpdaterMenu::replyError);
 }
 
 void UpdaterMenu::replyFinished(QNetworkReply *reply)

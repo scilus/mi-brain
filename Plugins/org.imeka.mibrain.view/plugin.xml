@@ -159,16 +159,20 @@
       label="Create mask from Selection Object"
       icon="resources/GenerateBinary.png"
       class="SOToImageAction" />
-    <contextMenuAction
+
+    <!-- We decided not to include these actions, but their code
+    and implementations are still available just in case we need them again,
+    so these only need to be uncommented to be used. -->
+    <!-- <contextMenuAction
       nodeDescriptorName="BoundingObject" where="DM" when="hover"
       DnD="true" idx="2" label="Cut Inside"
       icon="resources/CutFibersIn.png"
-      class="CutFibersInsideAction" />
-    <contextMenuAction
+      class="CutFibersInsideAction" /> -->
+    <!-- <contextMenuAction
       nodeDescriptorName="BoundingObject" where="DM" when="hover"
       DnD="true" idx="3" label="Cut Outside"
       icon="resources/CutFibersOut.png"
-      class="CutFibersOutsideAction" />
+      class="CutFibersOutsideAction" /> -->
 
     <contextMenuAction
       nodeDescriptorName="TractsCategory2"
@@ -225,6 +229,16 @@
 	  label="Duplicate"
 	  icon=""
 	  class="DuplicateSubset" />-->
+    <contextMenuAction
+      nodeDescriptorName="SelectionROI"
+      label="Convert to Multi-Label Segmentation"
+      icon="resources/Plus.png"
+      class="ConvertToMultiLabelAction" />
+    <contextMenuAction
+      nodeDescriptorName="MultiLabelSegmentation"
+      label="Convert to binary ROI"
+      icon="resources/GenerateBinary.png"
+      class="ConvertToBinaryROIAction" />
     <contextMenuAction
       nodeDescriptorName="PeaksImage"
       label="Toggle peaks image"

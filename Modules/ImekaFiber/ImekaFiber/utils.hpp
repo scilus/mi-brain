@@ -68,13 +68,40 @@ typename itk::Image<OutPixType, 3>::Pointer GetTractDensityImage(
 
   if (trackingMaskNode)
   {
+    auto mitkImage = dynamic_cast<mitk::Image *>(trackingMaskNode->GetData());
     auto itkImage = OutImageType::New();
-    mitk::CastToItkImage(
-      dynamic_cast<mitk::Image *>(trackingMaskNode->GetData()), itkImage);
+    
+    // Geometry-only copy to avoid pixel type mismatch crashes
+    typename OutImageType::RegionType region;
+    typename OutImageType::RegionType::SizeType size;
+    size[0] = mitkImage->GetDimension(0);
+    size[1] = mitkImage->GetDimension(1);
+    size[2] = mitkImage->GetDimension(2);
+    region.SetSize(size);
+    itkImage->SetRegions(region);
+    itkImage->SetSpacing(mitkImage->GetGeometry()->GetSpacing());
+    itkImage->SetOrigin(mitkImage->GetGeometry()->GetOrigin());
+    
+    itk::Matrix<double, 3, 3> direction;
+    for (int i=0; i<3; ++i)
+      for (int j=0; j<3; ++j)
+        direction[j][i] = mitkImage->GetGeometry()->GetMatrixColumn(i)[j] / mitkImage->GetGeometry()->GetSpacing()[i];
+    itkImage->SetDirection(direction);
+
     generator->SetInputImage(itkImage);
     generator->SetUseImageGeometry(true);
   }
-  generator->Update();
+
+  std::cout << "Fibers::GetTractDensityImage: fibers=" << fibers->GetNumFibers() << ", points=" << fibers->GetNumberOfPoints() << "\n";
+  try
+  {
+    generator->Update();
+  }
+  catch (itk::ExceptionObject& e)
+  {
+    std::cerr << "Fibers::GetTractDensityImage: ITK exception: " << e.GetDescription() << "\n";
+    return nullptr;
+  }
   return generator->GetOutput();
 }
 

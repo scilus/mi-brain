@@ -27,8 +27,10 @@ namespace Imeka
 // so there can't be a callback triggering a callback triggering ...
 class ImekaCommon_EXPORT Callback
 {
-private:
+public:
   typedef std::function<void(mitk::DataNode*)> CallbackFunction;
+
+private:
 
   class Command
   {
@@ -128,8 +130,8 @@ public:
   // Remove all callbacks from a particular node/object
   void Remove(const mitk::DataNode*, const std::string& = "");
 
-  void SetVisibilityCallback(mitk::DataNode*, Imeka::DataManager&);
-  void SetVisibilityCallback(
+  void AddVisibilityCallback(mitk::DataNode*, Imeka::DataManager&);
+  void AddVisibilityCallback(
     mitk::DataNode*,
     std::function<void()>,
     std::function<void()>,

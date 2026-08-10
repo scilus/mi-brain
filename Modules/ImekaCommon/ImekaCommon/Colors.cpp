@@ -1,6 +1,7 @@
 
 #include "Colors.hpp"
 
+#include <QRandomGenerator>
 #include <QTime>
 
 #include <mitkDataNode.h>
@@ -11,15 +12,18 @@ namespace Imeka
 namespace Color
 {
 
+//creating a global generator onces would make more sense to have a fixed seed
+QRandomGenerator generator(15); // Colors are beautiful with this seed
+
 std::vector<QColor>
 GetNColors(const unsigned int nbColors)
 {
   std::vector<QColor> colors;
   colors.reserve(nbColors);
 
-  qsrand(15); // Colors are beautiful with this seed
-  double rndInit = qrand();
-  qsrand(QTime::currentTime().msec());
+  // QRandomGenerator generator(15); // Colors are beautiful with this seed
+  double rndInit = generator.generateDouble();
+  generator.seed(QTime::currentTime().msec());
 
   for (unsigned int i = 0; i < nbColors; ++i)
   {
@@ -27,6 +31,7 @@ GetNColors(const unsigned int nbColors)
     rndInit = fmod(rndInit, 1.0);
 
     QColor color;
+    // Randomize the hue, but keep saturation and value high for vibrant colors
     color.setHsvF(rndInit, 0.99, 0.99);
     colors.push_back(color.toRgb());
   }

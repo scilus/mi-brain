@@ -19,7 +19,8 @@ namespace Fiber
 FibersManager::FibersManager(
   Imeka::DataManager& DM,
   Imeka::Callback& callback,
-  GroupNodes& groups)
+  GroupNodes& groups,
+  Callback::CallbackFunction roiCreate)
   : m_DM(DM)
   , m_Callback(callback)
   , m_FibersColors(m_DM, m_Callback, m_FibersNodeData)
@@ -28,12 +29,9 @@ FibersManager::FibersManager(
   , m_AnatNode(nullptr)
   , m_Filtering(m_FibersNodeData)
   , m_FilteringUI(m_Callback, m_DM, m_FibersColors, m_Filtering)
+  , m_GroupNodeManager(m_Callback, m_DM, m_FibersColors, m_FilteringUI, m_Groups, roiCreate)
 {
   Saver::Instance().AddNodes(&m_FibersNodeData, false);
-
-  GroupAdded(m_Groups.Anatomies);
-  GroupAdded(m_Groups.ROIs);
-  GroupAdded(m_Groups.Tracts);
 
   connect(&m_FilteringUI, &FilteringUI::RequestUpdateDataset,
     [this](mitk::DataNode* datasetNode)
@@ -64,56 +62,31 @@ void FibersManager::RemoveFibersNode(mitk::DataNode* node)
   }
 }
 
+// This function is essentially a wrapper around GroupNodeManager::InitializeGroupNode
 void FibersManager::GroupAdded(mitk::DataNode* node)
 {
-  std::string categoryGroupName = "";
-  node->GetStringProperty(
-    Imeka::Fiber::GroupNodes::CategoryPropertyName, categoryGroupName);
-  if (categoryGroupName == "Anatomies")
-  {
+  m_GroupNodeManager.InitializeGroupNode(node);
+}
 
-  }
-  else if (categoryGroupName == "Tracts")
-  {
-    m_FibersColors.SetTractsCategoryActions(node);
-    m_FilteringUI.AddActionsToTractsCategory(node);
-    m_Callback.Add("Save", "", node, [this](mitk::DataNode* node)
-    {
-      std::string saveTo = "";
-      if (!node->GetStringProperty("Save", saveTo) || saveTo.empty()) { return; }
-      node->SetStringProperty("Save", "");
-
-      Imeka::Fiber::Saver::Instance().Save(saveTo == "dm", m_DM);
-    });
-  }
-  else if (categoryGroupName == "ROIs")
-  {
-    m_Callback.Add("ShuffleColor", 0, node, [this](mitk::DataNode* node)
-    {
-      int shuffleColor = 0;
-      node->GetIntProperty("ShuffleColor", shuffleColor);
-      if (!shuffleColor) { return; }
-
-      Nodes nodes;
-      if (shuffleColor == 1)
-      {
-        // 1 is shuffle all
-        nodes = m_DM.DirectChildrenOf(node);
-      }
-      else
-      {
-        // 2 is shuffle masks
-        nodes = m_DM.GetAll(Imeka::Fiber::IsMaskPredicate(), node);
-      }
-      Imeka::Color::ShuffleColors(nodes);
-      node->SetIntProperty("ShuffleColor", 0);
-    });
-  }
+// This is also a wrapper, which came from GroupNodes to move the logic into GroupNodeManager.
+bool FibersManager::UpdateGroupIfRequired(mitk::DataNode* node){
+  return m_GroupNodeManager.SetupGroupIfRequired(node);
 }
 
 void FibersManager::NodeAdded(mitk::DataNode* node)
 {
   m_DM.GiveUUID(node);
+
+  // always make sure all groups exist when adding a node of any type.
+  if (!dynamic_cast<mitk::PlaneGeometryData*>(node->GetData())){
+    if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)||
+        !m_DM.GetDataStorage()->Exists(m_Groups.ROIs)||
+        !m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
+    {
+      MITK_INFO << "One of the groups is missing, adding them back.\n";
+      m_GroupNodeManager.EnsureAllGroupsExist();
+    }
+  }
 
   auto selectionObject = dynamic_cast<SelectionObject*>(node->GetData());
   if (selectionObject)
@@ -130,8 +103,13 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     node->GetBoolProperty("binary", binary);
     if (binary || Imeka::Fiber::IsLabelsImage(image))
     {
-      std::cout <<
-        "Binary or labels image laoded; setting interpolation to NN.\n";
+      if (binary)
+      {
+        node->SetBoolProperty("segmentation", true);
+        node->SetBoolProperty("org.mitk.views.segmentation.ismask", true);
+      }
+
+      MITK_INFO << "Binary or labels image loaded; setting interpolation to NN.\n";
       auto interpolation =
         dynamic_cast<mitk::VtkResliceInterpolationProperty*>(
           node->GetProperty("reslice interpolation"));
@@ -139,10 +117,20 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     }
     if (Imeka::Fiber::GetROIPredicate()->CheckNode(node))
     {
+      // We now check this at the start of the function.
+      // if (!m_DM.GetDataStorage()->Exists(m_Groups.ROIs)) { 
+      //   MITK_INFO << "ROIs group missing, adding it back.\n";
+      //   GroupAdded(m_Groups.ROIs);
+      // }
       ROIAdded(node);
     }
     else
     {
+      // We now check this at the start of the function.
+      // if (!m_DM.GetDataStorage()->Exists(m_Groups.Anatomies)) { 
+      //   MITK_INFO << "Anatomies group missing, adding it back.\n";
+      //   GroupAdded(m_Groups.Anatomies);
+      // }
       m_DM.ChangeParent(node, m_Groups.Anatomies);
     }
   }
@@ -153,6 +141,13 @@ void FibersManager::NodeAdded(mitk::DataNode* node)
     node->GetBoolProperty("helper object", helperObject);
     if (!helperObject) // Not RTT
     {
+      MITK_INFO << "FibersManager: Adding fibers node " << node->GetName() << "\n";
+      // We now check this at the start of the function.
+      // if (!m_DM.GetDataStorage()->Exists(m_Groups.Tracts))
+      // {
+      //   MITK_INFO << "FibersManager: Tracts group missing, adding it back.\n";
+      //   GroupAdded(m_Groups.Tracts);
+      // }
       m_DM.ChangeParent(node, m_Groups.Tracts);
       FibersAdded(node, fiber);
 
@@ -268,22 +263,21 @@ void FibersManager::FibersAdded(
 
   m_Filtering.AddDataset(node, fiber);
 
+  // Centering and updating views
+  mitk::RenderingManager::GetInstance()->InitializeViews(fiber->GetGeometry());
+  mitk::RenderingManager::GetInstance()->RequestUpdateAll();
+
   // Then we recompute the total visibility with the new fiber selections.
   ComputeFibersVisibility(node, true);
   fiber->CalculateStatsUsingVisibility();
   emit DisplayStats();
 
-  m_Callback.SetVisibilityCallback(
+  m_Callback.AddVisibilityCallback(
     node,
     [](){},
     [](){},
-    [node](){
-      const auto visible = node->IsVisible(nullptr)
-        && Mappers2DSettingsWidget::Instance->IsEnabled();
-      for (auto renderer : Imeka::View::Get2DRenderers())
-      {
-        node->SetBoolProperty("visible", visible, renderer);
-      }
+    [](){
+      mitk::RenderingManager::GetInstance()->RequestUpdateAll();
     }, m_DM);
 
   m_FilteringUI.AddActionsToDataset(node);
@@ -325,7 +319,7 @@ void FibersManager::NodeRemoved(mitk::DataNode* node)
   }
 
   const auto nodesToUpdate = m_FilteringUI.FilteringNodeRemoved(node);
-
+  
   // Actually remove the node from MITK DM and memory. We do this because we
   // don't want ComputeFibersVisibility to count the node that we just deleted.
   m_DM.RemoveNode(node);

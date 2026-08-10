@@ -27,7 +27,6 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <vtkCellData.h>
 #include <vtkPointData.h>
 #include <itksys/SystemTools.hxx>
-#include <tinyxml.h>
 #include <vtkCleanPolyData.h>
 #include "FiberBundle/mitkTrackvis.h"
 #include <mitkCustomMimeType.h>
@@ -55,7 +54,7 @@ mitk::FiberBundleDicomReader * mitk::FiberBundleDicomReader::Clone() const
   return new FiberBundleDicomReader(*this);
 }
 
-std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleDicomReader::Read()
+std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleDicomReader::DoRead()
 {
 
   std::vector<itk::SmartPointer<mitk::BaseData> > output_fibs;
@@ -131,10 +130,11 @@ std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleDicomReader::Re
 
       FiberBundle::Pointer fib = FiberBundle::New(fiberPolyData);
 
-      CodeSequenceMacro* algoCode = sets[ts]->getTrackingAlgorithmIdentification().at(0);
-      val = "-"; algoCode->getCodeValue(val);
+      AlgorithmIdentificationMacro* algoIdent = sets[ts]->getTrackingAlgorithmIdentification().at(0);
+      CodeSequenceMacro& algoCode = algoIdent->getAlgorithmNameCode();
+      val = "-"; algoCode.getCodeValue(val);
       fib->GetPropertyList()->SetStringProperty("DICOM.algo_code.value",val.c_str());
-      val = "-"; algoCode->getCodeMeaning(val);
+      val = "-"; algoCode.getCodeMeaning(val);
       fib->GetPropertyList()->SetStringProperty("DICOM.algo_code.meaning",val.c_str());
 
       CodeSequenceMacro modelCode = sets[ts]->getDiffusionModelCode();

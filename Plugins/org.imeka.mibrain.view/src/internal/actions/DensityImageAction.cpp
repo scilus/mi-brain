@@ -1,6 +1,9 @@
 
 #include "DensityImageAction.hpp"
 
+#include <mitkImageCast.h>
+#include <mitkLevelWindowProperty.h>
+
 #include "ImekaFiber/GroupNodes.hpp"
 #include "ImekaFiber/utils.hpp"
 #include "utils.hpp"
@@ -25,16 +28,26 @@ void DensityImageAction::Run(
     allStreamlines = Imeka::Fiber::Union(selectedNodes);
   }
 
+  if (!allStreamlines) { return; }
+
   allStreamlines->ResampleSpline(1);
   auto itkImage = Imeka::Fiber::GetTractDensityImage<float>(
     allStreamlines, anatNode, false);
 
+  if (itkImage.IsNull()) { return; }
+
   auto img = mitk::Image::New();
-  img->InitializeByItk(itkImage.GetPointer());
-  img->SetVolume(itkImage->GetBufferPointer());
+  mitk::CastToMitkImage(itkImage, img);
 
   auto node = mitk::DataNode::New();
   node->SetData(img);
   node->SetName("Density Map");
+  node->SetBoolProperty("binary", false);
+  node->SetBoolProperty("outline binary", false);
+
+  mitk::LevelWindow lw;
+  lw.SetAuto(img);
+  node->SetProperty("levelwindow", mitk::LevelWindowProperty::New(lw));
+
   DM.AddNode(node);
 }

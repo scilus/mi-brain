@@ -15,7 +15,12 @@ PlitkWorkbenchWindowAdvisor::PlitkWorkbenchWindowAdvisor(
   : CommonWorkbenchWindowAdvisor(workbenchAdvisor, configurer)
 {
   UseViewPlacerHotkeys();
-  UseMarkerWidget();
+  
+  // This adds the 3D orientation marker to the 3D view.
+  // We don't want it. It disappears when the display plane
+  // is removed anyways and never comes back. It also appears
+  // in screenshots, which is not good.
+  // UseMarkerWidget();
 }
 
 void PlitkWorkbenchWindowAdvisor::PostWindowCreate()

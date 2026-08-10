@@ -3,10 +3,9 @@
 #define IMEKA_BOUNDING_OBJECT_READER_HPP_INCLUDED
 
 #include <mitkAbstractFileReader.h>
+#include <tinyxml2.h>
 
 #include "ImekaIOExports.h"
-
-class TiXmlHandle;
 
 namespace mitk { class BoundingObject; }
 
@@ -23,15 +22,14 @@ public:
   BoundingObjectReader(const BoundingObjectReader& other);
   virtual ~BoundingObjectReader() {}
 
-  virtual BoundingObjectReader* Clone() const;
-  using mitk::AbstractFileReader::Read;
-  virtual std::vector<itk::SmartPointer<mitk::BaseData>> Read();
+  virtual BoundingObjectReader* Clone() const override;
+  virtual std::vector<itk::SmartPointer<mitk::BaseData>> DoRead() override;
 
 private:
   us::ServiceRegistration<mitk::IFileReader> m_ServiceReg;
 
-  void ReadOrigin(mitk::BoundingObject*, TiXmlHandle);
-  void ReadWorldTransform(mitk::BoundingObject*, TiXmlHandle);
+  void ReadOrigin(mitk::BoundingObject*, tinyxml2::XMLElement*);
+  void ReadWorldTransform(mitk::BoundingObject*, tinyxml2::XMLElement*);
 };
 
 } // namespace IO

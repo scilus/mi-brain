@@ -53,6 +53,11 @@ const mitk::FiberBundle* mitk::FiberBundleMapper3D::GetInput()
   return static_cast<const mitk::FiberBundle * > ( GetDataNode()->GetData() );
 }
 
+void mitk::FiberBundleMapper3D::UpdateVtkTransform(mitk::BaseRenderer *)
+{
+  // don't apply transform since the fiber polydata is already in world coordinates.
+  return;
+}
 
 /*
  This method is called once the mapper gets new input,
@@ -138,13 +143,14 @@ void mitk::FiberBundleMapper3D::InternalGenerateData(mitk::BaseRenderer *rendere
 
 void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *renderer )
 {
-  bool visible = true;
-  GetDataNode()->GetVisibility(visible, renderer, "visible");
+  LocalStorage3D* localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
+  bool visible = GetDataNode()->IsVisible(nullptr) && GetDataNode()->IsVisible(renderer);
+
+  localStorage->m_FiberAssembly->SetVisibility(visible);
   if ( !visible )
     return;
 
   const DataNode* node = this->GetDataNode();
-  LocalStorage3D* localStorage = m_LocalStorageHandler.GetLocalStorage(renderer);
 
   m_FiberBundle = dynamic_cast<mitk::FiberBundle*>(node->GetData());
   m_FiberPolyData = m_FiberBundle->GetFiberPolyData();
@@ -202,10 +208,11 @@ void mitk::FiberBundleMapper3D::GenerateDataForRenderer( mitk::BaseRenderer *ren
   property->SetLighting(true);
   property->SetOpacity(opacity);
 
-  if (localStorage->m_LastUpdateTime>=m_FiberBundle->GetUpdateTime3D())
+  if (localStorage->m_LastUpdateTime >= m_FiberBundle->GetUpdateTime3D() && localStorage->m_FiberMapper->GetInput() != nullptr)
     return;
 
   // Calculate time step of the input data for the specified renderer (integer value)
+
   // this method is implemented in mitkMapper
   this->CalculateTimeStep( renderer );
   this->InternalGenerateData(renderer);

@@ -55,7 +55,8 @@ std::vector<double> WidgetProperties::GetValues(
   const auto widgetData = WidgetDataFromFieldName(fieldName);
 
   std::vector<double> values;
-  for (const auto key : KeysFromName(fieldName))
+  /*loop variable key is not modified, so we can afford to use a const reference to avoid unnecessary copies*/
+  for (const auto &key : KeysFromName(fieldName))
   {
     auto valueFromSetting = m_Settings.value(
       key, widgetData.defaultValue).toDouble();
@@ -92,7 +93,7 @@ void WidgetProperties::ResetToDefault()
         widgetData.defaultValue).toDouble();
       widgetData.widget->setValue(valueFromSetting);
 
-      for (const auto key : KeysFromName(widgetData.widget->objectName()))
+      for (const auto &key : KeysFromName(widgetData.widget->objectName()))
       {
         Imeka::Property::Set(m_Node, key, valueFromSetting);
 
