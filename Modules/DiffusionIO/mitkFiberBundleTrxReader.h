@@ -1,3 +1,15 @@
+
+#ifndef __mitkFiberBundleTrxReader_h
+#define __mitkFiberBundleTrxReader_h
+
+#include <mitkCommon.h>
+#include <mitkFileReader.h>
+#include "FiberBundle/mitkFiberBundle.h"
+#include <vtkSmartPointer.h>
+
+#include <mitkAbstractFileReader.h>
+
+
 namespace mitk
 {
 

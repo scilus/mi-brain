@@ -3,13 +3,13 @@
 #include <itksys/SystemTools.hxx>
 
 #include <mitkDiffusionIOMimeTypes.h>
-#include "FiberBundle/mitkTrackvis.h"
 
 #include <trx/trx.h>
 
 mitk::FiberBundleTrxReader::FiberBundleTrxReader()
   : mitk::AbstractFileReader( mitk::DiffusionIOMimeTypes::FIBERBUNDLE_TRX_MIMETYPE_NAME(), "TRX Fiber Bundle Reader" )
 {
+  MITK_INFO << "TRX READER REGISTERED";
   m_ServiceReg = this->RegisterService();
 }
 
@@ -50,44 +50,8 @@ std::vector<itk::SmartPointer<mitk::BaseData> > mitk::FiberBundleTrxReader::DoRe
       const auto errCode = reader.Read(fiber.GetPointer());
 	  */
 
-      auto fiber = FilteredFiberBundle::New();
-	  //trx::AnyTrxFile::Load
+    auto fiber = FilteredFiberBundle::New();
 	  auto trxFile = trx::TrxFile::Load(this->GetInputLocation());
-
-
-      if (errCode == 0)
-      {
-        const auto emptyFileWarning =
-          "There's 0 point in this file. It won't be added to the DataManager "
-          "because there's nothing to be done with this file.";
-        throw std::length_error(emptyFileWarning);
-      }
-      else if (errCode == -1)
-      {
-        const auto noDSWarning =
-          "MI-Brain error unrelated to the current trx. "
-          "The TrackVisFiberReader doesn't know the DataStorage.";
-        throw std::length_error(noDSWarning);
-      }
-      else if (errCode == -2)
-      {
-        const auto corruptedHeaderWarning =
-          "The trx file you're trying to load is impossible to read because "
-          "the header is corrupted.";
-        throw std::length_error(corruptedHeaderWarning);
-      }
-      else if (errCode == -3)
-      {
-        const auto noReadPointsWarning =
-          "Error reading points. Trx file is corrupted.";
-        throw std::length_error(noReadPointsWarning);
-      }
-      else if (errCode == -4)
-      {
-        const auto noReadPropertiesWarning =
-          "Error reading properties. Trx file is corrupted.";
-        throw std::length_error(noReadPropertiesWarning);
-      }
 
       /*if (auto refGeometry = fiber->GetReferenceGeometry())
       {

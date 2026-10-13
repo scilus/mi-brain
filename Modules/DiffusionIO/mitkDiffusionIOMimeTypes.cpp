@@ -38,6 +38,7 @@ std::vector<CustomMimeType*> DiffusionIOMimeTypes::Get()
   mimeTypes.push_back(FIBERBUNDLE_TCK_MIMETYPE().Clone());
   mimeTypes.push_back(FIBERBUNDLE_DICOM_MIMETYPE().Clone());
   mimeTypes.push_back(FIBERBUNDLE_VTK_MIMETYPE().Clone());
+  mimeTypes.push_back(FIBERBUNDLE_TRX_MIMETYPE().Clone());
 
   mimeTypes.push_back(CONNECTOMICS_MIMETYPE().Clone());
   mimeTypes.push_back(TRACTOGRAPHYFOREST_MIMETYPE().Clone());
@@ -97,6 +98,16 @@ CustomMimeType DiffusionIOMimeTypes::FIBERBUNDLE_TRK_MIMETYPE()
   mimeType.SetComment("TrackVis Fibers");
   mimeType.SetCategory(category);
   mimeType.AddExtension("trk");
+  return mimeType;
+}
+
+CustomMimeType DiffusionIOMimeTypes::FIBERBUNDLE_TRX_MIMETYPE()
+{
+  CustomMimeType mimeType(FIBERBUNDLE_TRX_MIMETYPE_NAME());
+  std::string category = "Trx Fibers";
+  mimeType.SetComment("Trx Fibers");
+  mimeType.SetCategory(category);
+  mimeType.AddExtension("trx");
   return mimeType;
 }
 
@@ -224,6 +235,12 @@ std::string DiffusionIOMimeTypes::FIBERBUNDLE_TCK_MIMETYPE_NAME()
 std::string DiffusionIOMimeTypes::FIBERBUNDLE_TRK_MIMETYPE_NAME()
 {
   static std::string name = IOMimeTypes::DEFAULT_BASE_NAME() + ".FiberBundle.trk";
+  return name;
+}
+
+std::string DiffusionIOMimeTypes::FIBERBUNDLE_TRX_MIMETYPE_NAME()
+{
+  static std::string name = IOMimeTypes::DEFAULT_BASE_NAME() + ".FiberBundle.trx";
   return name;
 }
 
