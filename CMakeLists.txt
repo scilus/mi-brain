@@ -304,10 +304,24 @@ add_subdirectory(Modules)
 # TRX
 #-----------------------------------------------------------------------------
 
+set(Eigen3_DIR
+    "/data/clan2201/MITK-superbuild/ep/lib/cmake/ITK-5.4/Modules")
+
+find_package(Eigen3 REQUIRED CONFIG)
+
+set(TRX_EIGEN3_TARGET Eigen3::Eigen)
+
+if(TARGET Eigen3::Eigen)
+  message(STATUS "Eigen3::Eigen already exists")
+else()
+  message(FATAL_ERROR "Eigen3::Eigen does NOT exist")
+endif()
+
 add_subdirectory(
     /data/clan2201/trx-cpp
     ${CMAKE_BINARY_DIR}/trx-cpp-build
 )
+
 
 #-----------------------------------------------------------------------------
 # CTK plugins
