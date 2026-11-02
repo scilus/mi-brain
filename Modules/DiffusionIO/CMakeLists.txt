@@ -8,9 +8,3 @@ MITK_CREATE_MODULE(
   AUTOLOAD_WITH MitkCore
   PACKAGE_DEPENDS PUBLIC DCMTK|dcmtract+dcmiod+dcmdata+ofstd+oflog
 )
-
-target_link_libraries(
-    ${MODULE_TARGET}
-    PRIVATE
-    trx-cpp::trx
-)

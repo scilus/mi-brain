@@ -44,6 +44,11 @@ std::string ImekaIO_EXPORT GetRGBNiftiImageDescription();
 mitk::CustomMimeType ImekaIO_EXPORT GetRGBNiftiImageMimeType();
 QString ImekaIO_EXPORT GetRGBNiftiImageFilter();
 
+std::string ImekaIO_EXPORT GetTrxImageName();
+std::string ImekaIO_EXPORT GetTrxImageDescription();
+mitk::CustomMimeType ImekaIO_EXPORT GetTrxImageMimeType();
+QString ImekaIO_EXPORT GetTrxImageFilter();
+
 } // namespace IO
 
 } // namespace Imeka
