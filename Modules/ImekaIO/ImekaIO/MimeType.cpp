@@ -173,34 +173,6 @@ QString ImekaIO_EXPORT GetRGBNiftiImageFilter()
   );
 }
 
-std::string ImekaIO_EXPORT GetTrxImageName()
-{
-  return mitk::IOMimeTypes::DEFAULT_BASE_NAME() + ".image.trx";
-}
-
-std::string ImekaIO_EXPORT GetTrxImageDescription()
-{
-  return "TRX Images";
-}
-
-mitk::CustomMimeType ImekaIO_EXPORT GetTrxImageMimeType()
-{
-  mitk::CustomMimeType mimeType(GetTrxImageName());
-  // add every extention that needs to be detected.
-  mimeType.AddExtension("trx");
-  mimeType.SetCategory(mitk::IOMimeTypes::CATEGORY_IMAGES());
-  mimeType.SetComment("TRX Image");
-  return mimeType;
-}
-
-QString ImekaIO_EXPORT GetTrxImageFilter()
-{
-  const auto mime = GetTrxImageMimeType();
-  return QString::fromStdString(
-    mime.GetComment() + " (*." + mime.GetExtensions()[0] + ")"
-  );
-}
-
 } // namespace IO
 
 } // namespace Imeka
