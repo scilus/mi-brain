@@ -12,7 +12,8 @@
 #include <mitkFiberBundleTckWriter.hpp>
 #include <mitkFiberBundleTrackVisWriter.h>
 #include <mitkFiberBundleDicomWriter.h>
-// #include <mitkFiberBundleTrxWriter.h>
+#include <mitkFiberBundleTrxWriter.h>
+
 #include <mitkCoreServices.h>
 #include <mitkIPropertyDescriptions.h>
 #include <mitkIPropertyPersistence.h>
@@ -62,7 +63,7 @@ namespace mitk
       m_FiberBundleTckWriter = new FiberBundleTckWriter();
       m_FiberBundleTrackVisWriter = new FiberBundleTrackVisWriter();
       m_FiberBundleDicomWriter = new FiberBundleDicomWriter();
-      // m_FiberBundleTrxWriter = new FiberBundleTrxWriter();
+      m_FiberBundleTrxWriter = new FiberBundleTrxWriter();
     }
 
     void Unload(us::ModuleContext*) override
@@ -77,7 +78,7 @@ namespace mitk
       delete m_FiberBundleTrackVisReader;
       delete m_FiberBundleDicomReader;
       delete m_FiberBundleTrxReader;
-      // delete m_FiberBundleTrxWriter;
+      delete m_FiberBundleTrxWriter;
       delete m_FiberBundleDicomWriter;
       delete m_FiberBundleVtkWriter;
       delete m_FiberBundleTckWriter;
@@ -96,7 +97,7 @@ namespace mitk
     FiberBundleVtkWriter * m_FiberBundleVtkWriter;
     FiberBundleTckWriter *m_FiberBundleTckWriter;
     FiberBundleTrackVisWriter * m_FiberBundleTrackVisWriter;
-    // FiberBundleTrxWriter * m_FiberBundleTrxWriter;
+    FiberBundleTrxWriter * m_FiberBundleTrxWriter;
 
     std::vector<mitk::CustomMimeType*> m_MimeTypes;
 

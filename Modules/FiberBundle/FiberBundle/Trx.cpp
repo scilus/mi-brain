@@ -1,6 +1,8 @@
 #include "Trx.h"
 
 #include <cstring>
+#include <stdexcept>
+#include <vector>
 
 #include "FilteredFiberBundle.hpp"
 
@@ -111,4 +113,50 @@ vtkIdType FiberBundle_EXPORT ReadTrx(
   fiber->SetFiberPolyData(polyData);
 
   return polyData->GetNumberOfPoints();
+}
+
+void FiberBundle_EXPORT WriteTrx(
+  const std::string& filename, vtkPolyData* polydata)
+{
+  vtkCellArray* lines = polydata->GetLines();
+  vtkPoints* points = polydata->GetPoints();
+  if (lines == nullptr || points == nullptr || lines->GetNumberOfCells() == 0)
+  {
+    throw std::runtime_error("Cannot write an empty fiber bundle as TRX.");
+  }
+
+  // TrxStream spools positions to a temporary file, so we never hold a
+  // second full copy of the bundle in memory.
+  trx::TrxStream stream("float32");
+
+  // VOXEL_TO_RASMM and DIMENSIONS are mandatory in the TRX header but
+  // TrxStream does not set them. No reference image is known here, so use
+  // the same defaults as trx::TrxFile.
+  stream.set_voxel_to_rasmm(Eigen::Matrix4f::Identity());
+  stream.set_dimensions({1, 1, 1});
+
+  // Reused for all streamlines, re-allocated only for longer ones
+  std::vector<float> pointsOnLine;
+  pointsOnLine.reserve(3 * 500);
+
+  vtkIdType nbPoints;
+  const vtkIdType* ids;
+  lines->InitTraversal();
+  while (lines->GetNextCell(nbPoints, ids))
+  {
+    pointsOnLine.clear(); // Not supposed to free memory
+    for (vtkIdType i = 0; i < nbPoints; ++i)
+    {
+      double p[3];
+      points->GetPoint(ids[i], p);
+
+      // MITK world is LPS mm, TRX positions are in RAS+ mm
+      pointsOnLine.push_back(-static_cast<float>(p[0]));
+      pointsOnLine.push_back(-static_cast<float>(p[1]));
+      pointsOnLine.push_back( static_cast<float>(p[2]));
+    }
+    stream.push_streamline(pointsOnLine.data(), static_cast<size_t>(nbPoints));
+  }
+
+  stream.finalize<float>(filename);
 }
