@@ -80,7 +80,7 @@ QStringList FilteredFiberBundle::Filters() const
   {
     filters << TCK << TRK;
   }
-  filters << "Fibers VTK (*.fib)";
+  filters << "Fibers TRX (*.trx)" << "Fibers VTK (*.fib)";
 
   return filters;
 }
