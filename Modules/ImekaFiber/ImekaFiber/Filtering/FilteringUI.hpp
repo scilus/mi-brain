@@ -36,6 +36,13 @@ public:
   void SetROIProperties(mitk::DataNode*) const;
   void AddActionsToTractsCategory(mitk::DataNode*);
   void AddActionsToDataset(mitk::DataNode*);
+  
+  // Creates one tract group node, under the dataset node, for each streamline
+  // group stored in the fiber bundle (e.g. TRX groups). Returns false when
+  // there was nothing to create.
+  bool AddStreamlineGroups(mitk::DataNode*, mitk::FilteredFiberBundle*);
+  // Hides the TRX group nodes of the dataset. Returns true if it has any.
+  bool HideFixedTractGroups(const mitk::DataNode*);
   mitk::DataNode::Pointer NewActiveROINode(
     const mitk::DataNode*, const TractGroup::Line&);
   mitk::DataNode::Pointer NewTractGroupNode(

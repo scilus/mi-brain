@@ -6,6 +6,7 @@ set(CPP_FILES
   FiberBundle/mitkTrackvis.cpp
   FiberBundle/TrkProperties.cpp
   FiberBundle/Tck.cpp
+  FiberBundle/Trx.cpp
 )
 
 set(H_FILES

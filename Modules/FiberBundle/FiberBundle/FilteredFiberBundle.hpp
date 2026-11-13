@@ -1,6 +1,10 @@
 #ifndef IMEKA_FILTERED_FIBER_BUNDLE_HPP_INCLUDED
 #define IMEKA_FILTERED_FIBER_BUNDLE_HPP_INCLUDED
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include <QSet>
 #include <QStringList>
 
@@ -75,12 +79,21 @@ public:
   // Delete all color information and set coloring to Orientation
   void DeleteColoring();
 
-  void Shuffle();
+  // Reorders the streamlines randomly. The streamline groups are remapped.
+  // Returns the new order: new streamline i is the old streamline
+  // `ordering[i]` (empty if there's nothing to shuffle).
+  std::vector<vtkIdType> Shuffle();
 
   bool IsRTT() const { return m_RTT; }
 
   void SetFibersVisibility(const QSet<vtkIdType>& v)  { m_Visibility = v; }
   QSet<vtkIdType>& GetFibersVisibility() { return m_Visibility; }
+
+  // Named subsets of streamlines (group name -> streamline indices), e.g. the
+  // groups of a TRX file. Indices refer to the fiber order at load time.
+  using StreamlineGroups = std::map<std::string, std::vector<vtkIdType>>;
+  void SetStreamlineGroups(const StreamlineGroups& g) { m_StreamlineGroups = g; }
+  const StreamlineGroups& GetStreamlineGroups() const { return m_StreamlineGroups; }
 
 protected:
   FilteredFiberBundle(vtkPolyData* fiberPolyData = nullptr);
@@ -97,6 +110,7 @@ private:
   Coloring m_CurrentColoring;
   QSet<vtkIdType> m_Visibility;
   float m_RealMaxFiberLength;
+  StreamlineGroups m_StreamlineGroups;
 };
 
 } // namespace mitk

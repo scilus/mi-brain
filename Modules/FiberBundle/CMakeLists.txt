@@ -4,4 +4,10 @@ MITK_CREATE_MODULE( FiberBundle
   WARNINGS_NO_ERRORS
 )
 
+target_link_libraries(
+    ${MODULE_TARGET}
+    PRIVATE
+    trx-cpp::trx
+)
+
 add_definitions(-DBOOST_TIMER_ENABLE_DEPRECATED)

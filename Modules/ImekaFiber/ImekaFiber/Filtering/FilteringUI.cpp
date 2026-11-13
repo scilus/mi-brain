@@ -92,7 +92,10 @@ void FilteringUI::AddActionsToTractsCategory(mitk::DataNode* TC)
       bool updated = false;
       for (auto datasetNode : m_DM.DirectChildrenOf(TC))
       {
-        if (m_Filtering.UpdateResultsLinkedTo(datasetNode))
+        // Evaluate both: HideFixedTractGroups must always be called
+        const bool resultsUpdated =
+          m_Filtering.UpdateResultsLinkedTo(datasetNode);
+        if (HideFixedTractGroups(datasetNode) || resultsUpdated)
         {
           emit RequestUpdateDataset(datasetNode);
           updated = true;
@@ -119,7 +122,8 @@ void FilteringUI::AddActionsToDataset(mitk::DataNode* datasetNode)
     datasetNode,
     // OnVisible
     [this, datasetNode]() {
-      if (m_Filtering.UpdateResultsLinkedTo(datasetNode))
+      const bool resultsUpdated = m_Filtering.UpdateResultsLinkedTo(datasetNode);
+      if (HideFixedTractGroups(datasetNode) || resultsUpdated)
       {
         emit RequestUpdateDataset(datasetNode);
         emit RequestGenerateStats();
@@ -163,6 +167,58 @@ void FilteringUI::AddActionsToDataset(mitk::DataNode* datasetNode)
       ManageTractGroupSelection(datasetNode, TGNode);
     AddActionsToTractGroup(filteringConfirmed, datasetNode, TGNode);
   });
+}
+
+bool FilteringUI::HideFixedTractGroups(const mitk::DataNode* datasetNode)
+{
+  // Showing a dataset (or the Tracts category) also shows all its TGs, without
+  // calling their callbacks. TGs made of fixed streamlines (e.g. TRX groups)
+  // are put back in their initial state instead: hidden, so the whole
+  // dataset is displayed. Their state is their node visibility, so no
+  // callback is needed, but the dataset must be filtered again.
+  if (!m_Filtering.HasFixedTractGroup(datasetNode)) { return false; }
+
+  for (const auto& TGNode_TG : m_Filtering.DatasetInfo()[datasetNode].tractGroups)
+  {
+    if (!TGNode_TG.second.IsFixed()) { continue; }
+    auto TGNode = const_cast<mitk::DataNode*>(TGNode_TG.first);
+    TGNode->SetVisibility(false);
+    m_DM.HideAllChildren(TGNode);
+  }
+  return true;
+}
+
+bool FilteringUI::AddStreamlineGroups(
+  mitk::DataNode* datasetNode,
+  mitk::FilteredFiberBundle* fiber)
+{
+  const auto& groups = fiber->GetStreamlineGroups();
+  if (groups.empty()) { return false; }
+
+  // NodeAdded can be called more than once for the same dataset (e.g. when
+  // its parent is changed), so don't create the groups twice.
+  if (m_Filtering.HasFixedTractGroup(datasetNode)) { return false; }
+
+  for (const auto& name_indexes : groups)
+  {
+    FiberIndexes indexes;
+    indexes.reserve(static_cast<int>(name_indexes.second.size()));
+    for (const auto idx : name_indexes.second)
+    {
+      indexes.insert(idx);
+    }
+
+    // The TG must be known by the Filtering before being added to the
+    // DataStorage, otherwise LoadingSceneCheck thinks a scene is loading.
+    // Groups are hidden on load so the whole tractogram is displayed. Showing
+    // a group then restricts the display to the visible groups.
+    auto TGNode = NewTractGroupNode(name_indexes.first);
+    TGNode->SetVisibility(false);
+    m_Filtering.AddFixedTractGroup(datasetNode, TGNode, indexes);
+    AddActionsToTractGroup(true, datasetNode, TGNode);
+    m_DM.AddNode(TGNode, datasetNode);
+  }
+  return true;
 }
 
 void FilteringUI::AddActionsToTractGroup(

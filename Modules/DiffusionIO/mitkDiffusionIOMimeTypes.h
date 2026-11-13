@@ -112,6 +112,11 @@ public:
   static std::string TRACTOGRAPHYFOREST_MIMETYPE_NAME();
   static std::string TRACTOGRAPHYFOREST_MIMETYPE_DESCRIPTION();
 
+  // ------------------------------ Trx ----------------------------------
+
+  static CustomMimeType FIBERBUNDLE_TRX_MIMETYPE();
+  static std::string FIBERBUNDLE_TRX_MIMETYPE_NAME();
+
 private:
 
   // purposely not implemented

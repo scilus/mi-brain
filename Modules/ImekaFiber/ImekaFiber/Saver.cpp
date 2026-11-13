@@ -1,5 +1,7 @@
 #include "Saver.hpp"
 
+#include <numeric>
+
 #include <mitkIOUtil.h>
 
 #include <QApplication>
@@ -147,16 +149,19 @@ Saver::FiberBundleFromVisibleStreamlines() const
     mitk::FilteredFiberBundle::GetNewColorArray(TotalNbPoints());
 
   unsigned int nbVisible = 0;
-  for (auto it = m_DatasetDataMap->constBegin(); it != m_DatasetDataMap->constEnd(); ++it)
+  auto visibleDataset = m_DatasetDataMap->cend();
+  for (auto it = m_DatasetDataMap->cbegin(); it != m_DatasetDataMap->cend(); ++it)
   {
     if (it.key()->IsVisible(nullptr))
     {
       nbVisible++;
+      visibleDataset = it;
     }
   }
   if (nbVisible == 1 && (!m_RTTDataMap || m_RTTDataMap->isEmpty()))
   {
-    auto& fiberMapperData = m_DatasetDataMap->cbegin()->fiberMapperData;
+    // Not necessarily the first dataset: the hidden ones are not saved
+    auto& fiberMapperData = visibleDataset->fiberMapperData;
     auto oldPolydata = fiberMapperData.fiberBundle->GetFiberPolyData();
     auto newPolydata = vtkSmartPointer<vtkPolyData>::New();
     CopyPropertiesSettings(oldPolydata, newPolydata);
@@ -164,18 +169,23 @@ Saver::FiberBundleFromVisibleStreamlines() const
     {
       newColors = nullptr;
     }
+    mitk::FilteredFiberBundle::StreamlineGroups groups;
     fiberMapperData.FiberBundleFromData(
-      newLines, newPoints, newColors, newPolydata->GetCellData());
-    return NewFiberBundle(newPolydata, newLines, newPoints, newColors);
+      newLines, newPoints, newColors, newPolydata->GetCellData(), &groups);
+    auto newBundle = NewFiberBundle(newPolydata, newLines, newPoints, newColors);
+    newBundle->SetStreamlineGroups(groups);
+    return newBundle;
   }
 
+  // Groups with the same name in different datasets are renamed, not merged
+  mitk::FilteredFiberBundle::StreamlineGroups groups;
   const auto end = m_DatasetDataMap->cend();
   for (auto it = m_DatasetDataMap->cbegin(); it != end; ++it)
   {
     if (it.key()->IsVisible(nullptr))
     {
       it.value().fiberMapperData.FiberBundleFromData(
-        newLines, newPoints, newColors, nullptr);
+        newLines, newPoints, newColors, nullptr, &groups);
     }
   }
 
@@ -190,7 +200,9 @@ Saver::FiberBundleFromVisibleStreamlines() const
     }
   }
 
-  return mitk::FilteredFiberBundle::New(newLines, newPoints, newColors);
+  auto newBundle = mitk::FilteredFiberBundle::New(newLines, newPoints, newColors);
+  newBundle->SetStreamlineGroups(groups);
+  return newBundle;
 }
 
 mitk::FilteredFiberBundle::Pointer
@@ -215,10 +227,22 @@ Saver::FiberBundleFromVisibleStreamlines(
   if (datasetNode->IsVisible(nullptr) && TGNode->IsVisible(nullptr))
   {
     auto& mapperData = (*m_DatasetDataMap)[datasetNode].fiberMapperData;
-    return mapperData.partsMapperData[TGNode].FiberBundleFromData(
+    auto newBundle = mapperData.partsMapperData[TGNode].FiberBundleFromData(
       mapperData.fiberBundle,
       keepColors || !mapperData.fiberBundle->IsInOrientationColoring(),
       true);
+
+    // The saved streamlines are the ones of this tract group
+    if (newBundle)
+    {
+      std::vector<vtkIdType> indices(
+        static_cast<size_t>(newBundle->GetNumFibers()));
+      std::iota(indices.begin(), indices.end(), vtkIdType(0));
+      mitk::FilteredFiberBundle::StreamlineGroups groups;
+      AddStreamlineGroup(groups, TGNode->GetName(), std::move(indices));
+      newBundle->SetStreamlineGroups(groups);
+    }
+    return newBundle;
   }
   return nullptr;
 }

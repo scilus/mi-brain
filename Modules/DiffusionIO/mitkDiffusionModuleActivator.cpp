@@ -5,11 +5,14 @@
 #include <mitkFiberBundleTckReader.hpp>
 #include <mitkFiberBundleTrackVisReader.h>
 #include <mitkFiberBundleDicomReader.h>
+#include <mitkFiberBundleTrxReader.h>
+
 
 #include <mitkFiberBundleVtkWriter.h>
 #include <mitkFiberBundleTckWriter.hpp>
 #include <mitkFiberBundleTrackVisWriter.h>
 #include <mitkFiberBundleDicomWriter.h>
+#include <mitkFiberBundleTrxWriter.h>
 
 #include <mitkCoreServices.h>
 #include <mitkIPropertyDescriptions.h>
@@ -42,6 +45,8 @@ namespace mitk
           props[ us::ServiceConstants::SERVICE_RANKING() ] = -2;
         else if (mt->GetName()==mitk::DiffusionIOMimeTypes::FIBERBUNDLE_DICOM_MIMETYPE_NAME())
           props[ us::ServiceConstants::SERVICE_RANKING() ] = -4;
+        else if (mt->GetName()==mitk::DiffusionIOMimeTypes::FIBERBUNDLE_TRX_MIMETYPE_NAME())
+          props[ us::ServiceConstants::SERVICE_RANKING() ] = -5;
         else
           props[ us::ServiceConstants::SERVICE_RANKING() ] = 10;
 
@@ -52,11 +57,13 @@ namespace mitk
       m_FiberBundleTrackVisReader = new FiberBundleTrackVisReader();
       m_FiberBundleTckReader = new FiberBundleTckReader();
       m_FiberBundleDicomReader = new FiberBundleDicomReader();
+      m_FiberBundleTrxReader = new FiberBundleTrxReader();
 
       m_FiberBundleVtkWriter = new FiberBundleVtkWriter();
       m_FiberBundleTckWriter = new FiberBundleTckWriter();
       m_FiberBundleTrackVisWriter = new FiberBundleTrackVisWriter();
       m_FiberBundleDicomWriter = new FiberBundleDicomWriter();
+      m_FiberBundleTrxWriter = new FiberBundleTrxWriter();
     }
 
     void Unload(us::ModuleContext*) override
@@ -70,7 +77,8 @@ namespace mitk
       delete m_FiberBundleTckReader;
       delete m_FiberBundleTrackVisReader;
       delete m_FiberBundleDicomReader;
-
+      delete m_FiberBundleTrxReader;
+      delete m_FiberBundleTrxWriter;
       delete m_FiberBundleDicomWriter;
       delete m_FiberBundleVtkWriter;
       delete m_FiberBundleTckWriter;
@@ -83,11 +91,13 @@ namespace mitk
     FiberBundleTckReader * m_FiberBundleTckReader;
     FiberBundleTrackVisReader * m_FiberBundleTrackVisReader;
     FiberBundleDicomReader * m_FiberBundleDicomReader;
+    FiberBundleTrxReader * m_FiberBundleTrxReader;
 
     FiberBundleDicomWriter * m_FiberBundleDicomWriter;
     FiberBundleVtkWriter * m_FiberBundleVtkWriter;
     FiberBundleTckWriter *m_FiberBundleTckWriter;
     FiberBundleTrackVisWriter * m_FiberBundleTrackVisWriter;
+    FiberBundleTrxWriter * m_FiberBundleTrxWriter;
 
     std::vector<mitk::CustomMimeType*> m_MimeTypes;
 
