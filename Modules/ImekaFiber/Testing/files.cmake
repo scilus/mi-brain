@@ -3,6 +3,7 @@ set(MODULE_TESTS
   # CutTest.cpp
   # DuplicateTGTest.cpp
   ImekaIOTest.cpp
+  TrxGroupsTest.cpp
   # MinMaxFilteringTest.cpp
   # MirrorTest.cpp
   # SaveLoadScenesTest.cpp

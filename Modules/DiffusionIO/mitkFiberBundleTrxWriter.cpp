@@ -71,7 +71,18 @@ void FiberBundleTrxWriter::Write()
   MITK_INFO << "Writing fiber bundle as TRX";
   try
   {
-    WriteTrx(localFile.GetFileName(), input->GetFiberPolyData());
+    // Only a FilteredFiberBundle has streamline groups (TRX groups that were
+    // loaded and/or tract groups added by the save visible fibers actions)
+    const auto filtered = dynamic_cast<const mitk::FilteredFiberBundle*>(input);
+    if (filtered)
+    {
+      WriteTrx(localFile.GetFileName(), input->GetFiberPolyData(),
+               filtered->GetStreamlineGroups());
+    }
+    else
+    {
+      WriteTrx(localFile.GetFileName(), input->GetFiberPolyData());
+    }
   }
   catch (const std::exception& e)
   {

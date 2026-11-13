@@ -262,6 +262,7 @@ void FibersManager::FibersAdded(
   });
 
   m_Filtering.AddDataset(node, fiber);
+  m_FilteringUI.AddStreamlineGroups(node, fiber);
 
   // Centering and updating views
   mitk::RenderingManager::GetInstance()->InitializeViews(fiber->GetGeometry());

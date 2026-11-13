@@ -289,11 +289,38 @@ ConstNodes Filtering::DeleteROI(const mitk::BaseData* ROI)
   return concernedActiveROIs;
 }
 
+void Filtering::AddFixedTractGroup(
+  const mitk::DataNode* datasetNode,
+  const mitk::DataNode* TGNode,
+  const FiberIndexes& indexes)
+{
+  auto& TG = GetTractGroup(datasetNode, TGNode);
+  TG.fixedIndexes = std::make_shared<const FiberIndexes>(indexes);
+}
+
+bool Filtering::HasFixedTractGroup(const mitk::DataNode* datasetNode) const
+{
+  const auto it = m_DatasetInfo.find(datasetNode);
+  if (it == m_DatasetInfo.end()) { return false; }
+  for (const auto& TGNode_TG : it->second.tractGroups)
+  {
+    if (TGNode_TG.second.IsFixed()) { return true; }
+  }
+  return false;
+}
+
 void Filtering::EnableTractGroup(
   const mitk::DataNode* datasetNode,
   const mitk::DataNode* TGNode)
 {
-  for (auto& p : GetTractGroup(datasetNode, TGNode).lines)
+  auto& TG = GetTractGroup(datasetNode, TGNode);
+  if (TG.IsFixed())
+  {
+    m_NodeDataMap[datasetNode].fiberMapperData
+      .partsMapperData[TGNode].Enable();
+  }
+
+  for (auto& p : TG.lines)
   {
     EnableROIInTractGroup(datasetNode, TGNode, p.first);
   }
@@ -303,7 +330,14 @@ void Filtering::DisableTractGroup(
   const mitk::DataNode* datasetNode,
   mitk::DataNode* TGNode)
 {
-  for (auto& p : GetTractGroup(datasetNode, TGNode).lines)
+  auto& TG = GetTractGroup(datasetNode, TGNode);
+  if (TG.IsFixed())
+  {
+    m_NodeDataMap[datasetNode].fiberMapperData
+      .partsMapperData[TGNode].Disable();
+  }
+
+  for (auto& p : TG.lines)
   {
     DisableROIInTractGroup(datasetNode, TGNode, p.first);
   }
@@ -415,8 +449,10 @@ bool Filtering::HasAnyActiveROI(
   const mitk::DataNode* datasetNode,
   const mitk::DataNode* TGNode) const
 {
-  const auto& tractGroups = m_DatasetInfo.at(datasetNode).tractGroups;
-  for (const auto& roi_lines : tractGroups.at(TGNode).lines)
+  const auto& TG = m_DatasetInfo.at(datasetNode).tractGroups.at(TGNode);
+  if (TG.IsFixed() && TGNode->IsVisible(nullptr)) { return true; }
+
+  for (const auto& roi_lines : TG.lines)
   {
     if (roi_lines.second.enabled)
     {
@@ -607,6 +643,17 @@ bool Filtering::JoinAndExclude(
   // isn't even used in this dataset
   if (m_LastMovedSO && !IsInAnyActiveTractGroup(m_LastMovedSO, datasetInfo))
   { return false; }
+
+  if (TG.IsFixed())
+  {
+    // A hidden fixed TG selects nothing, even if it has active ROIs
+    if (!TGNode->IsVisible(nullptr)) { return false; }
+
+    // The streamlines of the group act as the first AND
+    AND = *TG.fixedIndexes;
+    atLeastOneAND = true;
+    atLeastOneROIActiveInTractGroup = true;
+  }
 
   for (const auto& p : linesMap)
   {

@@ -1,6 +1,8 @@
 #ifndef IMEKA_FIBER_TYPES_HPP_INCLUDED
 #define IMEKA_FIBER_TYPES_HPP_INCLUDED
 
+#include <memory>
+
 #include <QFuture>
 #include <QSet>
 
@@ -36,7 +38,17 @@ struct TractGroup
     bool isNot;
   };
   std::map<const mitk::BaseData*, Line> lines; // ROI -> Line
-  bool modified;
+  bool modified = false;
+
+  // Set for the groups stored in a file (e.g. TRX groups): the TG starts from
+  // these streamlines instead of the ROI selections. ROI lines, if any, are
+  // then applied on this subset. Such a TG is active when its node is
+  // visible: the node visibility can be changed without calling the TG
+  // callbacks (e.g. when its dataset is hidden/shown), so it's the only
+  // reliable state.
+  std::shared_ptr<const FiberIndexes> fixedIndexes;
+
+  bool IsFixed() const { return fixedIndexes != nullptr; }
 };
 
 inline bool operator==(const TractGroup::Line& l1, const TractGroup::Line& l2)

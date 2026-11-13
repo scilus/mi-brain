@@ -1,5 +1,9 @@
 #include "MapperData.hpp"
 
+#include <algorithm>
+
+#include <mitkDataNode.h>
+
 #include <vtkCellArray.h>
 #include <vtkCellData.h>
 #include <vtkPointData.h>
@@ -83,32 +87,87 @@ mitk::FilteredFiberBundle::Pointer FiberMapperData::FiberBundleFromData(
     CopyPropertiesSettings(fiberBundle->GetFiberPolyData(), newPolydata);
     newProperties = newPolydata->GetCellData();
   }
-  FiberBundleFromData(newLines, newPoints, newColors, newProperties);
+  mitk::FilteredFiberBundle::StreamlineGroups groups;
+  FiberBundleFromData(newLines, newPoints, newColors, newProperties, &groups);
 
-  return NewFiberBundle(newPolydata, newLines, newPoints, newColors);
+  auto newBundle = NewFiberBundle(newPolydata, newLines, newPoints, newColors);
+  newBundle->SetStreamlineGroups(groups);
+  return newBundle;
+}
+
+namespace
+{
+  // Indices of the written streamlines, in the new fiber bundle
+  template <typename Container>
+  std::vector<vtkIdType> MapIndices(
+    const QHash<vtkIdType, vtkIdType>& newIds,
+    const Container& oldIndices)
+  {
+    std::vector<vtkIdType> indices;
+    for (const auto oldIdx : oldIndices)
+    {
+      const auto it = newIds.constFind(oldIdx);
+      if (it != newIds.constEnd()) { indices.push_back(it.value()); }
+    }
+    return indices;
+  }
 }
 
 void FiberMapperData::FiberBundleFromData(
   vtkCellArray* newLines,
   vtkPoints* newPoints,
   vtkUnsignedCharArray* newColors,
-  vtkCellData* properties) const
+  vtkCellData* properties,
+  mitk::FilteredFiberBundle::StreamlineGroups* groups) const
 {
+  QHash<vtkIdType, vtkIdType> newIds;
+  auto newIdsPtr = groups ? &newIds : nullptr;
+
   if (useWhole)
   {
-    wholeMapperData.FiberBundleFromData(
-      fiberBundle, newLines, newPoints, newColors, properties, nullptr);
+    wholeMapperData.FiberBundleFromData(fiberBundle, newLines, newPoints,
+      newColors, properties, nullptr, newIdsPtr);
+
+    // No tract group is active, so keep the groups of the file, restricted to
+    // the written streamlines.
+    if (groups)
+    {
+      for (const auto& name_indexes : fiberBundle->GetStreamlineGroups())
+      {
+        AddStreamlineGroup(*groups, name_indexes.first,
+          MapIndices(newIds, name_indexes.second));
+      }
+    }
     return;
   }
 
   QSet<const float*> alreadyDone;
   for (const auto& _partMapperData : partsMapperData)
   {
-    const auto partMapperData = _partMapperData.second;
+    const auto& partMapperData = _partMapperData.second;
     if (partMapperData.IsEnabled())
     {
-      partMapperData.FiberBundleFromData(
-        fiberBundle, newLines, newPoints, newColors, properties, &alreadyDone);
+      partMapperData.FiberBundleFromData(fiberBundle, newLines, newPoints,
+        newColors, properties, &alreadyDone, newIdsPtr);
+    }
+  }
+
+  // A streamline can be in many tract groups, but it's written only once, so
+  // the groups are computed once everything is written.
+  if (groups)
+  {
+    for (const auto& TGNode_partMapperData : partsMapperData)
+    {
+      const auto TGNode = TGNode_partMapperData.first;
+      const auto& partMapperData = TGNode_partMapperData.second;
+      // Hidden TRX groups can be enabled with stale indices: their node
+      // visibility is their only reliable state.
+      if (!partMapperData.IsEnabled() || !TGNode->IsVisible(nullptr))
+      {
+        continue;
+      }
+      AddStreamlineGroup(*groups, TGNode->GetName(),
+        MapIndices(newIds, partMapperData.GetIndices()));
     }
   }
 }
@@ -148,7 +207,8 @@ void PartMapperData::FiberBundleFromData(
   vtkPoints* newPoints,
   vtkUnsignedCharArray* newColors,
   vtkCellData* newProperties,
-  QSet<const float*>* alreadyDone) const
+  QSet<const float*>* alreadyDone,
+  QHash<vtkIdType, vtkIdType>* newIds) const
 {
   vtkIdType nbPoints;
   const vtkIdType *pts;
@@ -171,6 +231,10 @@ void PartMapperData::FiberBundleFromData(
       alreadyDone->insert(streamlinePoints);
     }
 
+    if (newIds)
+    {
+      newIds->insert(cellID, newLines->GetNumberOfCells());
+    }
     newLines->InsertNextCell(nbPoints);
     for (vtkIdType pointID = 0; pointID < nbPoints; ++pointID)
     {
@@ -188,6 +252,22 @@ void PartMapperData::FiberBundleFromData(
       propertiesHelper.Save(cellID);
     }
   }
+}
+
+void AddStreamlineGroup(
+  mitk::FilteredFiberBundle::StreamlineGroups& groups,
+  const std::string& name,
+  std::vector<vtkIdType> indices)
+{
+  if (indices.empty()) { return; }
+
+  std::sort(indices.begin(), indices.end());
+  auto uniqueName = name;
+  for (int i = 2; groups.count(uniqueName); ++i)
+  {
+    uniqueName = name + " (" + std::to_string(i) + ")";
+  }
+  groups[uniqueName] = std::move(indices);
 }
 
 mitk::FilteredFiberBundle::Pointer NewFiberBundle(

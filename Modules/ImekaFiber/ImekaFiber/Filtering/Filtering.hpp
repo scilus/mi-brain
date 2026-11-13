@@ -76,6 +76,10 @@ public:
   Nodes ReplaceROI(const mitk::Surface*, const mitk::Surface*);
   ConstNodes DeleteROI(const mitk::BaseData*);
 
+  // Tract group made of a fixed set of streamlines (e.g. a TRX group)
+  void AddFixedTractGroup(
+    const mitk::DataNode*, const mitk::DataNode*, const FiberIndexes&);
+  bool HasFixedTractGroup(const mitk::DataNode*) const;
   void EnableTractGroup(const mitk::DataNode*, const mitk::DataNode*);
   void DisableTractGroup(const mitk::DataNode*, mitk::DataNode*);
   void DeleteTractGroup(const mitk::DataNode*, const mitk::DataNode*);
