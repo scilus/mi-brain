@@ -309,6 +309,53 @@ bool Filtering::HasFixedTractGroup(const mitk::DataNode* datasetNode) const
   return false;
 }
 
+bool Filtering::HasVisibleFixedTractGroup(
+  const mitk::DataNode* datasetNode) const
+{
+  const auto it = m_DatasetInfo.find(datasetNode);
+  if (it == m_DatasetInfo.end()) { return false; }
+  for (const auto& TGNode_TG : it->second.tractGroups)
+  {
+    if (TGNode_TG.second.IsFixed() && TGNode_TG.first->IsVisible(nullptr))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+void Filtering::RemapFixedTractGroups(
+  const mitk::DataNode* datasetNode,
+  const std::vector<vtkIdType>& ordering)
+{
+  const auto it = m_DatasetInfo.find(datasetNode);
+  if (it == m_DatasetInfo.end() || ordering.empty()) { return; }
+
+  const auto nbFibers = static_cast<vtkIdType>(ordering.size());
+  std::vector<vtkIdType> oldToNew(ordering.size());
+  for (vtkIdType newIdx = 0; newIdx < nbFibers; ++newIdx)
+  {
+    oldToNew[static_cast<size_t>(ordering[newIdx])] = newIdx;
+  }
+
+  for (auto& TGNode_TG : it->second.tractGroups)
+  {
+    auto& TG = TGNode_TG.second;
+    if (!TG.IsFixed()) { continue; }
+
+    FiberIndexes remapped;
+    remapped.reserve(TG.fixedIndexes->size());
+    for (const auto oldIdx : *TG.fixedIndexes)
+    {
+      if (oldIdx >= 0 && oldIdx < nbFibers)
+      {
+        remapped.insert(oldToNew[static_cast<size_t>(oldIdx)]);
+      }
+    }
+    TG.fixedIndexes = std::make_shared<const FiberIndexes>(std::move(remapped));
+  }
+}
+
 void Filtering::EnableTractGroup(
   const mitk::DataNode* datasetNode,
   const mitk::DataNode* TGNode)

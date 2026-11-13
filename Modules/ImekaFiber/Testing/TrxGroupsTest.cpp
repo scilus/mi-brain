@@ -26,6 +26,8 @@ class TrxGroupsTestSuite : public FibersManagerTester
   MITK_TEST(TestSaveNewTractGroup);
   MITK_TEST(TestSaveTractGroup);
   MITK_TEST(TestWriteReadTrxGroups);
+  MITK_TEST(TestShuffleKeepsGroups);
+  MITK_TEST(TestSaveOnlyVisibleDataset);
   CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -266,6 +268,72 @@ public:
     CPPUNIT_ASSERT_EQUAL(4, loaded->GetNumFibers());
     const Groups expected = { { "left_AF", { 0, 1, 2 } }, { "B", { 2, 5 } } };
     CPPUNIT_ASSERT(expected == OriginalGroups(loaded));
+  }
+
+  // Original index of each visible streamline (see OriginalGroups)
+  std::set<vtkIdType> VisibleOriginalIndexes() const
+  {
+    auto polyData = m_Fibers->GetFiberPolyData();
+    std::set<vtkIdType> visible;
+    for (const auto idx : m_Fibers->GetFibersVisibility())
+    {
+      vtkIdType nbPoints;
+      const vtkIdType* pts;
+      polyData->GetCellPoints(idx, nbPoints, pts);
+      double p[3];
+      polyData->GetPoint(pts[1], p);
+      visible.insert(static_cast<vtkIdType>(std::lround(std::abs(p[0]))) - 1);
+    }
+    return visible;
+  }
+
+  // Shuffling reorders the streamlines: the groups must follow them
+  void TestShuffleKeepsGroups()
+  {
+    const Groups expected = { { "A", { 0, 1, 2 } }, { "B", { 2, 5 } } };
+    GetChild("A")->SetVisibility(true);
+
+    // Several times, a shuffle can keep a group in place by chance
+    for (int i = 0; i < 5; ++i)
+    {
+      m_FibersNode->SetBoolProperty("ShuffleFibers", true);
+      CPPUNIT_ASSERT(expected == OriginalGroups(m_Fibers));
+
+      // The displayed group is still the same streamlines
+      CPPUNIT_ASSERT(std::set<vtkIdType>({ 0, 1, 2 }) == VisibleOriginalIndexes());
+
+      // And so are the saved ones
+      const auto saved = SaveDataset();
+      CPPUNIT_ASSERT_EQUAL(3, saved->GetNumFibers());
+      CPPUNIT_ASSERT(Groups({ { "A", { 0, 1, 2 } } }) == OriginalGroups(saved));
+    }
+
+    // Back to the whole tractogram
+    GetChild("A")->SetVisibility(false);
+    CPPUNIT_ASSERT_EQUAL(10, NbVisible());
+    CPPUNIT_ASSERT(expected == OriginalGroups(SaveDataset()));
+  }
+
+  // With many datasets and only one visible, the visible one is saved
+  void TestSaveOnlyVisibleDataset()
+  {
+    auto geo = mitk::Geometry3D::New();
+    auto other = Get1_10Fibers(geo, true);
+    auto otherNode = AddFibersNode(other, "OtherNode");
+    auto& saver = Imeka::Fiber::Saver::Instance();
+
+    // Whatever the order of the datasets in the saver
+    otherNode->SetVisibility(false);
+    auto saved = saver.FiberBundleFromVisibleStreamlines();
+    CPPUNIT_ASSERT_EQUAL(10, saved->GetNumFibers());
+    const Groups expected = { { "A", { 0, 1, 2 } }, { "B", { 2, 5 } } };
+    CPPUNIT_ASSERT(expected == OriginalGroups(saved));
+
+    otherNode->SetVisibility(true);
+    m_FibersNode->SetVisibility(false);
+    saved = saver.FiberBundleFromVisibleStreamlines();
+    CPPUNIT_ASSERT_EQUAL(10, saved->GetNumFibers());
+    CPPUNIT_ASSERT(saved->GetStreamlineGroups().empty());
   }
 };
 

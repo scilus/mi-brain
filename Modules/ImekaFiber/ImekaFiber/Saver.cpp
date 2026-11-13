@@ -149,16 +149,19 @@ Saver::FiberBundleFromVisibleStreamlines() const
     mitk::FilteredFiberBundle::GetNewColorArray(TotalNbPoints());
 
   unsigned int nbVisible = 0;
-  for (auto it = m_DatasetDataMap->constBegin(); it != m_DatasetDataMap->constEnd(); ++it)
+  auto visibleDataset = m_DatasetDataMap->cend();
+  for (auto it = m_DatasetDataMap->cbegin(); it != m_DatasetDataMap->cend(); ++it)
   {
     if (it.key()->IsVisible(nullptr))
     {
       nbVisible++;
+      visibleDataset = it;
     }
   }
   if (nbVisible == 1 && (!m_RTTDataMap || m_RTTDataMap->isEmpty()))
   {
-    auto& fiberMapperData = m_DatasetDataMap->cbegin()->fiberMapperData;
+    // Not necessarily the first dataset: the hidden ones are not saved
+    auto& fiberMapperData = visibleDataset->fiberMapperData;
     auto oldPolydata = fiberMapperData.fiberBundle->GetFiberPolyData();
     auto newPolydata = vtkSmartPointer<vtkPolyData>::New();
     CopyPropertiesSettings(oldPolydata, newPolydata);

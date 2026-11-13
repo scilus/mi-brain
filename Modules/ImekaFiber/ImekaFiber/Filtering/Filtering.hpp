@@ -80,6 +80,12 @@ public:
   void AddFixedTractGroup(
     const mitk::DataNode*, const mitk::DataNode*, const FiberIndexes&);
   bool HasFixedTractGroup(const mitk::DataNode*) const;
+  // True if a fixed TG of the dataset is visible, i.e. active
+  bool HasVisibleFixedTractGroup(const mitk::DataNode*) const;
+  // After the streamlines of the dataset were reordered (new streamline i is
+  // the old streamline `ordering[i]`), makes the fixed TGs follow them.
+  void RemapFixedTractGroups(
+    const mitk::DataNode*, const std::vector<vtkIdType>& ordering);
   void EnableTractGroup(const mitk::DataNode*, const mitk::DataNode*);
   void DisableTractGroup(const mitk::DataNode*, mitk::DataNode*);
   void DeleteTractGroup(const mitk::DataNode*, const mitk::DataNode*);

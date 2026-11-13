@@ -478,15 +478,23 @@ void FibersManager::ShuffleFibers(
   mitk::DataNode* datasetNode,
   mitk::FilteredFiberBundle* fibers)
 {
-  fibers->Shuffle();
+  const auto ordering = fibers->Shuffle();
+  // Fixed TGs (e.g. TRX groups) hold streamline indices
+  m_Filtering.RemapFixedTractGroups(datasetNode, ordering);
 
-  const bool isFiltered = m_Filtering.UpdateResultsLinkedTo(datasetNode);
+  // The length subset holds streamline indices too
+  m_Filtering.RecalculateSubset(datasetNode);
+
+  // UpdateResultsLinkedTo only knows about ROIs: a visible fixed TG filters
+  // the dataset without any ROI.
+  const bool resultsUpdated = m_Filtering.UpdateResultsLinkedTo(datasetNode);
+  const bool isFiltered =
+    resultsUpdated || m_Filtering.HasVisibleFixedTractGroup(datasetNode);
   if (!isFiltered)
   {
     // This call shouldn't be necessary but it's the simplest chain of calls
     // which has the responsability to update the OpenGL buffer objects, so
     // it's complex to avoid it when we are not in filtering mode.
-    m_Filtering.RecalculateSubset(datasetNode);
     m_Filtering.ForceFilterDataset(datasetNode, fibers);
     m_FibersNodeData[datasetNode].UpdateIndices();
   }

@@ -79,7 +79,10 @@ public:
   // Delete all color information and set coloring to Orientation
   void DeleteColoring();
 
-  void Shuffle();
+  // Reorders the streamlines randomly. The streamline groups are remapped.
+  // Returns the new order: new streamline i is the old streamline
+  // `ordering[i]` (empty if there's nothing to shuffle).
+  std::vector<vtkIdType> Shuffle();
 
   bool IsRTT() const { return m_RTT; }
 

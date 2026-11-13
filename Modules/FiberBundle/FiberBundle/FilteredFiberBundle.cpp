@@ -707,11 +707,11 @@ void FilteredFiberBundle::DeleteColoring() {
   SetCurrentColorCoding(Coloring::Orientation);
 }
 
-void FilteredFiberBundle::Shuffle()
+std::vector<vtkIdType> FilteredFiberBundle::Shuffle()
 {
   m_FiberPolyData->BuildCells();
   const vtkIdType nbCells = m_FiberPolyData->GetNumberOfCells();
-  if (nbCells == 0) { return; }
+  if (nbCells == 0) { return {}; }
 
   std::vector<vtkIdType> ordering(nbCells);
   std::iota(ordering.begin(), ordering.end(), 0);
@@ -767,8 +767,28 @@ void FilteredFiberBundle::Shuffle()
   newPolyData->BuildCells();
   SetFiberPolyData(newPolyData);
 
+  // The groups refer to streamline indices, which have all changed
+  if (!m_StreamlineGroups.empty())
+  {
+    std::vector<vtkIdType> oldToNew(static_cast<size_t>(nbCells));
+    for (vtkIdType newIdx = 0; newIdx < nbCells; ++newIdx)
+    {
+      oldToNew[static_cast<size_t>(ordering[newIdx])] = newIdx;
+    }
+    for (auto& name_indexes : m_StreamlineGroups)
+    {
+      for (auto& idx : name_indexes.second)
+      {
+        if (idx >= 0 && idx < nbCells) { idx = oldToNew[static_cast<size_t>(idx)]; }
+      }
+      std::sort(name_indexes.second.begin(), name_indexes.second.end());
+    }
+  }
+
   m_UpdateTime2D.Modified();
   m_UpdateTime3D.Modified();
+
+  return ordering;
 }
 
 } // namespace mitk
