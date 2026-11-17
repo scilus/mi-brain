@@ -11,7 +11,7 @@
 
 #include <mitkImageCast.h>
 #include <mitkImage.h>
-#include <mitkLogMacros.h>
+#include <mitkLog.h>
 #include <mitkProperties.h>
 
 #include "../MimeType.hpp"

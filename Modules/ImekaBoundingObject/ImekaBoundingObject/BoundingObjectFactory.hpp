@@ -12,7 +12,6 @@
 #include "ImekaBoundingObjectExports.h"
 
 class QWidget;
-namespace mitk { class Image; }
 
 namespace Imeka
 {
@@ -20,7 +19,7 @@ namespace Imeka
 namespace BoundingObject
 {
 
-class ImekaBoundingObject_EXPORT BoundingObjectFactory
+class IMEKABOUNDINGOBJECT_EXPORT BoundingObjectFactory
 {
 public:
   typedef std::vector<std::string> BoundingObjectNamesType;

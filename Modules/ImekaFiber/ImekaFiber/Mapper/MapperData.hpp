@@ -12,7 +12,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT PartMapperData
+class IMEKAFIBER_EXPORT PartMapperData
 {
 public:
   PartMapperData();
@@ -44,7 +44,7 @@ private:
   bool m_Enabled;
 };
 
-struct ImekaFiber_EXPORT FiberMapperData
+struct IMEKAFIBER_EXPORT FiberMapperData
 {
   typedef std::map<const mitk::DataNode*, PartMapperData> TGMapperData;
 
@@ -68,7 +68,7 @@ private:
   std::vector<unsigned int> m_IBO;
 };
 
-mitk::FilteredFiberBundle::Pointer ImekaFiber_EXPORT NewFiberBundle(
+mitk::FilteredFiberBundle::Pointer IMEKAFIBER_EXPORT NewFiberBundle(
   vtkSmartPointer<vtkPolyData>, vtkCellArray*, vtkPoints*, vtkUnsignedCharArray*);
 
 } // namespace Fiber

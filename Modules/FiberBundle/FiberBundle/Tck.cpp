@@ -12,7 +12,7 @@
 
 #include <mitkProgressBar.h>
 
-int FiberBundle_EXPORT ReadTck(
+int FIBERBUNDLE_EXPORT ReadTck(
   const std::string& filename, mitk::FilteredFiberBundle* fiber)
 {
   std::ifstream f(filename);
@@ -120,7 +120,7 @@ std::string GetHeader(vtkPolyData* polydata)
     toString.str());
 }
 
-void FiberBundle_EXPORT WriteTck(
+void FIBERBUNDLE_EXPORT WriteTck(
   const std::string& filename, vtkPolyData* polydata)
 {
   std::ofstream f(filename, std::ios::binary);

@@ -14,7 +14,7 @@ namespace Imeka
 namespace Common
 {
 
-QVariant ImekaCommon_EXPORT BasePropertyToQVariant(
+QVariant IMEKACOMMON_EXPORT BasePropertyToQVariant(
   mitk::BaseProperty* baseProp);
 
 // Perform operation between two property lists. The property type and name

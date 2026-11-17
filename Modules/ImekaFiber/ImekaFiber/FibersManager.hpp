@@ -15,7 +15,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT FibersManager : public QObject
+class IMEKAFIBER_EXPORT FibersManager : public QObject
 {
   Q_OBJECT
 

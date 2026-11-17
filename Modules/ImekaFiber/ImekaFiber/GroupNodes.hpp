@@ -14,7 +14,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT GroupNodes
+class IMEKAFIBER_EXPORT GroupNodes
 {
 public:
   static const char* CategoryPropertyName;
@@ -38,9 +38,9 @@ private:
   Imeka::DataManager& m_DM;
 };
 
-bool ImekaFiber_EXPORT IsAnatomiesCategory(const mitk::DataNode*);
-bool ImekaFiber_EXPORT IsROIsCategory(const mitk::DataNode*);
-bool ImekaFiber_EXPORT IsTractsCategory(const mitk::DataNode*);
+bool IMEKAFIBER_EXPORT IsAnatomiesCategory(const mitk::DataNode*);
+bool IMEKAFIBER_EXPORT IsROIsCategory(const mitk::DataNode*);
+bool IMEKAFIBER_EXPORT IsTractsCategory(const mitk::DataNode*);
 
 } // namespace Fiber
 

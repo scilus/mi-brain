@@ -16,7 +16,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT SurfaceFiltering
+class IMEKAFIBER_EXPORT SurfaceFiltering
 {
 public:
   SurfaceFiltering();

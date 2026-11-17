@@ -12,7 +12,7 @@ namespace Imeka
 namespace Widgets
 {
 
-class ImekaWidgets_EXPORT DataNodeAndPropertiesTableModel
+class IMEKAWIDGETS_EXPORT DataNodeAndPropertiesTableModel
   : public QmitkDataStorageTableModel
 {
   Q_OBJECT

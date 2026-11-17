@@ -15,7 +15,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT SOFiltering
+class IMEKAFIBER_EXPORT SOFiltering
 {
 public:
   void Update(

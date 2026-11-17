@@ -14,7 +14,7 @@ namespace Imeka
 namespace IO
 {
 
-class ImekaIO_EXPORT VFFReader : public mitk::AbstractFileReader
+class IMEKAIO_EXPORT VFFReader : public mitk::AbstractFileReader
 {
   struct VFFHeader
   {

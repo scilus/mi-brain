@@ -12,7 +12,7 @@ namespace Imeka
 namespace IO
 {
 
-class ImekaIO_EXPORT DataNodeGroupReader : public mitk::AbstractFileReader
+class IMEKAIO_EXPORT DataNodeGroupReader : public mitk::AbstractFileReader
 {
 public:
   DataNodeGroupReader();

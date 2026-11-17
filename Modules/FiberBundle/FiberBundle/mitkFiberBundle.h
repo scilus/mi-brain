@@ -3,7 +3,6 @@
 
 //includes for MITK datastructure
 #include <mitkBaseData.h>
-#include "FiberBundleExports.h"
 #include <mitkImage.h>
 #include <mitkDataStorage.h>
 #include <mitkPixelTypeTraits.h>
@@ -16,11 +15,14 @@
 #include <vtkFloatArray.h>
 #include <itkScalableAffineTransform.h>
 
+#include "mitkTrackvisHeader.h"
+#include "FiberBundleExports.h"
+
 namespace mitk {
 
 /**
    * \brief Base Class for Fiber Bundles;   */
-class FiberBundle_EXPORT FiberBundle : public BaseData
+class FIBERBUNDLE_EXPORT FiberBundle : public BaseData
 {
 public:
 
@@ -64,9 +66,14 @@ public:
 
     // get/set data
     float GetFiberLength(int index) const { return m_FiberLengths.at(index); }
+    vtkSmartPointer<vtkFloatArray> GetFiberWeights() const { return m_FiberWeights; }
+    float GetFiberWeight(unsigned int fiber) const;
+    void SetFiberWeights(float newWeight);
+    void SetFiberWeight(unsigned int fiber, float weight);
+    void SetFiberWeights(vtkSmartPointer<vtkFloatArray> weights);
     void SetFiberPolyData(vtkSmartPointer<vtkPolyData>, bool updateGeometry = true);
     vtkSmartPointer<vtkPolyData> GetFiberPolyData() const;
-    itkGetConstMacro( NumFibers, int)
+    itkGetConstMacro( NumFibers, unsigned int)
     itkGetConstMacro( MinFiberLength, float )
     itkGetConstMacro( MaxFiberLength, float )
     itkGetConstMacro( MeanFiberLength, float )
@@ -92,6 +99,17 @@ public:
 
     vtkSmartPointer<vtkPolyData>    GeneratePolyDataByIds(std::vector<long> fiberIds);
 
+    /** The header set, read from a .trk file or set from a reference geometry; while there is
+     *  none, a header describing the bundle's current bounding box. */
+    TrackVis_header GetTrackVisHeader() const;
+    /** Whether a header was set (read from a .trk file, set from a reference geometry or copied
+     *  from a bundle that had one), as opposed to the one derived from the bounding box. */
+    bool HasTrackVisHeader() const;
+    void SetTrackVisHeader(const TrackVis_header &TrackVisHeader);
+    void SetTrackVisHeader(const BaseGeometry *geometry);
+    void setIsRAS(bool newIsRAS);
+    bool IsRAS() const;
+
 protected:
 
     FiberBundle( vtkPolyData* fiberPolyData = nullptr );
@@ -104,10 +122,11 @@ protected:
     // actual fiber container
     vtkSmartPointer<vtkPolyData>  m_FiberPolyData;
 
-    int   m_NumFibers;
+    vtkIdType m_NumFibers;
 
     vtkSmartPointer<vtkUnsignedCharArray> m_FiberColors;
-    std::vector< float > m_FiberLengths;
+    vtkSmartPointer<vtkFloatArray> m_FiberWeights;
+    std::vector<float> m_FiberLengths;
     float   m_MinFiberLength;
     float   m_MaxFiberLength;
     float   m_MeanFiberLength;
@@ -116,6 +135,8 @@ protected:
     bool m_IsInOrientationColoring;
     itk::TimeStamp m_UpdateTime2D;
     itk::TimeStamp m_UpdateTime3D;
+    TrackVis_header     m_TrackVisHeader;
+    bool m_IsRAS;
     mitk::BaseGeometry::Pointer m_ReferenceGeometry;
 };
 

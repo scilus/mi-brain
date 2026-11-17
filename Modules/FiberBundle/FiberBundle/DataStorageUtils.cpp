@@ -48,7 +48,7 @@ mitk::BaseGeometry::Pointer GetTransformFromTrk()
   return nullptr;
 }
 
-mitk::BaseGeometry::Pointer FiberBundle_EXPORT
+mitk::BaseGeometry::Pointer FIBERBUNDLE_EXPORT
 GetTransformFromAnat()
 {
   mitk::DataNode* anatNode = GetAnatNode();

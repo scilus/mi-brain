@@ -12,7 +12,7 @@
 namespace mitk
 {
 
-class ImekaCommon_EXPORT Matrix3DPropertySerializer
+class IMEKACOMMON_EXPORT Matrix3DPropertySerializer
   : public BasePropertySerializer
 {
 public:

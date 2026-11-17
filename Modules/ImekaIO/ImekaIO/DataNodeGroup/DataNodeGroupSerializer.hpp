@@ -9,7 +9,7 @@
 namespace mitk
 {
 
-class ImekaIO_EXPORT DataNodeGroupSerializer : public mitk::BaseDataSerializer
+class IMEKAIO_EXPORT DataNodeGroupSerializer : public mitk::BaseDataSerializer
 {
 public:
   mitkClassMacro(DataNodeGroupSerializer, BaseDataSerializer);

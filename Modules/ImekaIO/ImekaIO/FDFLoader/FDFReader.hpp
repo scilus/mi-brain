@@ -17,7 +17,7 @@ namespace Imeka
 namespace IO
 {
 
-class ImekaIO_EXPORT FDFReader : public mitk::AbstractFileReader
+class IMEKAIO_EXPORT FDFReader : public mitk::AbstractFileReader
 {
 private:
   static const unsigned int SPACING_TO_MM_RATIO;

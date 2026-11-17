@@ -51,8 +51,6 @@ public:
   }
 
   void SetDataStorage(mitk::DataStorage*) override {}
-  void SetSmoothed(bool) override {}
-  void SetDecimated(bool) override {}
   void SetFunctionality(berry::QtViewPart*) override {}
 };
 

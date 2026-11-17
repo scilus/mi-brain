@@ -9,8 +9,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 
-#include "PlitkVersion.hpp"
-
 UpdaterMenu::UpdaterMenu(QWidget* parent)
   : QMenu(parent)
   , m_Reply(nullptr)
@@ -19,7 +17,7 @@ UpdaterMenu::UpdaterMenu(QWidget* parent)
   this->menuAction()->setVisible(false);
   this->setTitle("Update available!");
 
-  const QUrl checkURL(MIBRAIN_VERSION_CHECK);
+  const QUrl checkURL("");
   if (checkURL.isEmpty())
   {
     return;
@@ -65,7 +63,7 @@ void UpdaterMenu::replyFinished(QNetworkReply *reply)
     return;
   }
 
-  QString currentVersion = PLITK_VERSION_NOHASH;
+  QString currentVersion = "";
   if (NewerVersion(currentVersion, newVersion))
   {
     this->setVisible(true);
@@ -87,7 +85,7 @@ void UpdaterMenu::replyFinished(QNetworkReply *reply)
       const int answer = msgBox.exec();
       if (answer == QMessageBox::Open)
       {
-        const QUrl updateURL(MIBRAIN_VERSION_UPDATE);
+        const QUrl updateURL("");
         QDesktopServices::openUrl(updateURL);
       }
       if (answer != QMessageBox::Cancel)

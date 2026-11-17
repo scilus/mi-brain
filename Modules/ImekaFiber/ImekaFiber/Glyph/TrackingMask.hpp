@@ -14,7 +14,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT TrackingMask
+class IMEKAFIBER_EXPORT TrackingMask
   : public Glyph<float, 3, RawMemoryLoader<float, 3>>
 {
 public:

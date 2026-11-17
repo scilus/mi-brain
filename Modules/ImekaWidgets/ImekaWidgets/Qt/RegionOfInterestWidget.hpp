@@ -10,11 +10,10 @@
 
 #include "ImekaCommon/DataManager.hpp"
 
-#include "ui_RegionOfInterestWidget.h"
-
 #include "ImekaWidgetsExports.h"
 
 namespace mitk { class BoundingObject; };
+namespace Ui { class RegionOfInterestWidget; }
 
 namespace Imeka
 {
@@ -22,8 +21,7 @@ namespace Imeka
 namespace Widgets
 {
 
-class ImekaWidgets_EXPORT RegionOfInterestWidget : public QWidget,
-  public Ui::RegionOfInterestWidget
+class IMEKAWIDGETS_EXPORT RegionOfInterestWidget : public QWidget
 {
   Q_OBJECT
 
@@ -92,6 +90,7 @@ private:
   void CheckBOExistence();
   unsigned int GetTime();
 
+  ::Ui::RegionOfInterestWidget* m_Controls;
   Imeka::DataManager m_DM;
   mitk::DataNode* m_ParentNode;
   mitk::BaseData* m_Anat;

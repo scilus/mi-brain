@@ -18,7 +18,7 @@ namespace mitk
    It can't do the LookupTables, Points and Vectors though.
 */
 template <class Property>
-class ImekaCommon_EXPORT GenericPropertySerializer
+class IMEKACOMMON_EXPORT GenericPropertySerializer
   : public BasePropertySerializer
 {
   typedef typename Property::ValueType T;

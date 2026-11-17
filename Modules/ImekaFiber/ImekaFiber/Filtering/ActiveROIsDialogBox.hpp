@@ -41,7 +41,7 @@ protected:
 
 // Exported only because some tests access NodesToSelect directly and I
 // had link error if I didn't export it.
-class ImekaFiber_EXPORT ActiveROIsDialogBox : public QDialog
+class IMEKAFIBER_EXPORT ActiveROIsDialogBox : public QDialog
 {
   Q_OBJECT
 
@@ -83,8 +83,8 @@ private:
   QWidget* m_OkButton;
 };
 
-Nodes ImekaFiber_EXPORT GetOrderedIndexes(const Nodes& ROIs, const bool);
-bool ImekaFiber_EXPORT IsSurfaceAndWeCare(const mitk::DataNode*, const bool);
+Nodes IMEKAFIBER_EXPORT GetOrderedIndexes(const Nodes& ROIs, const bool);
+bool IMEKAFIBER_EXPORT IsSurfaceAndWeCare(const mitk::DataNode*, const bool);
 
 } // namespace Fiber
 

@@ -17,7 +17,7 @@ namespace mitk {
 
 struct IShaderRepository;
 
-class ImekaFiber_EXPORT PeakImageMapper2D : public VtkMapper
+class IMEKAFIBER_EXPORT PeakImageMapper2D : public VtkMapper
 {
 
 public:

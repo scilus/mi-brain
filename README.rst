@@ -1,43 +1,32 @@
 MI-Brain
 ========
 
-Medical imaging application based on MITK 2018.04, focused on diffusion MRI 
+Medical imaging application based on ``MITK 2026.06``, focused on diffusion MRI 
 and tractography visualisation and interaction.
 
-Based on code originally developed at Imeka Solutions Inc.
+Based on code originally developed at `Imeka Solutions Inc.
+<https://imeka.ca/>`_
 
 Requirements
 ------------
 
-- `CMake
-  <http://www.cmake.org/>`_ == 3.12.x or 3.13.x
-- `Qt
-  <https://download.qt.io/archive/qt/>`_ == 5.12.x up to 5.12.5 excluded
-- (recommended) `MITK`_ == dev2018
+See this `MITK page
+<https://docs.mitk.org/2026.06/BuildInstructionsPage.html>`_ for the details.
+MI-Brain has the exact same requirements as ``MITK 2026.06``.
 
 How-to build
 ------------
 
-You must build the MITK's development branch before building this project.
-The documentation to build MITK and this project (MI-Brain) can be found in
-those documents. Contact Imeka if needed.
+Tu build MI-Brain, you must build MITK and link to the ``mi-brain`` folder in cmake.::
 
-How-to run the tests
---------------------
-
-#. On Linux and macOS, simply run this command with the desired number of
-   processors::
-
-    > ctest -j #
-
-#. On Windows, in the Visual Studio 2017, right-click on the ``RUN_TEST``
-   project and ``Build``. It will run on only one processor. If you want to run
-   the test on a specific number of processors, open the a command line, copy
-   the path line from the ``startMitkWorkbench_release.bat`` in your
-   ``MITK-build\\bin`` folder, then run::
-   
-    > PATH=.............;%PATH%
-    > ctest -j #
+  cd mitk
+  mkdir _build
+  cd _build
+  cmake -G "Ninja" \
+      -D MITK_EXTENSION_DIRS=C:/path/to/mi-brain \
+      -D MITK_BUILD_CONFIGURATION=WorkbenchReleaseNoPython \
+      -D BUILD_TESTING:BOOL=OFF \
+      ..
 
 How-to package
 --------------
@@ -46,8 +35,8 @@ How-to package
    The resulting redistributable archive will be located in your build
    directory::
 
-    > make package
+    > ninja package
 
-#. On Windows, in the Visual Studio 2017, right-click on the ``PACKAGE``
+#. On Windows, in the Visual Studio 2022, right-click on the ``PACKAGE``
    project and ``Build``. The resulting redistributable archives
    (.exe and .zip) will be located in your build directory.

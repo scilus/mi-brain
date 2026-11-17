@@ -16,7 +16,7 @@ namespace mitk
 class LevelWindow;
 class LookupTable;
 
-class FiberBundle_EXPORT FilteredFiberBundle : public FiberBundle
+class FIBERBUNDLE_EXPORT FilteredFiberBundle : public FiberBundle
 {
 public:
   enum Coloring

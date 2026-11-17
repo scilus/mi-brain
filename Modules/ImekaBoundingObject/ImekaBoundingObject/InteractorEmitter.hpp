@@ -20,7 +20,7 @@ namespace Imeka
 namespace BoundingObject
 {
 
-class ImekaBoundingObject_EXPORT InteractorEmitter
+class IMEKABOUNDINGOBJECT_EXPORT InteractorEmitter
   : public QObject, public mitk::AffineImageCropperInteractor
 {
   Q_OBJECT

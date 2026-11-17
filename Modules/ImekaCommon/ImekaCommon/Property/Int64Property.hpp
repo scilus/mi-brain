@@ -8,7 +8,7 @@
 
 namespace mitk
 {
-  mitkDeclareGenericProperty(Int64Property, long long, ImekaCommon_EXPORT);
+  mitkDeclareGenericProperty(Int64Property, long long, IMEKACOMMON_EXPORT);
 }
 
 #endif // IMEKA_INT64_PROPERTY_SERIALIZER_HPP_INCLUDED

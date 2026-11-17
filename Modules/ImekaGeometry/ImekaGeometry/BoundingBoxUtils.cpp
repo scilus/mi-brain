@@ -14,7 +14,7 @@ namespace Imeka
 namespace Geometry
 {
 
-itk::FixedArray<double, 6> ImekaGeometry_EXPORT
+itk::FixedArray<double, 6> IMEKAGEOMETRY_EXPORT
 GetBoundingBox(mitk::BaseGeometry* geometry)
 {
   double
@@ -42,7 +42,7 @@ GetBoundingBox(mitk::BaseGeometry* geometry)
   return bbox;
 }
 
-mitk::BoundingBox::BoundsArrayType ImekaGeometry_EXPORT
+mitk::BoundingBox::BoundsArrayType IMEKAGEOMETRY_EXPORT
 GetSceneBounds(mitk::DataStorage* DS)
 {
   auto usefulObjects = mitk::NodePredicateNot::New(

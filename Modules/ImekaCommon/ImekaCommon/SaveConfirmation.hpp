@@ -15,7 +15,7 @@ namespace Imeka
 namespace FileSystem
 {
 
-class ImekaCommon_EXPORT SaveConfirmation
+class IMEKACOMMON_EXPORT SaveConfirmation
 {
   struct FileInfo
   {

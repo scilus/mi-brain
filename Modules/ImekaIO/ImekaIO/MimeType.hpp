@@ -14,35 +14,35 @@ namespace Imeka
 namespace IO
 {
 
-std::string ImekaIO_EXPORT GetBoundingObjectName();
-std::string ImekaIO_EXPORT GetBoundingObjectDescription();
-mitk::CustomMimeType ImekaIO_EXPORT GetBoundingObjectMimeType();
-QString ImekaIO_EXPORT GetBoundingObjectFilter();
+std::string IMEKAIO_EXPORT GetBoundingObjectName();
+std::string IMEKAIO_EXPORT GetBoundingObjectDescription();
+mitk::CustomMimeType IMEKAIO_EXPORT GetBoundingObjectMimeType();
+QString IMEKAIO_EXPORT GetBoundingObjectFilter();
 
-std::string ImekaIO_EXPORT GetDataNodeGroupName();
-std::string ImekaIO_EXPORT GetDataNodeGroupDescription();
-mitk::CustomMimeType ImekaIO_EXPORT GetDataNodeGroupMimeType();
-QString ImekaIO_EXPORT GetDataNodeGroupFilter();
+std::string IMEKAIO_EXPORT GetDataNodeGroupName();
+std::string IMEKAIO_EXPORT GetDataNodeGroupDescription();
+mitk::CustomMimeType IMEKAIO_EXPORT GetDataNodeGroupMimeType();
+QString IMEKAIO_EXPORT GetDataNodeGroupFilter();
 
-std::string ImekaIO_EXPORT GetDicomGroupName();
-std::string ImekaIO_EXPORT GetDicomDescription();
-mitk::CustomMimeType ImekaIO_EXPORT GetDicomMimeType();
-QString ImekaIO_EXPORT GetDicomFilter();
+std::string IMEKAIO_EXPORT GetDicomGroupName();
+std::string IMEKAIO_EXPORT GetDicomDescription();
+mitk::CustomMimeType IMEKAIO_EXPORT GetDicomMimeType();
+QString IMEKAIO_EXPORT GetDicomFilter();
 
-std::string ImekaIO_EXPORT GetFDFImageName();
-std::string ImekaIO_EXPORT GetFDFImageDescription();
-mitk::CustomMimeType ImekaIO_EXPORT GetFDFImageMimeType();
-QString ImekaIO_EXPORT GetFDFImageFilter();
+std::string IMEKAIO_EXPORT GetFDFImageName();
+std::string IMEKAIO_EXPORT GetFDFImageDescription();
+mitk::CustomMimeType IMEKAIO_EXPORT GetFDFImageMimeType();
+QString IMEKAIO_EXPORT GetFDFImageFilter();
 
-std::string ImekaIO_EXPORT GetVFFImageName();
-std::string ImekaIO_EXPORT GetVFFImageDescription();
-mitk::CustomMimeType ImekaIO_EXPORT GetVFFImageMimeType();
-QString ImekaIO_EXPORT GetVFFImageFilter();
+std::string IMEKAIO_EXPORT GetVFFImageName();
+std::string IMEKAIO_EXPORT GetVFFImageDescription();
+mitk::CustomMimeType IMEKAIO_EXPORT GetVFFImageMimeType();
+QString IMEKAIO_EXPORT GetVFFImageFilter();
 
-std::string ImekaIO_EXPORT GetRGBNiftiImageName();
-std::string ImekaIO_EXPORT GetRGBNiftiImageDescription();
-mitk::CustomMimeType ImekaIO_EXPORT GetRGBNiftiImageMimeType();
-QString ImekaIO_EXPORT GetRGBNiftiImageFilter();
+std::string IMEKAIO_EXPORT GetRGBNiftiImageName();
+std::string IMEKAIO_EXPORT GetRGBNiftiImageDescription();
+mitk::CustomMimeType IMEKAIO_EXPORT GetRGBNiftiImageMimeType();
+QString IMEKAIO_EXPORT GetRGBNiftiImageFilter();
 
 } // namespace IO
 

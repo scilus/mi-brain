@@ -17,12 +17,12 @@ namespace Imeka
 namespace Color
 {
 
-std::vector<QColor> ImekaCommon_EXPORT
+std::vector<QColor> IMEKACOMMON_EXPORT
 GetNColors(const unsigned int);
 
-void ImekaCommon_EXPORT ShuffleColors(const Nodes nodes);
+void IMEKACOMMON_EXPORT ShuffleColors(const Nodes nodes);
 
-void ImekaCommon_EXPORT
+void IMEKACOMMON_EXPORT
 Apply(mitk::DataNode*, const QColor&);
 
 } // namespace Color

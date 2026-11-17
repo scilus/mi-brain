@@ -17,7 +17,7 @@ namespace Imeka
 namespace BoundingObject
 {
 
-mitk::DataNode::Pointer ImekaBoundingObject_EXPORT
+mitk::DataNode::Pointer IMEKABOUNDINGOBJECT_EXPORT
 GetBoundingObjectNode(
   const mitk::DataStorage* storage,
   const mitk::DataNode* parentNode,
@@ -36,7 +36,7 @@ GetBoundingObjectNode(
   return boundingObjectNode;
 }
 
-bool ImekaBoundingObject_EXPORT
+bool IMEKABOUNDINGOBJECT_EXPORT
 AddBoundingObjectNodeToParent(
   mitk::DataStorage* storage,
   mitk::DataNode* parentNode,
@@ -76,7 +76,7 @@ AddBoundingObjectNodeToParent(
   return true;
 }
 
-mitk::DataNode::Pointer ImekaBoundingObject_EXPORT
+mitk::DataNode::Pointer IMEKABOUNDINGOBJECT_EXPORT
 GetNewBoundingObjectNode(
   mitk::BoundingObject* boundingObject,
   const bool isHelperObject)
@@ -96,7 +96,7 @@ GetNewBoundingObjectNode(
   return boundingObjectNode;
 }
 
-void ImekaBoundingObject_EXPORT
+void IMEKABOUNDINGOBJECT_EXPORT
 AddInteractorToAllBoundingObjectNodes(Imeka::DataManager* DM)
 {
   if (!DM)
@@ -112,7 +112,7 @@ AddInteractorToAllBoundingObjectNodes(Imeka::DataManager* DM)
   }
 }
 
-InteractorEmitter::Pointer ImekaBoundingObject_EXPORT
+InteractorEmitter::Pointer IMEKABOUNDINGOBJECT_EXPORT
 AddInteractor(mitk::DataNode* node)
 {
   if (node && !node->GetDataInteractor())

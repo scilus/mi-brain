@@ -20,18 +20,18 @@ namespace View
 
 typedef mitk::AnatomicalPlane ViewDirection;
 
-mitk::BaseRenderer ImekaGeometry_EXPORT * GetRenderer(const ViewDirection);
-mitk::BaseRenderer ImekaGeometry_EXPORT * GetRenderer(const std::string&);
-mitk::BaseRenderer ImekaGeometry_EXPORT * GetAxialRenderer();
-mitk::BaseRenderer ImekaGeometry_EXPORT * GetSagittalRenderer();
-mitk::BaseRenderer ImekaGeometry_EXPORT * GetCoronalRenderer();
-std::vector<mitk::BaseRenderer*> ImekaGeometry_EXPORT Get2DRenderers();
-std::vector<vtkCamera*> ImekaGeometry_EXPORT Get2DCameras();
-mitk::BaseRenderer ImekaGeometry_EXPORT * Get3DRenderer();
+mitk::BaseRenderer IMEKAGEOMETRY_EXPORT* GetRenderer(const ViewDirection);
+mitk::BaseRenderer IMEKAGEOMETRY_EXPORT* GetRenderer(const std::string&);
+mitk::BaseRenderer IMEKAGEOMETRY_EXPORT* GetAxialRenderer();
+mitk::BaseRenderer IMEKAGEOMETRY_EXPORT* GetSagittalRenderer();
+mitk::BaseRenderer IMEKAGEOMETRY_EXPORT* GetCoronalRenderer();
+std::vector<mitk::BaseRenderer*> IMEKAGEOMETRY_EXPORT Get2DRenderers();
+std::vector<vtkCamera*> IMEKAGEOMETRY_EXPORT Get2DCameras();
+mitk::BaseRenderer IMEKAGEOMETRY_EXPORT* Get3DRenderer();
 
 //Do NOT use these function if you have access to StdMultiWidget
-mitk::Point3D ImekaGeometry_EXPORT GetCrosshairPosition();
-void ImekaGeometry_EXPORT SetCrosshairPosition(const mitk::Point3D&);
+mitk::Point3D IMEKAGEOMETRY_EXPORT GetCrosshairPosition();
+void IMEKAGEOMETRY_EXPORT SetCrosshairPosition(const mitk::Point3D&);
 
 } // namespace View
 

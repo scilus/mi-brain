@@ -1,7 +1,7 @@
 MITK_CREATE_MODULE( ImekaFiber
   INCLUDE_DIRS ${CMAKE_BINARY_DIR}
   PACKAGE_DEPENDS Qt6|Core
-  DEPENDS MitkCore MitkTestingHelper MitkDataTypesExt MitkPersistence MitkSegmentation FiberBundle ImekaBoundingObject ImekaCommon ImekaGeometry ImekaWidgets
+  DEPENDS MitkCore MitkDataTypesExt MitkPersistence MitkSegmentation FiberBundle ImekaBoundingObject ImekaCommon ImekaGeometry ImekaWidgets
   WARNINGS_NO_ERRORS
 )
 

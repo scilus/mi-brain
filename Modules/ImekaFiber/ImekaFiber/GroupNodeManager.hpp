@@ -16,7 +16,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT GroupNodeManager
+class IMEKAFIBER_EXPORT GroupNodeManager
 {
 public:
   GroupNodeManager(

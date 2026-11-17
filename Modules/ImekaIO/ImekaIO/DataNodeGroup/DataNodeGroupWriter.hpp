@@ -12,7 +12,7 @@ namespace Imeka
 namespace IO
 {
 
-class ImekaIO_EXPORT DataNodeGroupWriter : public mitk::AbstractFileWriter
+class IMEKAIO_EXPORT DataNodeGroupWriter : public mitk::AbstractFileWriter
 {
 public:
   DataNodeGroupWriter();

@@ -11,7 +11,7 @@ namespace Imeka
 namespace FileSystem
 {
 
-class ImekaCommon_EXPORT SaveDialog
+class IMEKACOMMON_EXPORT SaveDialog
 {
 public:
   SaveDialog(QWidget *parent = nullptr);

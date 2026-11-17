@@ -6,6 +6,7 @@
 #include "ImekaBoundingObject/NodeUtils.hpp"
 #include "ImekaBoundingObject/BoundingObjectFactory.hpp"
 #include "ImekaCommon/SaveDialog.hpp"
+#include "ui_RegionOfInterestWidget.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -24,6 +25,7 @@ const QString RegionOfInterestWidget::DEFAULT_DIR =
 
 RegionOfInterestWidget::RegionOfInterestWidget(QWidget* parent)
   : QWidget(parent)
+  , m_Controls(new ::Ui::RegionOfInterestWidget)
   , m_DM(nullptr)
   , m_ParentNode(nullptr)
   , m_Anat(nullptr)
@@ -32,7 +34,7 @@ RegionOfInterestWidget::RegionOfInterestWidget(QWidget* parent)
   , m_IsHelperObject(false)
   , m_AlreadyEmited(false)
 {
-  setupUi(this);
+  m_Controls->setupUi(this);
 
   connect(this, &RegionOfInterestWidget::RequestUIUpdate,
     this, &RegionOfInterestWidget::UpdateUI);
@@ -60,16 +62,16 @@ void RegionOfInterestWidget::CreateBO(
 
 void RegionOfInterestWidget::ShowActionButtons()
 {
-  createROIButton->show();
-  importROIButton->show();
-  exportROIButton->show();
+  m_Controls->createROIButton->show();
+  m_Controls->importROIButton->show();
+  m_Controls->exportROIButton->show();
 }
 
 void RegionOfInterestWidget::HideActionButtons()
 {
-  createROIButton->hide();
-  importROIButton->hide();
-  exportROIButton->hide();
+  m_Controls->createROIButton->hide();
+  m_Controls->importROIButton->hide();
+  m_Controls->exportROIButton->hide();
 }
 
 void RegionOfInterestWidget::moveROI(
@@ -270,26 +272,26 @@ void RegionOfInterestWidget::UpdateROIInformation(
     if (geometry.IsNotNull())
     {
       const mitk::Point3D center = geometry->GetOrigin();
-      ROIx->setValue(center[0]);
-      ROIy->setValue(center[1]);
-      ROIz->setValue(center[2]);
+      m_Controls->ROIx->setValue(center[0]);
+      m_Controls->ROIy->setValue(center[1]);
+      m_Controls->ROIz->setValue(center[2]);
 
       const mitk::Vector3D spacing = geometry->GetSpacing();
-      ROIWidth->setValue(spacing[0] * 2.0);
-      ROIHeight->setValue(spacing[1] * 2.0);
-      ROIDepth->setValue(spacing[2] * 2.0);
+      m_Controls->ROIWidth->setValue(spacing[0] * 2.0);
+      m_Controls->ROIHeight->setValue(spacing[1] * 2.0);
+      m_Controls->ROIDepth->setValue(spacing[2] * 2.0);
 
       m_AlreadyEmited = false;
       return;
     }
   }
 
-  ROIx->setValue(0);
-  ROIy->setValue(0);
-  ROIz->setValue(0);
-  ROIWidth->setValue(0);
-  ROIHeight->setValue(0);
-  ROIDepth->setValue(0);
+  m_Controls->ROIx->setValue(0);
+  m_Controls->ROIy->setValue(0);
+  m_Controls->ROIz->setValue(0);
+  m_Controls->ROIWidth->setValue(0);
+  m_Controls->ROIHeight->setValue(0);
+  m_Controls->ROIDepth->setValue(0);
 
   m_AlreadyEmited = false;
 }
@@ -300,39 +302,39 @@ void RegionOfInterestWidget::UpdateUI(const UI_STATE state)
   {
     default:
     case DISABLED:
-      createROIButton->setEnabled(false);
-      importROIButton->setEnabled(false);
-      exportROIButton->setEnabled(false);
-      ROIx->setEnabled(false);
-      ROIy->setEnabled(false);
-      ROIz->setEnabled(false);
-      ROIWidth->setEnabled(false);
-      ROIHeight->setEnabled(false);
-      ROIDepth->setEnabled(false);
+      m_Controls->createROIButton->setEnabled(false);
+      m_Controls->importROIButton->setEnabled(false);
+      m_Controls->exportROIButton->setEnabled(false);
+      m_Controls->ROIx->setEnabled(false);
+      m_Controls->ROIy->setEnabled(false);
+      m_Controls->ROIz->setEnabled(false);
+      m_Controls->ROIWidth->setEnabled(false);
+      m_Controls->ROIHeight->setEnabled(false);
+      m_Controls->ROIDepth->setEnabled(false);
       break;
 
     case NODE_SELECTED:
-      createROIButton->setEnabled(true);
-      importROIButton->setEnabled(true);
-      exportROIButton->setEnabled(false);
-      ROIx->setEnabled(false);
-      ROIy->setEnabled(false);
-      ROIz->setEnabled(false);
-      ROIWidth->setEnabled(false);
-      ROIHeight->setEnabled(false);
-      ROIDepth->setEnabled(false);
+      m_Controls->createROIButton->setEnabled(true);
+      m_Controls->importROIButton->setEnabled(true);
+      m_Controls->exportROIButton->setEnabled(false);
+      m_Controls->ROIx->setEnabled(false);
+      m_Controls->ROIy->setEnabled(false);
+      m_Controls->ROIz->setEnabled(false);
+      m_Controls->ROIWidth->setEnabled(false);
+      m_Controls->ROIHeight->setEnabled(false);
+      m_Controls->ROIDepth->setEnabled(false);
       break;
 
     case ROI_EXISTS:
-      createROIButton->setEnabled(true);
-      importROIButton->setEnabled(true);
-      exportROIButton->setEnabled(true);
-      ROIx->setEnabled(true);
-      ROIy->setEnabled(true);
-      ROIz->setEnabled(true);
-      ROIWidth->setEnabled(true);
-      ROIHeight->setEnabled(true);
-      ROIDepth->setEnabled(true);
+      m_Controls->createROIButton->setEnabled(true);
+      m_Controls->importROIButton->setEnabled(true);
+      m_Controls->exportROIButton->setEnabled(true);
+      m_Controls->ROIx->setEnabled(true);
+      m_Controls->ROIy->setEnabled(true);
+      m_Controls->ROIz->setEnabled(true);
+      m_Controls->ROIWidth->setEnabled(true);
+      m_Controls->ROIHeight->setEnabled(true);
+      m_Controls->ROIDepth->setEnabled(true);
       break;
   };
 

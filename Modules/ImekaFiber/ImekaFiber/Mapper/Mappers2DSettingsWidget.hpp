@@ -5,9 +5,9 @@
 
 #include "../FiberNodeData.hpp"
 
-#include "ui_Mappers2DSettingsWidget.h"
-
 #include "ImekaFiberExports.h"
+
+namespace Ui { class Mappers2DSettingsWidget; }
 
 namespace Imeka
 {
@@ -15,8 +15,8 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT Mappers2DSettingsWidget
-  : public QWidget, public Ui::Mappers2DSettingsWidget
+class IMEKAFIBER_EXPORT Mappers2DSettingsWidget
+  : public QWidget
 {
   Q_OBJECT
 
@@ -29,9 +29,10 @@ public:
 
   void AddNodes(NodeDataMap*);
   void RemoveNodes(NodeDataMap*);
-  bool IsEnabled() { return btn2D->isChecked(); }
+  bool IsEnabled() const;
 
   Mappers2DSettingsWidget(QWidget* = nullptr);
+  ~Mappers2DSettingsWidget() override;
   void SetAnatGeometry(const mitk::BaseGeometry*);
   void SetThicknessParameters(const float spacing);
 
@@ -39,6 +40,7 @@ public slots:
   void Modified(const bool checked);
 
 private:
+  ::Ui::Mappers2DSettingsWidget* m_Controls;
   const mitk::BaseGeometry* m_AnatGeo;
   std::vector<NodeDataMap*> m_Maps;
 };

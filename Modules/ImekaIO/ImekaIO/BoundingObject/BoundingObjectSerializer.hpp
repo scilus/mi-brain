@@ -9,7 +9,7 @@
 namespace mitk
 {
 
-class ImekaIO_EXPORT BoundingObjectSerializer : public BaseDataSerializer
+class IMEKAIO_EXPORT BoundingObjectSerializer : public BaseDataSerializer
 {
 public:
   mitkClassMacro(BoundingObjectSerializer, BaseDataSerializer);

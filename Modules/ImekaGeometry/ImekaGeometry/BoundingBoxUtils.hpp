@@ -16,13 +16,13 @@ namespace Imeka
 namespace Geometry
 {
 
-itk::FixedArray<double, 6> ImekaGeometry_EXPORT
+itk::FixedArray<double, 6> IMEKAGEOMETRY_EXPORT
 GetBoundingBox(mitk::BaseGeometry*);
 
-mitk::BoundingBox::BoundsArrayType ImekaGeometry_EXPORT
+mitk::BoundingBox::BoundsArrayType IMEKAGEOMETRY_EXPORT
 GetSceneBounds(mitk::DataStorage*);
 
-class ImekaGeometry_EXPORT ReinitOnBoundsChangeScopeGuard
+class IMEKAGEOMETRY_EXPORT ReinitOnBoundsChangeScopeGuard
 {
 public:
   ReinitOnBoundsChangeScopeGuard(mitk::DataStorage*);

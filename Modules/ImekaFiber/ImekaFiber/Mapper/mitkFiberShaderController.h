@@ -32,7 +32,7 @@ namespace mitk {
    * This class handles the UpdateShaderEvent to inject uniforms and provides
    * GLSL logic for vertex and fragment shaders.
    */
-  class ImekaFiber_EXPORT mitkFiberShaderController : public vtkCommand
+  class IMEKAFIBER_EXPORT mitkFiberShaderController : public vtkCommand
   {
   public:
     static mitkFiberShaderController* New();

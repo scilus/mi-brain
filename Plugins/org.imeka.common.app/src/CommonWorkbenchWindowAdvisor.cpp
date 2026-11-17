@@ -1,6 +1,7 @@
 
 #include "CommonWorkbenchWindowAdvisor.hpp"
 
+#include <QmitkApplicationConstants.h>
 #include <berryCommandContributionItem.h>
 #include <berryCommandContributionItemParameter.h>
 #include <berryFileEditorInput.h>
@@ -9,7 +10,6 @@
 #include <berryIQtStyleManager.h>
 #include <berryMenuManager.h>
 #include <berryPlatformUI.h>
-#include <berryQtPreferences.h>
 #include <berryWorkbenchPlugin.h>
 #include <internal/berryQtShowViewAction.h>
 
@@ -115,19 +115,8 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
   // that's why it's currently separated in 2 groups.
   auto prefService = berry::WorkbenchPlugin::GetDefault()->GetPreferencesService();
 
-  /*{
-    auto prefs = prefService->GetSystemPreferences()
-      ->Node(berry::QtPreferences::QT_STYLES_NODE);
-    const bool showCategoryNames = prefs->GetBool(
-      berry::QtPreferences::QT_SHOW_TOOLBAR_CATEGORY_NAMES, true);
-    if (showCategoryNames)
-    {
-      prefs->PutBool(berry::QtPreferences::QT_SHOW_TOOLBAR_CATEGORY_NAMES, false);
-    }
-  }*/
-
   {
-    auto prefs = prefService->GetSystemPreferences()->Node("/org.mitk.views.datamanager");
+    auto prefs = prefService->GetSystemPreferences()->Node("org.mitk.views.datamanager");
     const QString pref = "Call global reinit if node is deleted";
     const bool reinitOnDelete = prefs->GetBool(pref.toStdString(), false);
     if (reinitOnDelete)
@@ -139,13 +128,12 @@ void CommonWorkbenchWindowAdvisor::PostWindowCreate()
   QmitkExtWorkbenchWindowAdvisor::PostWindowCreate();
 
   // very bad hack...
-  berry::IWorkbenchWindow::Pointer window =
-    this->GetWindowConfigurer()->GetWindow();
-  auto mainWindow =
-    static_cast<QMainWindow*>(window->GetShell()->GetControl());
+  berry::IWorkbenchWindow::Pointer window = this->GetWindowConfigurer()->GetWindow();
+  QMainWindow* mainWindow = qobject_cast<QMainWindow*>(window->GetShell()->GetControl());
 
   // The menu bar code is BELOW.
 
+  // Remove some unwanted actions in the official MITK menus
   for(auto action : mainWindow->menuBar()->actions())
   {
     // remove the MITK Edit menu

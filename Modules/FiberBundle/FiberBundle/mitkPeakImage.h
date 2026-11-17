@@ -13,7 +13,7 @@ namespace mitk
   /**
   * \brief this class encapsulates tensor images
   */
-  class FiberBundle_EXPORT PeakImage : public Image
+  class FIBERBUNDLE_EXPORT PeakImage : public Image
   {
 
   public:

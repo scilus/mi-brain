@@ -23,17 +23,17 @@ namespace Imeka
 namespace Predicate
 {
 
-mitk::NodePredicateImageInfo::Pointer ImekaCommon_EXPORT GetRGBPredicate();
+mitk::NodePredicateImageInfo::Pointer IMEKACOMMON_EXPORT GetRGBPredicate();
 
-bool ImekaCommon_EXPORT AtLeastOne(
+bool IMEKACOMMON_EXPORT AtLeastOne(
   const std::string&, mitk::DataStorage*,
   const bool = false, const bool = false);
 
-mitk::NodePredicateProperty::Pointer ImekaCommon_EXPORT Property(
+mitk::NodePredicateProperty::Pointer IMEKACOMMON_EXPORT Property(
   const char*, const bool);
-mitk::NodePredicateProperty::Pointer ImekaCommon_EXPORT Property(
+mitk::NodePredicateProperty::Pointer IMEKACOMMON_EXPORT Property(
   const char*, const char*);
-mitk::NodePredicateProperty::Pointer ImekaCommon_EXPORT Property(
+mitk::NodePredicateProperty::Pointer IMEKACOMMON_EXPORT Property(
   const char*, const std::string&);
 
 template <class T>
@@ -43,11 +43,11 @@ mitk::NodePredicateNot::Pointer NotProperty(
   return mitk::NodePredicateNot::New(Property(propertyName, t));
 }
 
-mitk::NodePredicateNot::Pointer ImekaCommon_EXPORT NotHelperObject();
+mitk::NodePredicateNot::Pointer IMEKACOMMON_EXPORT NotHelperObject();
 
-mitk::NodePredicateBase::Pointer ImekaCommon_EXPORT
+mitk::NodePredicateBase::Pointer IMEKACOMMON_EXPORT
   GetPredicateFor(const std::string& dataType);
-mitk::NodePredicateOr::Pointer ImekaCommon_EXPORT
+mitk::NodePredicateOr::Pointer IMEKACOMMON_EXPORT
 IsBoundingObjectPredicate();
 
 template <class T, class IT>

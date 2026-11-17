@@ -2,6 +2,7 @@ set(CPP_FILES
   FiberBundle/DataStorageUtils.cpp
   FiberBundle/FilteredFiberBundle.cpp
   FiberBundle/mitkFiberBundle.cpp
+  FiberBundle/mitkFiberPolyDataBuilder.cpp
   FiberBundle/mitkPeakImage.cpp
   FiberBundle/mitkTrackvis.cpp
   FiberBundle/TrkProperties.cpp
@@ -10,6 +11,7 @@ set(CPP_FILES
 
 set(H_FILES
   FiberBundle/itkTractDensityImageFilter.h
+  FiberBundle/mitkTrackvisHeader.h
 )
 
 set(MOC_H_FILES

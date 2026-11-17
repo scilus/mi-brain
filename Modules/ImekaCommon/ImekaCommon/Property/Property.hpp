@@ -50,14 +50,14 @@ inline mitk::Matrix3DProperty::Pointer New(const mitk::Matrix3D& m)
   return mitk::Matrix3DProperty::New(m);
 }
 
-const QString ImekaCommon_EXPORT
+const QString IMEKACOMMON_EXPORT
 GetKey(const QString &key, const unsigned int idx);
 
-bool ImekaCommon_EXPORT
+bool IMEKACOMMON_EXPORT
 HasProperty(const mitk::DataNode* node, const char* key);
-bool ImekaCommon_EXPORT
+bool IMEKACOMMON_EXPORT
 HasProperty(const mitk::DataNode* node, const std::string& key);
-bool ImekaCommon_EXPORT
+bool IMEKACOMMON_EXPORT
 HasProperty(const mitk::DataNode* node, const QString& key);
 
 template <class T>
@@ -83,7 +83,7 @@ const T Get(
 }
 
 // This function must be used for string type.
-const QString ImekaCommon_EXPORT
+const QString IMEKACOMMON_EXPORT
 GetString(mitk::DataNode* node, const QString &key);
 
 template <class T>
@@ -100,7 +100,7 @@ const T Get(
 }
 
 // This function must be used for string type.
-const QString ImekaCommon_EXPORT
+const QString IMEKACOMMON_EXPORT
 GetString(
   mitk::DataNode* node,
   const QString &key,

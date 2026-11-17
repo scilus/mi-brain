@@ -4,4 +4,3 @@ MITK_CREATE_MODULE( DiffusionIO
   AUTOLOAD_WITH MitkCore
   PACKAGE_DEPENDS PUBLIC DCMTK|dcmtract+dcmiod+dcmdata+ofstd+oflog
 )
-

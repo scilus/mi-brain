@@ -32,7 +32,7 @@ struct Parameters
   {}
 };
 
-class ImekaReport_EXPORT Document
+class IMEKAREPORT_EXPORT Document
 {
 public:
   Document();

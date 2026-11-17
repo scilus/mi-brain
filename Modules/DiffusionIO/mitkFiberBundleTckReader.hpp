@@ -3,7 +3,6 @@
 
 #include <mitkAbstractFileReader.h>
 #include <mitkCommon.h>
-#include <mitkFileReader.h>
 
 #include <vtkSmartPointer.h>
 

@@ -23,7 +23,7 @@ namespace Fiber
 
 enum RTTMode {DTI, HARDI};
 
-class ImekaFiber_EXPORT RTT
+class IMEKAFIBER_EXPORT RTT
 {
 public:
   static struct Parameters

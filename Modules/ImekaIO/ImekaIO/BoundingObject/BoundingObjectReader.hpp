@@ -15,7 +15,7 @@ namespace Imeka
 namespace IO
 {
 
-class ImekaIO_EXPORT BoundingObjectReader : public mitk::AbstractFileReader
+class IMEKAIO_EXPORT BoundingObjectReader : public mitk::AbstractFileReader
 {
 public:
   BoundingObjectReader();

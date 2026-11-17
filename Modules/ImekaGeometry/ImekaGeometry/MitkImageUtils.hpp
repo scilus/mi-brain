@@ -38,7 +38,7 @@ mitk::Image::Pointer MitkImageFromItkImage(
   return im;
 }
 
-mitk::Image::Pointer ImekaGeometry_EXPORT GetImageForSelectedTime(
+mitk::Image::Pointer IMEKAGEOMETRY_EXPORT GetImageForSelectedTime(
   const mitk::Image* image, const unsigned int t);
 
 } // namespace Geometry

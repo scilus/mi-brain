@@ -26,28 +26,28 @@ extern const char* GroupPropertyName;
 extern const char* TractGroupName;
 extern const char* ActiveROIName;
 
-mitk::NodePredicateAnd::Pointer ImekaFiber_EXPORT GetAnatPredicate();
-mitk::NodePredicateImageInfo::Pointer ImekaFiber_EXPORT GetRGBPredicate();
-mitk::NodePredicateAnd::Pointer ImekaFiber_EXPORT GetTensorsPredicate();
-mitk::NodePredicateAnd::Pointer ImekaFiber_EXPORT
+mitk::NodePredicateAnd::Pointer IMEKAFIBER_EXPORT GetAnatPredicate();
+mitk::NodePredicateImageInfo::Pointer IMEKAFIBER_EXPORT GetRGBPredicate();
+mitk::NodePredicateAnd::Pointer IMEKAFIBER_EXPORT GetTensorsPredicate();
+mitk::NodePredicateAnd::Pointer IMEKAFIBER_EXPORT
   GetMaximaPredicate(const bool ignoreNotAPeaks=false);
-mitk::NodePredicateAnd::Pointer ImekaFiber_EXPORT IsMaskPredicate();
-mitk::NodePredicateOr::Pointer ImekaFiber_EXPORT GetROIPredicate();
-mitk::NodePredicateOr::Pointer ImekaFiber_EXPORT GetTractPredicate();
-mitk::NodePredicateProperty::Pointer ImekaFiber_EXPORT GetTractGroupPredicate();
-mitk::NodePredicateProperty::Pointer ImekaFiber_EXPORT GetActiveROIPredicate();
+mitk::NodePredicateAnd::Pointer IMEKAFIBER_EXPORT IsMaskPredicate();
+mitk::NodePredicateOr::Pointer IMEKAFIBER_EXPORT GetROIPredicate();
+mitk::NodePredicateOr::Pointer IMEKAFIBER_EXPORT GetTractPredicate();
+mitk::NodePredicateProperty::Pointer IMEKAFIBER_EXPORT GetTractGroupPredicate();
+mitk::NodePredicateProperty::Pointer IMEKAFIBER_EXPORT GetActiveROIPredicate();
 
 bool IsLabelsImage(const mitk::Image*);
 
-bool ImekaFiber_EXPORT IsTract(const mitk::DataNode*);
-bool ImekaFiber_EXPORT IsTractGroup(const mitk::DataNode*);
-bool ImekaFiber_EXPORT IsActiveROI(const mitk::DataNode*);
+bool IMEKAFIBER_EXPORT IsTract(const mitk::DataNode*);
+bool IMEKAFIBER_EXPORT IsTractGroup(const mitk::DataNode*);
+bool IMEKAFIBER_EXPORT IsActiveROI(const mitk::DataNode*);
 
-void ImekaFiber_EXPORT SetupNodeDataAndMappers(
+void IMEKAFIBER_EXPORT SetupNodeDataAndMappers(
   mitk::DataNode*, mitk::FilteredFiberBundle*, FiberNodeData&);
 
-mitk::FilteredFiberBundle::Pointer ImekaFiber_EXPORT Union(const ConstNodes&);
-mitk::FilteredFiberBundle::Pointer ImekaFiber_EXPORT Union(
+mitk::FilteredFiberBundle::Pointer IMEKAFIBER_EXPORT Union(const ConstNodes&);
+mitk::FilteredFiberBundle::Pointer IMEKAFIBER_EXPORT Union(
   const QList<mitk::DataNode::Pointer>&);
 
 template <class OutPixType>

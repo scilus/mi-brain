@@ -19,7 +19,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT Saver
+class IMEKAFIBER_EXPORT Saver
 {
 public:
   static const QString DEFAULT_DIR;
@@ -69,7 +69,7 @@ private:
   std::string m_SaveTo; // Tests only
 };
 
-void ImekaFiber_EXPORT ExportFibersStatsToCSV(const ConstNodes&, const bool);
+void IMEKAFIBER_EXPORT ExportFibersStatsToCSV(const ConstNodes&, const bool);
 
 } // namespace Fiber
 

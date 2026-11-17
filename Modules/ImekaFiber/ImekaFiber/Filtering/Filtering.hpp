@@ -39,7 +39,7 @@ Public class for SO and Surface filtering.
 
 Keeps the results in memory. Knows when to recalculate the results.
 */
-class ImekaFiber_EXPORT Filtering
+class IMEKAFIBER_EXPORT Filtering
 {
 public:
   Filtering(Imeka::Fiber::NodeDataMap&);

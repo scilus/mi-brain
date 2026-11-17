@@ -33,7 +33,11 @@ const char* mitk::FiberBundle::FIBER_ID_ARRAY = "Fiber_IDs";
 mitk::FiberBundle::FiberBundle( vtkPolyData* fiberPolyData )
   : m_NumFibers(0)
   , m_IsInOrientationColoring(true)
+  , m_IsRAS(false)
 {
+  m_FiberWeights = vtkSmartPointer<vtkFloatArray>::New();
+  m_FiberWeights->SetName("FIBER_WEIGHTS");
+
   m_FiberPolyData = vtkSmartPointer<vtkPolyData>::New();
   if (fiberPolyData != nullptr)
     m_FiberPolyData = fiberPolyData;
@@ -58,6 +62,7 @@ mitk::FiberBundle::Pointer mitk::FiberBundle::GetDeepCopy()
   polyData->DeepCopy(m_FiberPolyData);
   mitk::FiberBundle::Pointer newFib = mitk::FiberBundle::New(polyData);
   newFib->SetFiberColors(this->m_FiberColors);
+  newFib->SetFiberWeights(this->m_FiberWeights);
   return newFib;
 }
 
@@ -90,6 +95,8 @@ void mitk::FiberBundle::SetFiberPolyData(vtkSmartPointer<vtkPolyData> fiberPD, b
   }
 
   m_NumFibers = m_FiberPolyData->GetNumberOfLines();
+  m_FiberWeights = vtkSmartPointer<vtkFloatArray>::New();
+  m_FiberWeights->SetName("FIBER_WEIGHTS");
 
   if (updateGeometry)
     UpdateFiberGeometry();
@@ -138,7 +145,6 @@ void mitk::FiberBundle::ColorFibersByLength(const bool opacity, const bool norma
   mitkLookup->SetVtkLookupTable(lookupTable);
   mitkLookup->SetType(mitk::LookupTable::JET);
 
-  unsigned int count = 0;
   for (int i=0; i<m_FiberPolyData->GetNumberOfCells(); i++)
   {
     vtkCell* cell = m_FiberPolyData->GetCell(i);
@@ -164,7 +170,6 @@ void mitk::FiberBundle::ColorFibersByLength(const bool opacity, const bool norma
       else
         rgba[3] = (unsigned char) (255.0);
       m_FiberColors->InsertTypedTuple(cell->GetPointId(j), rgba);
-      count++;
     }
   }
   m_UpdateTime3D.Modified();
@@ -528,6 +533,14 @@ void mitk::FiberBundle::UpdateFiberGeometry()
   if (m_FiberColors==nullptr || m_FiberColors->GetNumberOfTuples()!=m_FiberPolyData->GetNumberOfPoints())
     this->ColorFibersByOrientation();
 
+  if (m_FiberWeights->GetNumberOfValues()!=m_NumFibers)
+  {
+      m_FiberWeights = vtkSmartPointer<vtkFloatArray>::New();
+      m_FiberWeights->SetName("FIBER_WEIGHTS");
+      m_FiberWeights->SetNumberOfValues(m_NumFibers);
+      this->SetFiberWeights(1);
+  }
+
   if (m_NumFibers<=0) // no fibers present; apply default geometry
   {
     m_MinFiberLength = 0;
@@ -579,7 +592,7 @@ void mitk::FiberBundle::UpdateFiberGeometry()
 
   std::vector< float > sortedLengths = m_FiberLengths;
   std::sort(sortedLengths.begin(), sortedLengths.end());
-  for (int i=0; i<m_NumFibers; i++)
+  for (vtkIdType i=0; i<m_NumFibers; i++)
     m_LengthStDev += (m_MeanFiberLength-sortedLengths.at(i))*(m_MeanFiberLength-sortedLengths.at(i));
   if (m_NumFibers>1)
     m_LengthStDev /= (m_NumFibers-1);
@@ -594,6 +607,40 @@ void mitk::FiberBundle::UpdateFiberGeometry()
 
   m_UpdateTime3D.Modified();
   m_UpdateTime2D.Modified();
+}
+
+float mitk::FiberBundle::GetFiberWeight(unsigned int fiber) const
+{
+  // vtkFloatArray does not check the index
+  if (fiber >= static_cast<unsigned int>(m_FiberWeights->GetNumberOfValues()))
+    mitkThrow() << "Fiber index " << fiber << " out of range (" << m_FiberWeights->GetNumberOfValues() << " weights).";
+  return m_FiberWeights->GetValue(fiber);
+}
+
+void mitk::FiberBundle::SetFiberWeights(float newWeight)
+{
+  for (int i=0; i<m_FiberWeights->GetNumberOfValues(); i++)
+    m_FiberWeights->SetValue(i, newWeight);
+}
+
+void mitk::FiberBundle::SetFiberWeights(vtkSmartPointer<vtkFloatArray> weights)
+{
+  // One weight per fiber; another count would leave weights of other fibers on some of them.
+  if (weights==nullptr || m_NumFibers!=weights->GetNumberOfValues())
+    mitkThrow() << "Fiber weights need one value per fiber (" << m_NumFibers << " fibers, "
+                << (weights==nullptr ? 0 : weights->GetNumberOfValues()) << " weights).";
+
+  for (int i=0; i<weights->GetNumberOfValues(); i++)
+    m_FiberWeights->SetValue(i, weights->GetValue(i));
+
+  m_FiberWeights->SetName("FIBER_WEIGHTS");
+}
+
+void mitk::FiberBundle::SetFiberWeight(unsigned int fiber, float weight)
+{
+  if (fiber >= static_cast<unsigned int>(m_FiberWeights->GetNumberOfValues()))
+    mitkThrow() << "Fiber index " << fiber << " out of range (" << m_FiberWeights->GetNumberOfValues() << " weights).";
+  m_FiberWeights->SetValue(fiber, weight);
 }
 
 void mitk::FiberBundle::SetFiberColors(vtkSmartPointer<vtkUnsignedCharArray> fiberColors)
@@ -625,7 +672,7 @@ void mitk::FiberBundle::MirrorFibers(unsigned int axis)
   vtkSmartPointer<vtkPoints> vtkNewPoints = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> vtkNewCells = vtkSmartPointer<vtkCellArray>::New();
 
-  for (int i=0; i<m_NumFibers; i++)
+  for (vtkIdType i=0; i<m_NumFibers; i++)
   {
     ++disp;
     vtkCell* cell = m_FiberPolyData->GetCell(i);
@@ -677,7 +724,7 @@ void mitk::FiberBundle::ResampleSpline(float pointDistance, double tension, doub
 
   boost::timer::progress_display disp(m_NumFibers);
 
-  for (int chunkStart = 0; chunkStart < m_NumFibers; chunkStart += chunkSize)
+  for (vtkIdType chunkStart = 0; chunkStart < m_NumFibers; chunkStart += chunkSize)
   {
     const int chunkEnd = std::min(chunkStart + chunkSize, m_NumFibers);
     std::vector<FiberResult<std::array<double, 3>>> results(chunkEnd - chunkStart);
@@ -960,7 +1007,7 @@ bool mitk::FiberBundle::Equals(mitk::FiberBundle* fib, double eps)
 
   auto cell1 = vtkSmartPointer<vtkGenericCell>::New();
   auto cell2 = vtkSmartPointer<vtkGenericCell>::New();
-  for (int i=0; i<m_NumFibers; i++)
+  for (vtkIdType i=0; i<m_NumFibers; i++)
   {
     m_FiberPolyData->GetCell(i, cell1);
     int numPoints = cell1->GetNumberOfPoints();
@@ -1013,15 +1060,110 @@ void mitk::FiberBundle::PrintSelf(std::ostream &os, itk::Indent indent) const
   Superclass::PrintSelf(os, indent);
 }
 
+/** Header fields that describe the reference grid of the given geometry. */
+void FillTrackVisHeader(TrackVis_header& header, const mitk::BaseGeometry* geometry)
+{
+  // vox_to_ras holds the index-to-RAS affine of the reference grid, as the TrackVis format defines
+  // it (MITK's world is LPS: x and y negated). A geometry that is no image grid (the bounding box
+  // of a bundle without reference image) gets a grid whose index 0 lies at the box corner, so that
+  // all points lie inside the declared volume.
+  const vtkMatrix4x4* indexToLps = geometry->GetVtkMatrix();
+  double shift[3] = {0, 0, 0};
+  double dims[3];
+  for (int i=0; i<3; ++i)
+  {
+    dims[i] = geometry->GetExtent(i);
+    if (!geometry->GetImageGeometry())
+    {
+      shift[i] = geometry->GetBounds()[2*i];
+      dims[i] = std::ceil(geometry->GetExtent(i)) + 1;
+    }
+  }
+  double indexToRas[3][4];
+  for (int r=0; r<3; ++r)
+  {
+    const double flip = r<2 ? -1.0 : 1.0;
+    indexToRas[r][3] = indexToLps->GetElement(r, 3);
+    for (int c=0; c<3; ++c)
+    {
+      indexToRas[r][c] = flip * indexToLps->GetElement(r, c);
+      indexToRas[r][3] += indexToLps->GetElement(r, c) * shift[c];
+    }
+    indexToRas[r][3] *= flip;
+  }
+
+  // Voxel axes are reordered and flipped to point to R, A and S (voxel order "RAS"), the one order
+  // that TrackVis readers, MITK's of 2023 to 2026 included, all map the same way.
+  const double spacing[3] = {geometry->GetSpacing()[0], geometry->GetSpacing()[1], geometry->GetSpacing()[2]};
+  //mitk::TrackVisFile::SetGrid(header, indexToRas, dims, spacing, "RAS");
+
+  header.nbScalars = 0;
+  header.nbProperties = 0;
+  header.imageOrientationPatient[0] = 1.0;
+  header.imageOrientationPatient[1] = 0.0;
+  header.imageOrientationPatient[2] = 0.0;
+  header.imageOrientationPatient[3] = 0.0;
+  header.imageOrientationPatient[4] = 1.0;
+  header.imageOrientationPatient[5] = 0.0;
+  header.pad1[0] = 0;
+  header.pad1[1] = 0;
+  header.pad2[0] = 0;
+  header.pad2[1] = 0;
+  header.invertX = 0;
+  header.invertY = 0;
+  header.invertZ = 0;
+  header.swapXY = 0;
+  header.swapYZ = 0;
+  header.swapZX = 0;
+  header.nbCount = 0;
+  header.version = 2;
+  header.hdrSize = 1000;
+  std::memcpy(header.idString, "TRACK", 6);
+}
+
+TrackVis_header mitk::FiberBundle::GetTrackVisHeader() const
+{
+  if (this->HasTrackVisHeader())
+    return m_TrackVisHeader;
+  // Derived from the current bounding box on every call, so that it contains all fibers also after
+  // they were joined, moved or transformed.
+  TrackVis_header header = m_TrackVisHeader;
+  if (auto geometry = dynamic_cast<const mitk::Geometry3D*>(this->GetGeometry()))
+    FillTrackVisHeader(header, geometry);
+  return header;
+}
+
+bool mitk::FiberBundle::HasTrackVisHeader() const
+{
+  return m_TrackVisHeader.hdrSize!=0;
+}
+
+void mitk::FiberBundle::SetTrackVisHeader(const TrackVis_header &TrackVisHeader)
+{
+  m_TrackVisHeader = TrackVisHeader;
+}
+
+void mitk::FiberBundle::SetTrackVisHeader(const mitk::BaseGeometry* geometry)
+{
+  if (geometry!=nullptr)
+    FillTrackVisHeader(m_TrackVisHeader, geometry);
+}
+
+bool mitk::FiberBundle::IsRAS() const
+{
+  return m_IsRAS;
+}
+
+void mitk::FiberBundle::setIsRAS(bool newIsRAS)
+{
+  m_IsRAS = newIsRAS;
+}
+
 /* ESSENTIAL IMPLEMENTATION OF SUPERCLASS METHODS */
 void mitk::FiberBundle::UpdateOutputInformation()
-{
-
-}
+{ }
 void mitk::FiberBundle::SetRequestedRegionToLargestPossibleRegion()
-{
-
-}
+{}
 bool mitk::FiberBundle::RequestedRegionIsOutsideOfTheBufferedRegion()
 {
   return false;
@@ -1031,6 +1173,4 @@ bool mitk::FiberBundle::VerifyRequestedRegion()
   return true;
 }
 void mitk::FiberBundle::SetRequestedRegion(const itk::DataObject* )
-{
-
-}
+{}

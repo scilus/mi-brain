@@ -18,7 +18,7 @@ namespace Fiber
 
 enum SurfaceColorTypes { FILE, UNIFORM, MAP, FIBER, NONE };
 
-class ImekaFiber_EXPORT SurfaceColors
+class IMEKAFIBER_EXPORT SurfaceColors
 {
 public:
   SurfaceColors(Imeka::DataManager&, Imeka::Callback&, NodeDataMap&);

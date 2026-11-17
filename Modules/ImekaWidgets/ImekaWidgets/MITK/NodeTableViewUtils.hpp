@@ -23,13 +23,13 @@ namespace Widgets
   QmitkDataStorageTableModel::GetNode on each row of
   tableView->selectionModel->selectedRows would be simpler.
  */
-void ImekaWidgets_EXPORT UpdateSelected(
+void IMEKAWIDGETS_EXPORT UpdateSelected(
   const QTableView* tableView,
   const QItemSelection& selected,
   const QItemSelection& deselected,
   Nodes& nodes);
 
-Nodes ImekaWidgets_EXPORT IndicesToNodes(
+Nodes IMEKAWIDGETS_EXPORT IndicesToNodes(
   const QTableView* tableView,
   const QItemSelection& indices);
 

@@ -8,7 +8,7 @@ namespace mitk { class DataStorage; class DataNode; }
 
 // Class to hold the current DataStorage.
 // Yes, it's a huge ugly hack
-class FiberBundle_EXPORT DataStorageSingleton
+class FIBERBUNDLE_EXPORT DataStorageSingleton
 {
 public:
   DataStorageSingleton() {};
@@ -18,6 +18,6 @@ public:
 
 mitk::DataNode* GetAnatNode();
 mitk::BaseGeometry::Pointer GetTransformFromTrk();
-mitk::BaseGeometry::Pointer FiberBundle_EXPORT GetTransformFromAnat();
+mitk::BaseGeometry::Pointer FIBERBUNDLE_EXPORT GetTransformFromAnat();
 
 #endif // DATA_STORAGE_SINGLETON_HPP_INCLUDED

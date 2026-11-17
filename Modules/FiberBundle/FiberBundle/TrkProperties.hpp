@@ -16,7 +16,7 @@ namespace Fiber
 
 typedef vtkSmartPointer<vtkFloatArray> Properties[10];
 
-class FiberBundle_EXPORT PropertiesHelperToReadTrk
+class FIBERBUNDLE_EXPORT PropertiesHelperToReadTrk
 {
 public:
   PropertiesHelperToReadTrk(const unsigned int, char[10][20]);
@@ -29,7 +29,7 @@ private:
   Properties m_Properties;
 };
 
-class FiberBundle_EXPORT PropertiesHelperToWriteTrk
+class FIBERBUNDLE_EXPORT PropertiesHelperToWriteTrk
 {
 public:
   PropertiesHelperToWriteTrk(vtkCellData*, vtkCellData*);
@@ -42,11 +42,11 @@ private:
   Properties m_NewProperties;
 };
 
-void FiberBundle_EXPORT CopyPropertiesSettings(vtkPolyData*, vtkPolyData*);
-unsigned int FiberBundle_EXPORT FillPropertiesFromPolydata(
+void FIBERBUNDLE_EXPORT CopyPropertiesSettings(vtkPolyData*, vtkPolyData*);
+unsigned int FIBERBUNDLE_EXPORT FillPropertiesFromPolydata(
   vtkPolyData*, char[10][20]);
-unsigned int FiberBundle_EXPORT NbFloatsForProperties(vtkPolyData*);
-void FiberBundle_EXPORT AppendPropertiesToVector(
+unsigned int FIBERBUNDLE_EXPORT NbFloatsForProperties(vtkPolyData*);
+void FIBERBUNDLE_EXPORT AppendPropertiesToVector(
   vtkPolyData*, const vtkIdType, std::vector<float>&);
 
 } // namespace Fiber

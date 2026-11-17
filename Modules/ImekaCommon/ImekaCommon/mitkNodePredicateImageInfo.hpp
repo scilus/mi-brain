@@ -18,7 +18,7 @@ class BaseData;
 Check if node is a mitk::Image and other things if they were requested,
 such as number of dimensions, size of dimension, etc.
 */
-class ImekaCommon_EXPORT NodePredicateImageInfo: public NodePredicateBase
+class IMEKACOMMON_EXPORT NodePredicateImageInfo: public NodePredicateBase
 {
 public:
   mitkClassMacro(NodePredicateImageInfo, NodePredicateBase);

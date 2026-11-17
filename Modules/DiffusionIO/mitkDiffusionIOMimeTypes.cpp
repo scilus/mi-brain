@@ -15,15 +15,15 @@ See LICENSE.txt or http://www.mitk.org for details.
 ===================================================================*/
 
 #include "mitkDiffusionIOMimeTypes.h"
-#include "mitkIOMimeTypes.h"
+
+#include <dcmtk/dcmdata/dcdeftag.h>
+#include <dcmtk/dcmdata/dcfilefo.h>
+#include <dcmtk/dcmdata/dcuid.h>
 #include <itksys/SystemTools.hxx>
-#include <itkNrrdImageIO.h>
-#include <itkMetaDataDictionary.h>
-#include <itkMetaDataObject.h>
-#include <mitkLogMacros.h>
-#include <dcmtk/dcmtract/trctractographyresults.h>
-#include <mitkDICOMDCMTKTagScanner.h>
-#include <itkGDCMImageIO.h>
+#include <mitkIOMimeTypes.h>
+#include <mitkLog.h>
+
+#include <array>
 
 namespace mitk
 {
@@ -118,47 +118,33 @@ DiffusionIOMimeTypes::FiberBundleDicomMimeType::FiberBundleDicomMimeType()
 
 bool DiffusionIOMimeTypes::FiberBundleDicomMimeType::AppliesTo(const std::string &path) const
 {
+  // MITK bug 18572: the writer selection also asks with the output path, which does not exist
+  // yet; then the extension decides, so that saving to a new .dcm file finds the writer.
+  if (!itksys::SystemTools::FileExists(path.c_str(), true))
+    return CustomMimeType::AppliesTo(path);
+
   try
   {
-    std::ifstream myfile;
-    myfile.open (path, std::ios::binary);
-//    myfile.seekg (128);
-    char *buffer = new char [128];
-    myfile.read (buffer,128);
-    myfile.read (buffer,4);
-    if (std::string(buffer).compare("DICM")!=0)
-    {
-      delete[] buffer;
-      return false;
-    }
-    delete[] buffer;
-
-    mitk::DICOMDCMTKTagScanner::Pointer scanner = mitk::DICOMDCMTKTagScanner::New();
-    mitk::DICOMTag SOPInstanceUID(0x0008, 0x0016);
-
-    mitk::StringList relevantFiles;
-    relevantFiles.push_back(path);
-
-    scanner->AddTag(SOPInstanceUID);
-    scanner->SetInputFiles(relevantFiles);
-    scanner->Scan();
-    mitk::DICOMTagCache::Pointer tagCache = scanner->GetScanCache();
-
-    mitk::DICOMImageFrameList imageFrameList = mitk::ConvertToDICOMImageFrameList(tagCache->GetFrameInfoList());
-    if (imageFrameList.empty())
+    // DICOM part 10 file: 128 bytes preamble, then "DICM"
+    std::ifstream file(path, std::ios::binary);
+    std::array<char, 132> head{};
+    if (!file.read(head.data(), static_cast<std::streamsize>(head.size())) || std::string(head.data() + 128, 4) != "DICM")
       return false;
 
-    mitk::DICOMImageFrameInfo *firstFrame = imageFrameList.begin()->GetPointer();
-
-    std::string tag_value = tagCache->GetTagValue(firstFrame, SOPInstanceUID).value;
-    if (tag_value.empty()) {
+    // The dataset is parsed only up to the SOP Class UID (0008,0016): a tractogram holds one item
+    // per track, and parsing all of them only to tell the file type cost about 0.2 s per call for
+    // a million points (and the check runs for every DICOM file the user opens).
+    file.close();
+    DcmFileFormat dicomFile;
+    const DcmTagKey afterSopClassUid(0x0008, 0x0017);
+    if (dicomFile.loadFileUntilTag(path.c_str(), EXS_Unknown, EGL_noChange, DCM_MaxReadLength, ERM_autoDetect, afterSopClassUid).bad())
       return false;
-    }
 
-    if (tag_value.compare(UID_TractographyResultsStorage)!=0)
+    OFString sopClassUid;
+    if (dicomFile.getDataset()->findAndGetOFString(DCM_SOPClassUID, sopClassUid).bad() || sopClassUid.empty())
       return false;
 
-    return true;
+    return sopClassUid == UID_TractographyResultsStorage;
   }
   catch (std::exception& e)
   {

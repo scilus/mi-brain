@@ -44,21 +44,21 @@ mitk::DataNode::Pointer GroupNodes::NewCategoryNode(const char* name) const
   return node;
 }
 
-bool ImekaFiber_EXPORT IsAnatomiesCategory(const mitk::DataNode* node)
+bool FIBERBUNDLE_EXPORT IsAnatomiesCategory(const mitk::DataNode* node)
 {
   std::string categoryGroup;
   node->GetStringProperty(GroupNodes::CategoryPropertyName, categoryGroup);
   return categoryGroup == GroupNodes::AnatomiesCategoryName;
 }
 
-bool ImekaFiber_EXPORT IsROIsCategory(const mitk::DataNode* node)
+bool FIBERBUNDLE_EXPORT IsROIsCategory(const mitk::DataNode* node)
 {
   std::string categoryGroup;
   node->GetStringProperty(GroupNodes::CategoryPropertyName, categoryGroup);
   return categoryGroup == GroupNodes::ROIsCategoryName;
 }
 
-bool ImekaFiber_EXPORT IsTractsCategory(const mitk::DataNode* node)
+bool FIBERBUNDLE_EXPORT IsTractsCategory(const mitk::DataNode* node)
 {
   std::string categoryGroup;
   node->GetStringProperty(GroupNodes::CategoryPropertyName, categoryGroup);

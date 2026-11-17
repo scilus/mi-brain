@@ -4,6 +4,7 @@ set(CPP_FILES
 
   mitkDiffusionIOMimeTypes.cpp
 
+  mitkFiberBundleDicomReferenceTags.cpp
   mitkFiberBundleDicomReader.cpp
   mitkFiberBundleDicomWriter.cpp
   mitkFiberBundleTckReader.cpp

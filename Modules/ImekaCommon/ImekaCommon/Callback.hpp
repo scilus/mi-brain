@@ -25,7 +25,7 @@ namespace Imeka
 // - A callback is already running.
 // - You set the "DisableCallback" property to True
 // so there can't be a callback triggering a callback triggering ...
-class ImekaCommon_EXPORT Callback
+class IMEKACOMMON_EXPORT Callback
 {
 public:
   typedef std::function<void(mitk::DataNode*)> CallbackFunction;

@@ -16,7 +16,7 @@ namespace Mapper
 {
 
 // Swaps the standard image for an RGB version just for display.
-class ImekaCommon_EXPORT ImekaRGBMapper : public mitk::ImageVtkMapper2D
+class IMEKACOMMON_EXPORT ImekaRGBMapper : public mitk::ImageVtkMapper2D
 {
 public:
   mitkClassMacro(ImekaRGBMapper, ImageVtkMapper2D)

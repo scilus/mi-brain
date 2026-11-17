@@ -1,5 +1,6 @@
 #include "Mappers2DSettingsWidget.hpp"
 
+#include "ui_Mappers2DSettingsWidget.h"
 #include "ImekaGeometry/ViewUtils.hpp"
 
 namespace Imeka
@@ -12,44 +13,47 @@ Mappers2DSettingsWidget* Mappers2DSettingsWidget::Instance = nullptr;
 
 Mappers2DSettingsWidget::Mappers2DSettingsWidget(QWidget* parent)
   : QWidget(parent)
+  , m_Controls(new ::Ui::Mappers2DSettingsWidget)
   , m_AnatGeo(nullptr)
 {
   Instance = this;
-  setupUi(this);
-  connect(btn2D, &QAbstractButton::toggled,
+  m_Controls->setupUi(this);
+  connect(m_Controls->btn2D, &QAbstractButton::toggled,
     this, &Mappers2DSettingsWidget::Modified);
 
-  connect(sldThickness, &QAbstractSlider::valueChanged, [this]()
+  connect(m_Controls->sldThickness, &QAbstractSlider::valueChanged, [this]()
   {
-    spnThickness->blockSignals(true);
+    m_Controls->spnThickness->blockSignals(true);
 
     auto spacing = 1.0;
     if (m_AnatGeo)
     {
       spacing = m_AnatGeo->GetSpacing()[0];
     }
-    spnThickness->setValue(sldThickness->value() / 40.0 * spacing);
-    Modified(btn2D->isChecked());
+    m_Controls->spnThickness->setValue(m_Controls->sldThickness->value() / 40.0 * spacing);
+    Modified(m_Controls->btn2D->isChecked());
 
-    spnThickness->blockSignals(false);
+    m_Controls->spnThickness->blockSignals(false);
   });
 
-  connect(spnThickness,
+  connect(m_Controls->spnThickness,
     QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this]()
   {
-    sldThickness->blockSignals(true);
+    m_Controls->sldThickness->blockSignals(true);
 
     auto spacing = 1.0;
     if (m_AnatGeo)
     {
       spacing = m_AnatGeo->GetSpacing()[0];
     }
-    sldThickness->setValue(spnThickness->value() * 40.0 / spacing);
-    Modified(btn2D->isChecked());
+    m_Controls->sldThickness->setValue(m_Controls->spnThickness->value() * 40.0 / spacing);
+    Modified(m_Controls->btn2D->isChecked());
 
-    sldThickness->blockSignals(false);
+    m_Controls->sldThickness->blockSignals(false);
   });
 }
+
+Mappers2DSettingsWidget::~Mappers2DSettingsWidget() { delete m_Controls; }
 
 void Mappers2DSettingsWidget::SetVisibility(mitk::DataNode* node)
 {
@@ -64,7 +68,7 @@ void Mappers2DSettingsWidget::SetVisibility(mitk::DataNode* node)
 
 void Mappers2DSettingsWidget::SetFiberThickness(mitk::DataNode* node)
 {
-  const float thickness = (Instance) ? Instance->spnThickness->value() : 0.5;
+  const float thickness = (Instance) ? Instance->m_Controls->spnThickness->value() : 0.5;
   node->SetFloatProperty("Fiber2DSliceThickness", thickness);
 }
 
@@ -86,6 +90,8 @@ void Mappers2DSettingsWidget::RemoveNodes(NodeDataMap* nodesMap)
   }
 }
 
+bool Mappers2DSettingsWidget::IsEnabled() const { return m_Controls->btn2D->isChecked(); }
+
 void Mappers2DSettingsWidget::SetAnatGeometry(
   const mitk::BaseGeometry* anatGeo)
 {
@@ -103,25 +109,25 @@ void Mappers2DSettingsWidget::SetAnatGeometry(
 void Mappers2DSettingsWidget::SetThicknessParameters(
   const float spacing)
 {
-  sldThickness->blockSignals(true);
-  spnThickness->blockSignals(true);
+  m_Controls->sldThickness->blockSignals(true);
+  m_Controls->spnThickness->blockSignals(true);
 
   const auto spacingFactor = spacing / 40.0;
-  spnThickness->setMinimum(sldThickness->minimum() * spacingFactor);
-  spnThickness->setMaximum(sldThickness->maximum() * spacingFactor);
-  spnThickness->setDecimals(
+  m_Controls->spnThickness->setMinimum(m_Controls->sldThickness->minimum() * spacingFactor);
+  m_Controls->spnThickness->setMaximum(m_Controls->sldThickness->maximum() * spacingFactor);
+  m_Controls->spnThickness->setDecimals(
     (spacingFactor >= 0.01) ? 2 : 3);
-  spnThickness->setSingleStep(spacingFactor * 2.0);
-  spnThickness->setValue(sldThickness->value() * spacingFactor);
+  m_Controls->spnThickness->setSingleStep(spacingFactor * 2.0);
+  m_Controls->spnThickness->setValue(m_Controls->sldThickness->value() * spacingFactor);
 
-  sldThickness->blockSignals(false);
-  spnThickness->blockSignals(false);
+  m_Controls->sldThickness->blockSignals(false);
+  m_Controls->spnThickness->blockSignals(false);
 }
 
 void Mappers2DSettingsWidget::Modified(const bool checked)
 {
   MITK_INFO << "Mappers2DSettingsWidget::Modified(" << checked << ")";
-  btn2D->setChecked(checked);
+  m_Controls->btn2D->setChecked(checked);
   const auto renderers = Imeka::View::Get2DRenderers();
   for (auto map : m_Maps)
   {
@@ -130,9 +136,9 @@ void Mappers2DSettingsWidget::Modified(const bool checked)
       MITK_INFO << "Setting visibility for node: " << node->GetName() << " to " << checked;
       float oldThickness = 0.0;
       node->GetFloatProperty("Fiber2DSliceThickness", oldThickness);
-      if (oldThickness != spnThickness->value())
+      if (oldThickness != m_Controls->spnThickness->value())
       {
-        node->SetFloatProperty("Fiber2DSliceThickness", spnThickness->value());
+        node->SetFloatProperty("Fiber2DSliceThickness", m_Controls->spnThickness->value());
       }
 
       for (auto renderer : renderers)

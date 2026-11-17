@@ -12,7 +12,7 @@ namespace Imeka
 namespace Common
 {
 
-class ImekaWidgets_EXPORT DataNodeGroup : public mitk::BaseData
+class IMEKAWIDGETS_EXPORT DataNodeGroup : public mitk::BaseData
 {
 public:
   mitkClassMacro(DataNodeGroup, mitk::BaseData);

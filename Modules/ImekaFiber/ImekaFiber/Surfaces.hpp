@@ -16,9 +16,9 @@ namespace Surface
    shoud be, but when I put them there, some tests stop running on Linux.
    Nobody knows why and it's not really important so here they are. */
 
-mitk::Surface::Pointer ImekaCommon_EXPORT ImageToSurface(
+mitk::Surface::Pointer IMEKACOMMON_EXPORT ImageToSurface(
   const mitk::Image*, const mitk::Image*);
-mitk::Image::Pointer ImekaCommon_EXPORT SurfaceToImage(
+mitk::Image::Pointer IMEKACOMMON_EXPORT SurfaceToImage(
   const mitk::Image*, const mitk::Surface*);
 
 } // namespace Surface

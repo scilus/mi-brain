@@ -30,36 +30,17 @@ namespace mitk {
 class FiberTrackingObjectFactory : public CoreObjectFactoryBase
 {
   public:
-    mitkClassMacro(FiberTrackingObjectFactory,CoreObjectFactoryBase)
+    mitkClassMacro(FiberTrackingObjectFactory, CoreObjectFactoryBase)
     itkFactorylessNewMacro(Self)
     itkCloneMacro(Self)
 
     ~FiberTrackingObjectFactory() override;
 
     Mapper::Pointer CreateMapper(mitk::DataNode* node, MapperSlotId slotId) override;
-
     void SetDefaultProperties(mitk::DataNode* node) override;
-
-    std::string GetFileExtensions() override;
-
-    mitk::CoreObjectFactoryBase::MultimapType GetFileExtensionsMap() override;
-
-    std::string GetSaveFileExtensions() override;
-
-    mitk::CoreObjectFactoryBase::MultimapType GetSaveFileExtensionsMap() override;
-
-    void RegisterIOFactories();
 
 protected:
     FiberTrackingObjectFactory();
-  private:
-    void CreateFileExtensionsMap();
-    std::string m_ExternalFileExtensions;
-    std::string m_InternalFileExtensions;
-    std::string m_SaveFileExtensions;
-    MultimapType m_FileExtensionsMap;
-    MultimapType m_SaveFileExtensionsMap;
-
 };
 
 }

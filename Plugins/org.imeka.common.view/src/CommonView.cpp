@@ -54,8 +54,9 @@ void CommonView::CallNodeAddedOnAllNodes()
 
 QmitkStdMultiWidget* CommonView::GetStdMultiWidget()
 {
-  for (auto& editor : GetSite()->GetPage()->GetEditors())
+  for (const auto& ref : GetSite()->GetPage()->GetEditorReferences())
   {
+    berry::IEditorPart::Pointer editor = ref->GetEditor(true);
     auto stdmwe = dynamic_cast<QmitkStdMultiWidgetEditor*>(editor.GetPointer());
     if (stdmwe)
     {

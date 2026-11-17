@@ -4,7 +4,7 @@
 
 #include <mitkAbstractFileReader.h>
 #include <mitkCustomMimeType.h>
-#include <mitkLogMacros.h>
+#include <mitkLog.h>
 
 #include "ImekaIOExports.h"
 
@@ -12,7 +12,7 @@ namespace Imeka
 {
 namespace IO{
 
-class ImekaIO_EXPORT RGBNiftiFileReader : public mitk::AbstractFileReader
+class IMEKAIO_EXPORT RGBNiftiFileReader : public mitk::AbstractFileReader
 {
 public:
   RGBNiftiFileReader();

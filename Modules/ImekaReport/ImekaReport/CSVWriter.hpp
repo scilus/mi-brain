@@ -22,7 +22,7 @@ namespace Imeka
 namespace Report
 {
 
-class ImekaReport_EXPORT CSVWriter : public Document
+class IMEKAREPORT_EXPORT CSVWriter : public Document
 {
   public:
     static const char* EXTENSION;

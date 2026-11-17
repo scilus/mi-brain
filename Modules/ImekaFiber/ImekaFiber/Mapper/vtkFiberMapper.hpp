@@ -6,7 +6,7 @@
 #include "MapperData.hpp"
 #include "ImekaFiberExports.h"
 
-class ImekaFiber_EXPORT vtkFiberMapper : public vtkOpenGLPolyDataMapper
+class IMEKAFIBER_EXPORT vtkFiberMapper : public vtkOpenGLPolyDataMapper
 {
 public:
   static vtkFiberMapper* New();

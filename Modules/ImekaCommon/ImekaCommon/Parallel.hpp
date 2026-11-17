@@ -4,7 +4,7 @@
 
 #include "ImekaCommonExports.h"
 
-int ImekaCommon_EXPORT omp_max_threads();
-int ImekaCommon_EXPORT omp_thread_num();
+int IMEKACOMMON_EXPORT omp_max_threads();
+int IMEKACOMMON_EXPORT omp_thread_num();
 
 #endif // IMEKA_COMMON_PARALLEL_HPP_INCLUDED

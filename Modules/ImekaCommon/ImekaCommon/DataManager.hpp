@@ -18,7 +18,7 @@ namespace mitk
 namespace Imeka
 {
 
-class ImekaCommon_EXPORT DataManager
+class IMEKACOMMON_EXPORT DataManager
 {
 public:
   static const char* UUIDPropertyName;
@@ -88,7 +88,7 @@ private:
   mitk::DataStorage* m_DataStorage;
 };
 
-void ImekaCommon_EXPORT RemoveNodeFromDataStorage(
+void IMEKACOMMON_EXPORT RemoveNodeFromDataStorage(
   mitk::DataStorage* storage, const mitk::DataNode* node);
 
 } // namespace Imeka

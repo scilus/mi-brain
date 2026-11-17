@@ -14,7 +14,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT Maxima
+class IMEKAFIBER_EXPORT Maxima
   : public Glyph<float, 4, VectorLoader<float, 4>, V>
 {
 public:

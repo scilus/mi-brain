@@ -8,11 +8,11 @@
 namespace mitk { class FilteredFiberBundle; }
 class vtkPolyData;
 
-int FiberBundle_EXPORT ReadTck(
+int FIBERBUNDLE_EXPORT ReadTck(
   const std::string&, mitk::FilteredFiberBundle*);
 
 std::string GetHeader(vtkPolyData*);
-void FiberBundle_EXPORT WriteTck(
+void FIBERBUNDLE_EXPORT WriteTck(
   const std::string&, vtkPolyData*);
 
 #endif // IMEKA_TCK_READER_WRITER_HPP_INCLUDED

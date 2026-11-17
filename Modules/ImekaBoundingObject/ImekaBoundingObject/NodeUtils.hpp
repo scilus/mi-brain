@@ -19,28 +19,28 @@ namespace BoundingObject
 static const char* const INTERNAL_BOUNDING_OBJECT_NAME =
   "Imeka.BoundingObject.BoundingObject";
 
-mitk::DataNode::Pointer ImekaBoundingObject_EXPORT
+mitk::DataNode::Pointer IMEKABOUNDINGOBJECT_EXPORT
 GetBoundingObjectNode(
   const mitk::DataStorage* storage,
   const mitk::DataNode* parentNode,
   const unsigned int index = 0);
 
-bool ImekaBoundingObject_EXPORT
+bool IMEKABOUNDINGOBJECT_EXPORT
 AddBoundingObjectNodeToParent(
   mitk::DataStorage* storage,
   mitk::DataNode* parentNode,
   mitk::DataNode* boundingObjectNode,
   mitk::BaseGeometry* geometry = nullptr);
 
-mitk::DataNode::Pointer ImekaBoundingObject_EXPORT
+mitk::DataNode::Pointer IMEKABOUNDINGOBJECT_EXPORT
 GetNewBoundingObjectNode(
   mitk::BoundingObject* boundingObject,
   const bool isHelperObject = false);
 
-void ImekaBoundingObject_EXPORT
+void IMEKABOUNDINGOBJECT_EXPORT
 AddInteractorToAllBoundingObjectNodes(Imeka::DataManager* DM);
 
-InteractorEmitter::Pointer ImekaBoundingObject_EXPORT
+InteractorEmitter::Pointer IMEKABOUNDINGOBJECT_EXPORT
 AddInteractor(mitk::DataNode* node);
 
 } // namespace BoundingObject

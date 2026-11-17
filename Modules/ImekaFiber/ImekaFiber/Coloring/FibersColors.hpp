@@ -18,7 +18,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT FibersColors
+class IMEKAFIBER_EXPORT FibersColors
 {
   typedef mitk::FilteredFiberBundle::Coloring Coloring;
 
@@ -50,8 +50,8 @@ private:
   mitk::DataNode* m_AnatNode;
 };
 
-QColor ImekaFiber_EXPORT GetInitialColor(const mitk::DataNode*);
-QColor ImekaFiber_EXPORT GetInitialColor(
+QColor IMEKAFIBER_EXPORT GetInitialColor(const mitk::DataNode*);
+QColor IMEKAFIBER_EXPORT GetInitialColor(
   const mitk::DataNode*, const mitk::DataNode*);
 
 template <class C>

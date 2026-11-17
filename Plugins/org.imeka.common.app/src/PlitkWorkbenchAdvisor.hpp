@@ -8,8 +8,6 @@
 
 #include <mitkWorkbenchUtil.h>
 
-#include "PlitkVersion.hpp"
-
 template <class Activator, class WorkbenchWindowAdvisor>
 class PlitkWorkbenchAdvisor : public berry::QtWorkbenchAdvisor
 {
@@ -34,7 +32,7 @@ public:
   berry::WorkbenchWindowAdvisor* CreateWorkbenchWindowAdvisor(
     berry::IWorkbenchWindowConfigurer::Pointer configurer) override
   {
-    configurer->SetTitle(m_AppTitle + " " + PLITK_VERSION);
+    configurer->SetTitle(m_AppTitle + " " + "2026.12");
     auto windowAdvisor = new WorkbenchWindowAdvisor(this, configurer);
     windowAdvisor->Setup();
     windowAdvisor->SetProductName(m_AppTitle);

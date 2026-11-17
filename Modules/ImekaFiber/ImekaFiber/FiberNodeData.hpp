@@ -29,11 +29,11 @@ struct FiberNodeData
 
 typedef QMap<const mitk::DataNode*, FiberNodeData> NodeDataMap;
 
-void ImekaFiber_EXPORT ForEachFiberNode(
+void IMEKAFIBER_EXPORT ForEachFiberNode(
   NodeDataMap& nodesMap,
   std::function<void(mitk::DataNode*, FiberNodeData&)> f);
 
-ConstNodes ImekaFiber_EXPORT GetFiberNodesToTransform(
+ConstNodes IMEKAFIBER_EXPORT GetFiberNodesToTransform(
   const ConstNodes& defaultNodes,
   const NodeDataMap& nodesMap);
 

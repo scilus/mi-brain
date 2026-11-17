@@ -16,7 +16,7 @@ namespace Fiber
 {
 
 // Streamlines going through the SO will be cut (line-based)
-class ImekaFiber_EXPORT StreamlinesCutter
+class IMEKAFIBER_EXPORT StreamlinesCutter
 {
 public:
   StreamlinesCutter(

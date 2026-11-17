@@ -12,7 +12,7 @@ namespace Imeka
 namespace Predicate
 {
 
-mitk::NodePredicateImageInfo::Pointer ImekaCommon_EXPORT GetRGBPredicate()
+mitk::NodePredicateImageInfo::Pointer IMEKACOMMON_EXPORT GetRGBPredicate()
 {
   auto pred = mitk::NodePredicateImageInfo::New();
   pred->SetPixelComponents(1);
@@ -22,7 +22,7 @@ mitk::NodePredicateImageInfo::Pointer ImekaCommon_EXPORT GetRGBPredicate()
   return pred;
 }
 
-bool ImekaCommon_EXPORT AtLeastOne(
+bool IMEKACOMMON_EXPORT AtLeastOne(
   const std::string& dataType, mitk::DataStorage* dataStorage,
   const bool dropIfHidden, const bool dropIfHelperObject)
 {
@@ -50,32 +50,32 @@ bool ImekaCommon_EXPORT AtLeastOne(
   return dataStorage->GetNode(pred) != nullptr;
 }
 
-mitk::NodePredicateProperty::Pointer ImekaCommon_EXPORT Property(
+mitk::NodePredicateProperty::Pointer IMEKACOMMON_EXPORT Property(
   const char* propertyName, const bool b)
 {
   return mitk::NodePredicateProperty::New(
     propertyName, mitk::BoolProperty::New(b));
 }
 
-mitk::NodePredicateProperty::Pointer ImekaCommon_EXPORT Property(
+mitk::NodePredicateProperty::Pointer IMEKACOMMON_EXPORT Property(
   const char* propertyName, const char* c)
 {
   return mitk::NodePredicateProperty::New(
     propertyName, mitk::StringProperty::New(c));
 }
 
-mitk::NodePredicateProperty::Pointer ImekaCommon_EXPORT Property(
+mitk::NodePredicateProperty::Pointer IMEKACOMMON_EXPORT Property(
   const char* propertyName, const std::string& str)
 {
   return Property(propertyName, str.c_str());
 }
 
-mitk::NodePredicateNot::Pointer ImekaCommon_EXPORT NotHelperObject()
+mitk::NodePredicateNot::Pointer IMEKACOMMON_EXPORT NotHelperObject()
 {
   return NotProperty("helper object", true);
 }
 
-mitk::NodePredicateBase::Pointer ImekaCommon_EXPORT
+mitk::NodePredicateBase::Pointer IMEKACOMMON_EXPORT
 GetPredicateFor(const std::string& dataType)
 {
   if (dataType == "BoundingObject" || dataType == "SelectionObject")

@@ -13,7 +13,7 @@ namespace Imeka
 namespace Fiber
 {
 
-class ImekaFiber_EXPORT MaximaData : public QObject
+class IMEKAFIBER_EXPORT MaximaData : public QObject
 {
   Q_OBJECT
 

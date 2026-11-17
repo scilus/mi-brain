@@ -2,6 +2,7 @@ MITK_CREATE_MODULE( ImekaBoundingObject
   PACKAGE_DEPENDS Qt6|Core+Widgets
   DEPENDS MitkDataTypesExt MitkQtWidgets ImekaCommon
   WARNINGS_NO_ERRORS
+  AUTOMOC
 )
 
 if(BUILD_TESTING)
